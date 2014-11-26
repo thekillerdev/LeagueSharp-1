@@ -56,9 +56,9 @@ namespace WorstAnnouncer
             { // 256 ^
                 if (dq + 500 < Environment.TickCount)
                 {
-                    for (int eax = 0; eax < _max_ecx; ++eax)
-                        if (args.WParam == esp[eax])
-                            Game.Say(dword[eax]);
+                    for (int edx = 0; edx < _max_ecx; ++edx)
+                        if (args.WParam == esp[edx])
+                            Game.Say(dword[edx]);
                     dq = Environment.TickCount;
                 }
             }
