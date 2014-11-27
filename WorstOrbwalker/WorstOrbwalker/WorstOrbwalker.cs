@@ -70,6 +70,7 @@ namespace WorstOrbwalker
         private Obj_AI_Base _forcedTarget;
         private Vector3 _orbwalkingPoint;
         private Obj_AI_Minion _prevMinion;
+        private bool srFix = false;
 
         public class BeforeAttackEventArgs
         {
@@ -92,76 +93,65 @@ namespace WorstOrbwalker
         {
             get
             {
-                if (_config.Item("Orbwalk").GetValue<KeyBind>().Active)
+                if (_config.Item("_worstorbwalker_keybinds_combo").GetValue<KeyBind>().Active)
                     return MODE.COMBO;
-                else if (_config.Item("LaneClear").GetValue<KeyBind>().Active)
+                else if (_config.Item("_worstorbwalker_keybinds_laneclear").GetValue<KeyBind>().Active)
                     return MODE.LANE_CLEAR;
-                else if (_config.Item("Farm").GetValue<KeyBind>().Active)
+                else if (_config.Item("_worstorbwalker_keybinds_mixed").GetValue<KeyBind>().Active)
                     return MODE.MIXED;
-                else if (_config.Item("LastHit").GetValue<KeyBind>().Active)
+                else if (_config.Item("_worstorbwalker_keybinds_lasthit").GetValue<KeyBind>().Active)
                     return MODE.LAST_HIT;
-                else if (_config.Item("Flee").GetValue<KeyBind>().Active)
+                else if (_config.Item("_worstorbwalker_keybinds_flee").GetValue<KeyBind>().Active)
                     return MODE.FLEE;
-
 
                 return MODE.NONE;
             }
         }
 
-        public WorstOrbwalker(Menu attachToMenu)
+        public WorstOrbwalker(Menu menu)
         {
-            _config = attachToMenu;
-            /* Drawings submenu */
-            var drawings = new Menu("Drawings", "drawings");
-            drawings.AddItem(
-                new MenuItem("AACircle", "AACircle").SetShared()
-                    .SetValue(new Circle(true, Color.FromArgb(255, 255, 0, 255))));
-            drawings.AddItem(
-                new MenuItem("AACircle2", "Enemy AA circle").SetShared()
-                    .SetValue(new Circle(false, Color.FromArgb(255, 255, 0, 255))));
-            drawings.AddItem(
-                new MenuItem("HoldZone", "HoldZone").SetShared()
-                    .SetValue(new Circle(false, Color.FromArgb(255, 255, 0, 255))));
+            _config = menu;
+
+            /* TargetSelector menu */
+            var ts = new Menu("Target Selector", "_worstorbwalker_targetselector");
+            _config.AddSubMenu(ts);
+
+            /* Drawings menu */
+            var drawings = new Menu("Drawings", "_worstorbwalker_drawings");
+            drawings.AddItem(new MenuItem("_worstorbwalker_drawings_aacircle", "Attack Range")).SetValue(new Circle(true, Color.FromArgb(255, 255, 0, 255)));
+            drawings.AddItem(new MenuItem("_worstorbwalker_drawings_aaenemycircle", "Enemy Attack Range")).SetValue(new Circle(true, Color.FromArgb(255, 255, 0, 255)));
+            drawings.AddItem(new MenuItem("_worstorbwalker_drawings_selectedtarget", "Selected Target")).SetValue(new Circle(true, Color.FromArgb(255, 255, 255, 255)));
+            drawings.AddItem(new MenuItem("_worstorbwalker_drawings_focusedminion", "Focused Minion")).SetValue(new Circle(true, Color.FromArgb(255, 255, 0, 0)));
+            drawings.AddItem(new MenuItem("_worstorbwalker_drawings_focusedminionsize", "Focused Minion Circles")).SetValue(new Slider(1, 1, 3));
             _config.AddSubMenu(drawings);
 
-            /* Misc options */
-            var misc = new Menu("Misc", "Misc");
-            misc.AddItem(
-                new MenuItem("HoldPosRadius", "Hold Position Radius").SetShared().SetValue(new Slider(0, 150, 0)));
-            misc.AddItem(new MenuItem("PriorizeFarm", "Priorize farm over harass").SetShared().SetValue(true));
-            misc.AddItem(new MenuItem("MixedLaneClear", "Mixed Lane Clear Mode")).SetValue(false);
-            misc.AddItem(new MenuItem("AutoWindUp", "Autoset Windup")).SetValue(false);
-            misc.AddItem(new MenuItem("Humanizer", "Humanizer Delay")).SetValue(new Slider(50, 100, 0));
+            /* Misc menu */
+            var misc = new Menu("Miscellaneous", "_worstorbwalker_miscellaneous");
+            misc.AddItem(new MenuItem("_worstorbwalker_miscellaneous_priorizefarm", "Priorize farm over harass").SetValue(true));
+            misc.AddItem(new MenuItem("_worstorbwalker_miscellaneous_holdposradius", "Hold Position Radius")).SetValue(new Slider(0, 150, 0));
+            misc.AddItem(new MenuItem("_worstorbwalker_miscellaneous_humanizerdelay", "Humanizer Delay")).SetValue(new Slider(50, 100, 0));
+            misc.AddItem(new MenuItem("_worstorbwalker_miscellaneous_extrawinduptime", "Extra Windup Time")).SetValue(new Slider(80, 200, 0));
+            misc.AddItem(new MenuItem("_worstorbwalker_miscellaneous_selectedtargetfocus", "Enable selected target focus")).SetValue(true);
+            misc.AddItem(new MenuItem("_worstorbwalker_miscellaneous_harassturret", "Harass under turret")).SetValue(false);
+            misc.AddItem(new MenuItem("_worstorbwalker_miscellaneous_mixedlaneclear", "Mixed lane clear")).SetValue(false);
+            misc.AddItem(new MenuItem("_worstorbwalker_miscellaneous_farmdelay", "Farm Delay")).SetValue(new Slider(0, 200, 0));
+            misc.AddItem(new MenuItem("_worstorbwalker_miscellaneous_towerwait", "Tower Last Hit")).SetValue(false);
             _config.AddSubMenu(misc);
 
+            /* Main menu */
+            MenuItem[] menuItem = { (new MenuItem("_worstorbwalker_keybinds_lasthit", "Last hit").SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press, false))),
+                                    (new MenuItem("_worstorbwalker_keybinds_mixed", "Mixed").SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press, false))),
+                                    (new MenuItem("_worstorbwalker_keybinds_laneclear", "Lane clear").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press, false))),
+                                    (new MenuItem("_worstorbwalker_keybinds_flee", "Flee").SetValue(new KeyBind("A".ToCharArray()[0], KeyBindType.Press, false))),
+                                    (new MenuItem("_worstorbwalker_keybinds_combo", "Combo").SetValue(new KeyBind(32, KeyBindType.Press, false)))};
 
-            /* Delay sliders */
-            _config.AddItem(
-                new MenuItem("ExtraWindup", "Extra windup time").SetShared().SetValue(new Slider(80, 200, 0)));
-            _config.AddItem(new MenuItem("FarmDelay", "Farm delay").SetShared().SetValue(new Slider(0, 200, 0)));
-
-            /*Load the menu*/
-            _config.AddItem(
-                new MenuItem("LastHit", "Last hit").SetShared()
-                    .SetValue(new KeyBind("X".ToCharArray()[0], KeyBindType.Press, false)));
-
-            _config.AddItem(
-                new MenuItem("Farm", "Mixed").SetShared()
-                    .SetValue(new KeyBind("C".ToCharArray()[0], KeyBindType.Press, false)));
-
-            _config.AddItem(
-                new MenuItem("LaneClear", "LaneClear").SetShared()
-                    .SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press, false)));
-
-            _config.AddItem(
-                new MenuItem("Orbwalk", "Combo").SetShared().SetValue(new KeyBind(32, KeyBindType.Press, false)));
+            _config.AddItem(new MenuItem("_worstorbwalker_spacer0", ""));
+            foreach (var mi in menuItem)
+                if (mi != null)
+                    _config.AddItem(mi);
 
             Player = ObjectManager.Player;
             Game.OnGameUpdate += GameOnOnGameUpdate;
-            Drawing.OnDraw += DrawingOnOnDraw;
-            Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
-            GameObject.OnCreate += Obj_SpellMissile_OnCreate;
-            Game.OnGameProcessPacket += OnProcessPacket;
         }
 
         private static void Obj_SpellMissile_OnCreate(GameObject sender, EventArgs args)
@@ -280,8 +270,7 @@ namespace WorstOrbwalker
 
         private static void MoveTo(Vector3 position, float holdAreaRadius = 0, bool overrideTimer = false)
         {
-            var delay = _config.Item("Humanizer").GetValue<Slider>().Value;
-            if ((Environment.TickCount - LastMoveCommandT < (80+delay) && !overrideTimer))
+            if ((Environment.TickCount - LastMoveCommandT < (80 + _config.Item("_worstorbwalker_miscellaneous_humanizerdelay").GetValue<Slider>().Value) && !overrideTimer))
                 return;
 
             LastMoveCommandT = Environment.TickCount;
@@ -292,14 +281,9 @@ namespace WorstOrbwalker
                     Player.IssueOrder(GameObjectOrder.HoldPosition, Player.ServerPosition);
                 return;
             }
-
-            if (position.Distance(Player.Position) < 200)
-                Player.IssueOrder(GameObjectOrder.MoveTo, position);
-            else
-            {
-                var point = Player.ServerPosition + 400 * (position.To2D() - Player.ServerPosition.To2D()).Normalized().To3D();
-                Player.IssueOrder(GameObjectOrder.MoveTo, point);
-            }
+            
+            var point = Player.ServerPosition + 400 * (position.To2D() - Player.ServerPosition.To2D()).Normalized().To3D();
+            Player.IssueOrder(GameObjectOrder.MoveTo, point);
         }
 
         private static bool IsValidBuilding(Obj_Building building)
@@ -311,27 +295,29 @@ namespace WorstOrbwalker
 
         public static void Orbwalk(Obj_AI_Base target, Vector3 position, float extraWindup = 90, float holdAreaRadius = 0)
         {
-            if (target != null && CanAttack())
+            if (target == null && CanAttack())
+            {
+                if (ActiveMode != MODE.COMBO && ActiveMode != MODE.FLEE)
+                {
+                    foreach (var building in ObjectManager.Get<Obj_Building>().Where(b => IsValidBuilding(b) && InAutoAttackRangeBuildings(b) && (b.Name.StartsWith("Barracks_") || IsValidBuilding(b) && InAutoAttackRangeBuildings(b) && b.Name.StartsWith("HQ_"))))
+                    {
+                        Player.IssueOrder(GameObjectOrder.AttackUnit, building);
+
+                        if (_lastTarget.IsValid && target.IsValid && _lastTarget.NetworkId != target.NetworkId)
+                            LastAATick = Environment.TickCount + Game.Ping / 2;
+
+                        _lastTarget = target;
+                        return;
+                    }
+                }
+            }
+            else if (target != null && CanAttack())
             {
                 DisableNextAttack = false;
                 FireBeforeAttack(target);
 
                 if (!DisableNextAttack)
                 {
-                    if (ActiveMode != MODE.COMBO && ActiveMode != MODE.FLEE)
-                    {
-                        foreach (var building in ObjectManager.Get<Obj_Building>().Where(b => IsValidBuilding(b) && InAutoAttackRangeBuildings(b) && (b.Name.StartsWith("Barracks_") || IsValidBuilding(b) && InAutoAttackRangeBuildings(b) && b.Name.StartsWith("HQ_"))))
-                        {
-                            Player.IssueOrder(GameObjectOrder.AttackUnit, building);
-
-                            if (_lastTarget.IsValid && target.IsValid && _lastTarget.NetworkId != target.NetworkId)
-                                LastAATick = Environment.TickCount + Game.Ping / 2;
-
-                            _lastTarget = target;
-                            return;
-                        }
-                    }
-
                     Player.IssueOrder(GameObjectOrder.AttackUnit, target);
 
                     if (_lastTarget.IsValid && target.IsValid && _lastTarget.NetworkId != target.NetworkId)
@@ -341,6 +327,7 @@ namespace WorstOrbwalker
                     return;
                 }
             }
+
             if (CanMove(extraWindup))
                 MoveTo(position, holdAreaRadius);
         }
@@ -384,6 +371,17 @@ namespace WorstOrbwalker
 
         private void GameOnOnGameUpdate(EventArgs args)
         {
+            // Fix for new summoners rift
+            if ((Utility.Map.GetMap()._MapType == Utility.Map.MapType.SummonersRift && Game.Time >= 23.135f && !srFix) || (Utility.Map.GetMap()._MapType != Utility.Map.MapType.SummonersRift))
+            {
+                Drawing.OnDraw += DrawingOnOnDraw;
+                Obj_AI_Base.OnProcessSpellCast += OnProcessSpell;
+                GameObject.OnCreate += Obj_SpellMissile_OnCreate;
+                Game.OnGameProcessPacket += OnProcessPacket;
+                Player = ObjectManager.Player;
+                srFix = true;
+            }
+
             if (ActiveMode == MODE.NONE)
                 return;
 
@@ -392,20 +390,26 @@ namespace WorstOrbwalker
                 return;
 
             var target = GetTarget();
-            Orbwalk(target, (_orbwalkingPoint.To2D().IsValid()) ? _orbwalkingPoint : Game.CursorPos, _config.Item("ExtraWindup").GetValue<Slider>().Value, _config.Item("HoldPosRadius").GetValue<Slider>().Value);
+            Orbwalk(target, (_orbwalkingPoint.To2D().IsValid()) ? _orbwalkingPoint : Game.CursorPos, _config.Item("_worstorbwalker_miscellaneous_extrawinduptime").GetValue<Slider>().Value, _config.Item("_worstorbwalker_miscellaneous_holdposradius").GetValue<Slider>().Value);
         }
 
         private void DrawingOnOnDraw(EventArgs args)
         {
-            if (_config.Item("AACircle").GetValue<Circle>().Active)
-                Utility.DrawCircle(Player.Position, GetRealAutoAttackRange(null) + 65, _config.Item("AACircle").GetValue<Circle>().Color);
+            if (_config.Item("_worstorbwalker_drawings_aacircle").GetValue<Circle>().Active)
+                Utility.DrawCircle(Player.Position, GetRealAutoAttackRange(null) + 65f, _config.Item("_worstorbwalker_drawings_aacircle").GetValue<Circle>().Color);
 
-            if (_config.Item("AACircle2").GetValue<Circle>().Active)
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(1175)))
-                    Utility.DrawCircle(target.Position, GetRealAutoAttackRange(target) + 65, _config.Item("AACircle2").GetValue<Circle>().Color);
+            if (_config.Item("_worstorbwalker_drawings_aaenemycircle").GetValue<Circle>().Active)
+                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget(1175f)))
+                    Utility.DrawCircle(target.Position, GetRealAutoAttackRange(target) + 65f, _config.Item("_worstorbwalker_drawings_aaenemycircle").GetValue<Circle>().Color);
 
-            if (_config.Item("HoldZone").GetValue<Circle>().Active)
-                Utility.DrawCircle(Player.Position, _config.Item("HoldPosRadius").GetValue<Slider>().Value, _config.Item("HoldZone").GetValue<Circle>().Color);
+            if (_config.Item("_worstorbwalker_drawings_selectedtarget").GetValue<Circle>().Active)
+                if (Hud.SelectedUnit != null && isValidSelectedUnit() && Hud.SelectedUnit.IsEnemy && Hud.SelectedUnit.Position.Distance(Player.Position) <= 1175f)
+                    Utility.DrawCircle(Hud.SelectedUnit.Position, Hud.SelectedUnit.BoundingRadius + (10f), _config.Item("_worstorbwalker_drawings_selectedtarget").GetValue<Circle>().Color);
+
+            if(_config.Item("_worstorbwalker_drawings_focusedminion").GetValue<Circle>().Active)
+                if(ActiveMode == MODE.LANE_CLEAR || ActiveMode == MODE.LAST_HIT)
+                    for (int i = 0; i < _config.Item("_worstorbwalker_drawings_focusedminionsize").GetValue<Slider>().Value; ++i )
+                        Utility.DrawCircle(Hud.SelectedUnit.Position, Hud.SelectedUnit.BoundingRadius + (10f + (10f * i)), _config.Item("_worstorbwalker_drawings_focusedminion").GetValue<Circle>().Color);
         }
 
         public void SetAttack(bool b)
@@ -433,6 +437,11 @@ namespace WorstOrbwalker
             return ObjectManager.Get<Obj_AI_Minion>().Any(minion => minion.IsValidTarget() && minion.Team != GameObjectTeam.Neutral && InAutoAttackRange(minion) && HealthPrediction.LaneClearHealthPrediction(minion, (int)((Player.AttackDelay * 1000) * LaneClearWaitTimeMod), FarmDelay) <= Player.GetAutoAttackDamage(minion));
         }
 
+        private bool ShouldWaitTower()
+        {
+            return ObjectManager.Get<Obj_AI_Turret>().Any(t => t.IsValidTarget() && t.Team != GameObjectTeam.Neutral && InAutoAttackRange(t) && HealthPrediction.GetHealthPrediction(t, ((int)(Player.AttackCastDelay * 1000) - 100 + Game.Ping / 2 + 1000 * (int)Player.Distance(t) / (int)GetMyProjectileSpeed()), FarmDelay) <= Player.GetAutoAttackDamage(t));
+        }
+
         public Obj_AI_Base GetTarget()
         {
             Obj_AI_Base result = null;
@@ -442,10 +451,10 @@ namespace WorstOrbwalker
             if (ActiveMode == MODE.LANE_CLEAR || ActiveMode == MODE.MIXED)
                 if (Hud.SelectedUnit != null)
                     if (Hud.SelectedUnit.IsValid && Hud.SelectedUnit.IsEnemy && !Hud.SelectedUnit.IsDead && InAutoAttackRange((Obj_AI_Base)Hud.SelectedUnit))
-                        if (Hud.SelectedUnit.Type == GameObjectType.obj_AI_Base || Hud.SelectedUnit.Type == GameObjectType.obj_AI_Turret)
+                        if (isValidSelectedUnit())
                             return (Obj_AI_Base)Hud.SelectedUnit;
 
-            if ((ActiveMode == MODE.MIXED || ActiveMode == MODE.LANE_CLEAR) && !_config.Item("PriorizeFarm").GetValue<bool>())
+            if ((ActiveMode == MODE.MIXED || ActiveMode == MODE.LANE_CLEAR) && !_config.Item("_worstorbwalker_miscellaneous_priorizefarm").GetValue<bool>())
             {
                 var target = SimpleTs.GetTarget(-1, SimpleTs.DamageType.Physical);
                 if (target != null)
@@ -498,7 +507,7 @@ namespace WorstOrbwalker
 
             /* Lane Clear minions */
             r = float.MaxValue;
-            if (ActiveMode == MODE.LANE_CLEAR || ActiveMode == MODE.MIXED && _config.Item("MixedLaneClear").GetValue<bool>())
+            if (ActiveMode == MODE.LANE_CLEAR || ActiveMode == MODE.MIXED && _config.Item("_worstorbwalker_miscellaneous_mixedlaneclear").GetValue<bool>())
             {
                 if (!ShouldWait())
                 {
@@ -528,14 +537,26 @@ namespace WorstOrbwalker
             /* Turrets */
             if (ActiveMode == MODE.LANE_CLEAR)
                 foreach (var turret in ObjectManager.Get<Obj_AI_Turret>().Where(t => t.IsValidTarget() && InAutoAttackRange(t)))
-                    return turret;
+                {
+                    if (!ShouldWaitTower() && _config.Item("_worstorbwalker_miscellaneous_towerwait").GetValue<bool>())
+                        return turret;
+                    else if (!_config.Item("_worstorbwalker_miscellaneous_towerwait").GetValue<bool>())
+                        return turret;
+                }
 
             return result;
         }
 
         private int FarmDelay
         {
-            get { return _config.Item("FarmDelay").GetValue<Slider>().Value; }
+            get { return _config.Item("_worstorbwalker_miscellaneous_farmdelay").GetValue<Slider>().Value; }
+        }
+
+        private bool isValidSelectedUnit()
+        {
+            if (Hud.SelectedUnit.Type == GameObjectType.obj_AI_Base || Hud.SelectedUnit.Type == GameObjectType.obj_AI_Turret || Hud.SelectedUnit.Type == GameObjectType.obj_AI_Minion || Hud.SelectedUnit.Type == GameObjectType.obj_AI_Hero || Hud.SelectedUnit.Type == GameObjectType.obj_BarracksDampener || Hud.SelectedUnit.Type == GameObjectType.obj_HQ)
+                return true;
+            return false;
         }
     }
 }
