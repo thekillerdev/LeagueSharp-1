@@ -17,81 +17,46 @@ namespace WorstOrbwalker
             MOST_AP,
             CLOSEST,
             NEAR_MOUSE,
-            AUTO_PRIORITY,
+            PRIORITY,
             LESS_ATTACK,
             LESS_CAST
         }
 
         public enum DamageType
         {
-            Magical,
-            Physical,
-            True,
+            MAGICAL,
+            PHYSICAL,
+            TRUE
         }
 
-        private static double lastTick;
-
-        private static readonly string[] AP =
-        {
-            "Ahri", "Akali", "Anivia", "Annie", "Brand", "Cassiopeia", "Diana",
-            "FiddleSticks", "Fizz", "Gragas", "Heimerdinger", "Karthus", "Kassadin", "Katarina", "Kayle", "Kennen",
-            "Leblanc", "Lissandra", "Lux", "Malzahar", "Mordekaiser", "Morgana", "Nidalee", "Orianna", "Ryze", "Sion",
-            "Swain", "Syndra", "Teemo", "TwistedFate", "Veigar", "Viktor", "Vladimir", "Xerath", "Ziggs", "Zyra",
-            "Velkoz"
-        };
-
-        private static readonly string[] SUP =
-        {
-            "Blitzcrank", "Janna", "Karma", "Leona", "Lulu", "Nami", "Sona",
-            "Soraka", "Thresh", "Zilean"
-        };
-
-        private static readonly string[] TANK =
-        {
-            "Amumu", "Chogath", "DrMundo", "Galio", "Hecarim", "Malphite",
-            "Maokai", "Nasus", "Rammus", "Sejuani", "Shen", "Singed", "Skarner", "Volibear", "Warwick", "Yorick", "Zac",
-            "Nunu", "Taric", "Alistar", "Garen", "Nautilus", "Braum"
-        };
-
-        private static readonly string[] AD =
-        {
-            "Ashe", "Caitlyn", "Corki", "Draven", "Ezreal", "Graves", "KogMaw",
-            "MissFortune", "Quinn", "Sivir", "Talon", "Tristana", "Twitch", "Urgot", "Varus", "Vayne", "Zed", "Jinx",
-            "Yasuo", "Lucian", "Kalista"
-        };
-
-        private static readonly string[] BRUISER =
-        {
-            "Darius", "Elise", "Evelynn", "Fiora", "Gangplank", "Gnar", "Jayce",
-            "Pantheon", "Irelia", "JarvanIV", "Jax", "Khazix", "LeeSin", "Nocturne", "Olaf", "Poppy", "Renekton",
-            "Rengar", "Riven", "Shyvana", "Trundle", "Tryndamere", "Udyr", "Vi", "MonkeyKing", "XinZhao", "Aatrox",
-            "Rumble", "Shaco", "MasterYi"
-        };
-
-        public Obj_AI_Hero Target;
-        private bool drawCircle;
+        public Obj_AI_Hero target;
         private Obj_AI_Hero mainTarget;
-        private TargetingMode mode;
-        private float range;
-        private bool update = true;
-        private static Menu _config;
 
-        public WorstSelector(float range, TargetingMode mode)
+        private double lastTick;
+
+        private float range;
+        private TargetingMode mode;
+
+        private bool update = true;
+
+        private Menu config;
+
+        // ==
+
+        public WorstSelector(float range = 1135f, TargetingMode mode = TargetingMode.PRIORITY)
         {
             this.range = range;
             this.mode = mode;
 
             Game.OnGameUpdate += onGameUpdate;
-            Drawing.OnDraw += onDraw;
             Game.OnWndProc += onWndProc;
         }
 
         public void AddToMenu(Menu menu)
         {
-            _config = menu;
-            menu.AddItem(new MenuItem("FocusSelected", "Focus selected target").SetShared().SetValue(true));
-            menu.AddItem(new MenuItem("SelTColor", "Selected target color").SetShared().SetValue(new Circle(true, System.Drawing.Color.Red)));
-            menu.AddItem(new MenuItem("Sep", "").SetShared());
+            this.config = menu;
+
+            menu.AddItem(new MenuItem("", ""));
             var autoPriorityItem = new MenuItem("AutoPriority", "Auto arrange priorities").SetShared().SetValue(false);
             autoPriorityItem.ValueChanged += autoPriorityItem_ValueChanged;
 
@@ -123,7 +88,7 @@ namespace WorstOrbwalker
                     {
                         if (mainTarget.IsValidTarget())
                         {
-                            Target = mainTarget;
+                            target = mainTarget;
                         }
                         else
                         {
@@ -134,28 +99,20 @@ namespace WorstOrbwalker
             }
         }
 
-        private void onDraw(EventArgs args)
-        {
-            if (!ObjectManager.Player.IsDead && drawCircle && Target != null && Target.IsVisible && !Target.IsDead)
-            {
-                Drawing.DrawCircle(Target.Position, 125, _config.Item("SelTColor").GetValue<Circle>().Color);
-            }
-        }
-
         private void onWndProc(WndEventArgs args)
         {
             if (MenuGUI.IsChatOpen || ObjectManager.Player.Spellbook.SelectedSpellSlot != SpellSlot.Unknown)
                 return;
 
-            if(args.WParam == 1)
+            if (args.WParam == 1)
             {
-                if(args.Msg == 257)
+                if (args.Msg == 257)
                 {
                     foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
                     {
                         if (hero.IsValidTarget() && SharpDX.Vector2.Distance(Game.CursorPos.To2D(), hero.ServerPosition.To2D()) < 300)
                         {
-                            Target = hero;
+                            target = hero;
                             mainTarget = hero;
                             Game.PrintChat("TargetSelector: New main target: " + mainTarget.ChampionName);
                         }
@@ -164,72 +121,72 @@ namespace WorstOrbwalker
             }
         }
 
-        public void GetNormalTarget(int range = -1, DamageType damage = DamageType.Physical)
+        public void GetNormalTarget(int range = -1, DamageType damage = DamageType.PHYSICAL)
         {
             Obj_AI_Hero newtarget = null;
-            if (mode != TargetingMode.AUTO_PRIORITY)
+            if (mode != TargetingMode.PRIORITY)
             {
-                foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget() && Geometry.Distance(target) <= range))
+                foreach (var _target in ObjectManager.Get<Obj_AI_Hero>().Where(target => target.IsValidTarget() && Geometry.Distance(target) <= range))
                 {
                     if (newtarget == null)
                     {
-                        newtarget = target;
+                        newtarget = _target;
                     }
                     else
                     {
                         switch (mode)
                         {
                             case TargetingMode.LOW_HP:
-                                if (target.Health < newtarget.Health)
+                                if (_target.Health < newtarget.Health)
                                 {
-                                    newtarget = target;
+                                    newtarget = _target;
                                 }
                                 break;
                             case TargetingMode.MOST_AD:
-                                if (target.BaseAttackDamage + target.FlatPhysicalDamageMod <
+                                if (_target.BaseAttackDamage + _target.FlatPhysicalDamageMod <
                                     newtarget.BaseAttackDamage + newtarget.FlatPhysicalDamageMod)
                                 {
-                                    newtarget = target;
+                                    newtarget = _target;
                                 }
                                 break;
                             case TargetingMode.MOST_AP:
-                                if (target.FlatMagicDamageMod < newtarget.FlatMagicDamageMod)
+                                if (_target.FlatMagicDamageMod < newtarget.FlatMagicDamageMod)
                                 {
-                                    newtarget = target;
+                                    newtarget = _target;
                                 }
                                 break;
                             case TargetingMode.CLOSEST:
-                                if (Geometry.Distance(target) < Geometry.Distance(newtarget))
+                                if (Geometry.Distance(_target) < Geometry.Distance(newtarget))
                                 {
-                                    newtarget = target;
+                                    newtarget = _target;
                                 }
                                 break;
                             case TargetingMode.NEAR_MOUSE:
-                                if (SharpDX.Vector2.Distance(Game.CursorPos.To2D(), target.Position.To2D()) + 50 <
+                                if (SharpDX.Vector2.Distance(Game.CursorPos.To2D(), _target.Position.To2D()) + 50 <
                                     SharpDX.Vector2.Distance(Game.CursorPos.To2D(), newtarget.Position.To2D()))
                                 {
-                                    newtarget = target;
+                                    newtarget = _target;
                                 }
                                 break;
 
                             case TargetingMode.LESS_ATTACK:
-                                if ((target.Health -
-                                     ObjectManager.Player.CalcDamage(target, Damage.DamageType.Physical, target.Health) <
+                                if ((_target.Health -
+                                     ObjectManager.Player.CalcDamage(_target, Damage.DamageType.Physical, _target.Health) <
                                      (newtarget.Health -
                                       ObjectManager.Player.CalcDamage(
                                           newtarget, Damage.DamageType.Physical, newtarget.Health))))
                                 {
-                                    newtarget = target;
+                                    newtarget = _target;
                                 }
                                 break;
                             case TargetingMode.LESS_CAST:
-                                if ((target.Health -
-                                     ObjectManager.Player.CalcDamage(target, Damage.DamageType.Magical, target.Health) <
+                                if ((_target.Health -
+                                     ObjectManager.Player.CalcDamage(_target, Damage.DamageType.Magical, _target.Health) <
                                      (newtarget.Health -
                                       ObjectManager.Player.CalcDamage(
                                           newtarget, Damage.DamageType.Magical, newtarget.Health))))
                                 {
-                                    newtarget = target;
+                                    newtarget = _target;
                                 }
                                 break;
                         }
@@ -240,18 +197,22 @@ namespace WorstOrbwalker
             {
                 newtarget = GetTarget(range, damage);
             }
-            Target = newtarget;
+            this.target = newtarget;
         }
 
         public static bool IsInvulnerable(Obj_AI_Base target)
         {
-            //TODO: add yasuo wall, spellshields, etc.
             if (target.HasBuff("Undying Rage") && target.Health >= 2f)
             {
                 return true;
             }
 
             if (target.HasBuff("JudicatorIntervention"))
+            {
+                return true;
+            }
+
+            if (Collision.GetCollision(new List<SharpDX.Vector3> { ObjectManager.Player.Position, target.Position }, new PredictionInput { Radius = (ObjectManager.Player.AttackRange + ObjectManager.Player.BoundingRadius), Speed = ((int)(ObjectManager.Player.AttackCastDelay * 1000) - 100 + Game.Ping / 2 + 1000 * (int)ObjectManager.Player.Distance(target) / (int)(ObjectManager.Player.IsMelee() ? float.MaxValue : ObjectManager.Player.BasicAttack.MissileSpeed)) }).Count == 0)
             {
                 return true;
             }
@@ -271,8 +232,7 @@ namespace WorstOrbwalker
 
             foreach (var hero in ObjectManager.Get<Obj_AI_Hero>())
             {
-                if (!hero.IsValidTarget() || IsInvulnerable(hero) ||
-                    ((!(range < 0) || !Orbwalking.InAutoAttackRange(hero)) && !(champion.Distance(hero) < range)))
+                if (!hero.IsValidTarget() || IsInvulnerable(hero) || ((!(range < 0) || !Orbwalking.InAutoAttackRange(hero)) && !(champion.Distance(hero) < range)))
                 {
                     continue;
                 }
@@ -280,13 +240,13 @@ namespace WorstOrbwalker
 
                 switch (damageType)
                 {
-                    case DamageType.Magical:
+                    case DamageType.MAGICAL:
                         damage = (float)ObjectManager.Player.CalcDamage(hero, Damage.DamageType.Magical, 100);
                         break;
-                    case DamageType.Physical:
+                    case DamageType.PHYSICAL:
                         damage = (float)ObjectManager.Player.CalcDamage(hero, Damage.DamageType.Physical, 100);
                         break;
-                    case DamageType.True:
+                    case DamageType.TRUE:
                         damage = 100;
                         break;
                 }
@@ -351,13 +311,11 @@ namespace WorstOrbwalker
             return p4.Contains(championName) ? 4 : 1;
         }
 
-        public static float GetPriority(Obj_AI_Hero hero)
+        public float GetPriority(Obj_AI_Hero hero)
         {
             var p = 1;
-            if (_config != null && _config.Item("SimpleTS" + hero.ChampionName + "Priority") != null)
-            {
-                p = _config.Item("WorstSelector" + hero.ChampionName + "Priority").GetValue<Slider>().Value;
-            }
+            if (config != null && config.Item("SimpleTS" + hero.ChampionName + "Priority") != null)
+                p = config.Item("WorstSelector" + hero.ChampionName + "Priority").GetValue<Slider>().Value;
 
             switch (p)
             {
@@ -374,28 +332,41 @@ namespace WorstOrbwalker
             }
         }
 
-        private static void autoPriorityItem_ValueChanged(object sender, OnValueChangeEventArgs e)
+        private void autoPriorityItem_ValueChanged(object sender, OnValueChangeEventArgs e)
         {
             if (!e.GetNewValue<bool>())
-            {
                 return;
-            }
-            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.Team != ObjectManager.Player.Team)
-                )
-            {
-                _config.Item("WorstSelector" + enemy.ChampionName + "Priority")
-                    .SetValue(new Slider(GetPriorityFromDb(enemy.ChampionName), 5, 1));
-            }
+            foreach (var enemy in ObjectManager.Get<Obj_AI_Hero>().Where(hero => hero.Team != ObjectManager.Player.Team))
+                config.Item("WorstSelector" + enemy.ChampionName + "Priority").SetValue(new Slider(GetPriorityFromDb(enemy.ChampionName), 5, 1));
         }
 
-        public void SetDrawCircleOfTarget(bool draw)
+        public static WorstSelector.TargetingMode IntToTargetingMode(int integer)
         {
-            drawCircle = draw;
+            switch (integer)
+            {
+                case 0:
+                    return TargetingMode.LOW_HP;
+                case 1:
+                    return TargetingMode.MOST_AD;
+                case 2:
+                    return TargetingMode.MOST_AP;
+                case 3:
+                    return TargetingMode.CLOSEST;
+                case 4:
+                    return TargetingMode.NEAR_MOUSE;
+                case 5:
+                    return TargetingMode.PRIORITY;
+                case 6:
+                    return TargetingMode.LESS_ATTACK;
+                case 7:
+                    return TargetingMode.LESS_CAST;
+                default: return TargetingMode.PRIORITY;
+            }
         }
 
         public void OverrideTarget(Obj_AI_Hero newtarget)
         {
-            Target = newtarget;
+            target = newtarget;
             update = false;
         }
 
@@ -426,12 +397,12 @@ namespace WorstOrbwalker
 
         public Obj_AI_Hero GetSelectedTarget()
         {
-            return this.Target;
+            return this.target;
         }
 
         public override string ToString()
         {
-            return "Target: " + Target.ChampionName + "Range: " + range + "Mode: " + mode;
+            return "Target: " + target.ChampionName + "Range: " + range + "Mode: " + mode;
         }
     }
 }
