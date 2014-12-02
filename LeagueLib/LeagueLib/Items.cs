@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LeagueLib
 {
@@ -37,7 +35,22 @@ namespace LeagueLib
             // Amplifying Tome + Amplifying Tome -> Hextech Revolver
             Tuple.Create(3145, "Hextech Revolver", Tier.Advanced, new Tuple<int, int>(330, 840), 0f, new Tuple<List<string>, List<int>>(new List<string>{"+40 ability power"}, new List<int>{1052, 1052})),
 
+            // Haunting Guise + Amplifying Tome -> Liandry's Torment
+            Tuple.Create(3151, "Liandry's Torment", Tier.Legendary, new Tuple<int, int>(980, 2030), 0f, new Tuple<List<string>, List<int>>(new List<string>{"+50 ability power","+300 health"}, new List<int>{3145, 1052})),
 
+            // Amplifying Tome -> Mejai's Soulstealer
+            Tuple.Create(3041, "Mejai's Soulstealer", Tier.Advanced, new Tuple<int, int>(965, 980), 0f, new Tuple<List<string>, List<int>>(new List<string>{"+20 ability power"}, new List<int>{1052})),
+
+            // Blasting Wand
+            Tuple.Create(1026, "Blasting Wand", Tier.Basic, new Tuple<int, int>(860, 602), 0f, new Tuple<List<string>, List<int>>(new List<string>{"+40 ability power"}, new List<int>{})),
+
+            // Giant's Belt
+            Tuple.Create(1011, "Giant's Belt", Tier.Basic, new Tuple<int, int>(1000, 700), 0f, new Tuple<List<string>, List<int>>(new List<string>{"+380 health"}, new List<int>{})),
+
+            // Amplifying Tome + Blasting Wand + Giant's Belt -> Rylai's Crystal Scepter
+            Tuple.Create(3116, "Rylai's Crystal Scepter", Tier.Advanced, new Tuple<int, int>(605, 2030), 0f, new Tuple<List<string>, List<int>>(new List<string>{"+100 ability power","+400 health"}, new List<int>{1052, 1026, 1011})),
+
+            // 
         };
 
         public static int GetItemByName(string name)
