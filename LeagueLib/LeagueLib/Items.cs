@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LeagueLib
 {
-    class Items
+    public class Items
     {
         private static Tuple<int, string, int, int, int, List<string>, List<int>>[] items =
         {
