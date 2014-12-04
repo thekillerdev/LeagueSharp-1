@@ -46,11 +46,6 @@ namespace LeagueLib
             return champions.FirstOrDefault(i => i.GetId() == champID);
         }
 
-        public List<Champion> GetComponents()
-        {
-            return pre_champions.ToList();
-        }
-
         public class Champion
         {
             private readonly int champID;

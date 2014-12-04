@@ -125,11 +125,6 @@ namespace LeagueLib
             return items.FirstOrDefault(i => i.GetId() == itemID);
         }
 
-        public List<Item> GetComponents()
-        {
-            return pre_items.ToList();
-        }
-
         public class Item
         {
             private readonly List<int> builtFrom;
@@ -171,10 +166,15 @@ namespace LeagueLib
                 return itemTier;
             }
 
-            public int GetPriceValue()
+            public int GetFullPriceValue()
             {
                 return priceValue +
                        builtFrom.SelectMany(i => items.Where(c => c.GetId() == i)).Sum(i2 => i2.GetPriceValue());
+            }
+
+            public int GetPriceValue()
+            {
+                return priceValue;
             }
 
             public int GetSellValue()
@@ -185,6 +185,14 @@ namespace LeagueLib
             public float GetRange()
             {
                 return itemRange;
+            }
+
+            public List<Item> GetComponents()
+            {
+                List<Item> returned = new List<Item>();
+                foreach (var i in builtFrom)
+                    returned.Add(GetItem(i));
+                return returned;
             }
 
             public override string ToString()
