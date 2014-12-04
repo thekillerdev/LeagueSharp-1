@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using LeagueSharp;
 
 #endregion
 
@@ -138,7 +139,7 @@ namespace LeagueLib
 
         public static Item GetItem(int itemID)
         {
-            return items.FirstOrDefault(i => i.GetID() == itemID);
+            return items.FirstOrDefault(i => i.GetId() == itemID);
         }
 
         public class Item
@@ -168,9 +169,14 @@ namespace LeagueLib
                 this.builtFrom = builtFrom;
             }
 
-            public int GetID()
+            public int GetId()
             {
                 return itemID;
+            }
+
+            public ItemId GetItemId()
+            {
+                return (ItemId) itemID;
             }
 
             public string GetName()
@@ -186,7 +192,7 @@ namespace LeagueLib
             public int GetPriceValue()
             {
                 return priceValue +
-                       builtFrom.SelectMany(i => items.Where(c => c.GetID() == i)).Sum(i2 => i2.GetPriceValue());
+                       builtFrom.SelectMany(i => items.Where(c => c.GetId() == i)).Sum(i2 => i2.GetPriceValue());
             }
 
             public int GetSellValue()
@@ -197,6 +203,11 @@ namespace LeagueLib
             public float GetRange()
             {
                 return itemRange;
+            }
+
+            public List<Item> GetComponents()
+            {
+                return pre_items.ToList();
             }
         }
     }
