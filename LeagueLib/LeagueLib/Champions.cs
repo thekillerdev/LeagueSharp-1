@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 #endregion
 
@@ -9,227 +10,156 @@ namespace LeagueLib
 {
     public class Champions
     {
-        #region champsData
-
-        private static readonly Tuple<int, string, string, string, string, Tuple<int, int, int, int>>[] champions =
+        public enum Role
         {
-            Tuple.Create(1, "Annie", "the Dark Child", "Mage", "N/A", Tuple.Create(2, 3, 10, 6)),
-            Tuple.Create(2, "Olaf", "the Berserker", "Figther", "Tank", Tuple.Create(9, 5, 3, 3)),
-            Tuple.Create(3, "Galio", "the Sentinel's Sorrow", "Tank", "Mage", Tuple.Create(3, 7, 6, 3)),
-            Tuple.Create(4, "Twisted Fate", "the Card Master", "Mage", "N/A", Tuple.Create(6, 2, 6, 9)),
-            Tuple.Create(5, "Xin Zhao", "the Senechal of Demacia", "Fighter", "Assassin", Tuple.Create(8, 6, 3, 3)),
-            Tuple.Create(6, "Urgot", "the Headsman's Pride", "Marksman", "Figther", Tuple.Create(8, 5, 3, 8)),
-            Tuple.Create(7, "LeBlanc", "the Deceiver", "Assassin", "Mage", Tuple.Create(1, 4, 10, 9)),
-            Tuple.Create(8, "Vladimir", "the Crimson Reaper", "Mage", "Tank", Tuple.Create(2, 6, 8, 7)),
-            Tuple.Create(9, "Fiddlesticks", "the Harbinger of Doom", "Mage", "Support", Tuple.Create(2, 3, 9, 9)),
-            Tuple.Create(10, "Kayle", "the Judicator", "Fighter", "Support", Tuple.Create(6, 6, 7, 7)),
-            Tuple.Create(266, "Aatrox", "the Darkin Blade", "Fighter", "Tank", Tuple.Create(8, 4, 3, 4)),
-            Tuple.Create(103, "Ahri", "the Nine-Tailed Fox", "Mage", "Assassin", Tuple.Create(3, 4, 8, 5))
+            Mage,
+            Tank,
+            Support,
+            Fighter,
+            Assassin,
+            Marksman,
+            None
+        }
+
+        private static readonly Champion[] pre_champions =
+        {
+            new Champion(1, "Annie", "the Dark Child", Role.Mage, Role.None, new Power(2, 3, 10, 6), new Stats()),
+            new Champion(2, "Olaf", "the Berserker", Role.Fighter, Role.Tank, new Power(9, 5, 3, 3), new Stats()),
+            new Champion(3, "Galio", "the Sentinel's Sorrow", Role.Tank, Role.Mage, new Power(3, 7, 6, 3), new Stats()),
+            new Champion(4, "Twisted Fate", "the Card Master", Role.Mage, Role.None, new Power(6, 2, 6, 9), new Stats()),
+            new Champion(5, "Xin Zhao", "the Senechal of Demacia", Role.Fighter, Role.Assassin, new Power(8, 6, 3, 3), new Stats()),
+            new Champion(6, "Urgot", "the Headsman's Pride", Role.Marksman, Role.Fighter, new Power(8, 5, 3, 8), new Stats()),
+            new Champion(7, "LeBlanc", "the Deceiver", Role.Assassin, Role.Mage, new Power(1, 4, 10, 9), new Stats()),
+            new Champion(8, "Vladimir", "the Crimson Reaper", Role.Mage, Role.Tank, new Power(2, 6, 8, 7), new Stats()),
+            new Champion(9, "Fiddlesticks", "the Harbinger of Doom", Role.Mage, Role.Tank, new Power(2, 3, 9, 9), new Stats()),
+            new Champion(10, "Kayle", "the Judicator", Role.Fighter, Role.Support, new Power(6, 6, 7, 7), new Stats())
         };
+        private static readonly List<Champion> champions = new List<Champion>(pre_champions);
 
-        #endregion
-
-        #region GetChampion
-
-        public static int GetChampion(string championName)
+        public static Champion GetChampionByName(string name)
         {
-            for (var i = 0; i < champions.Length; ++i)
-            {
-                if (champions[i].Item2.Equals(championName))
-                {
-                    return i;
-                }
-            }
-
-            return -1;
+            return champions.FirstOrDefault(i => i.GetName().Equals(name));
         }
 
-        public static int GetChampion(int championID)
+        public static Champion GetChampion(int champID)
         {
-            for (var i = 0; i < champions.Length; ++i)
-            {
-                if (champions[i].Item1 == championID)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
+            return champions.FirstOrDefault(i => i.GetId() == champID);
         }
 
-        #endregion
-
-        #region GetData
-
-        public static void GetData(int cDataID,
-            out int champID,
-            out string champName,
-            out string champDesc,
-            out string roleA,
-            out string roleB,
-            out int attackPower,
-            out int defensePower,
-            out int abilityPower,
-            out int difficultyPower)
+        public List<Champion> GetComponents()
         {
-            if (cDataID < champions.Length)
-            {
-                champID = champions[cDataID].Item1;
-                champName = champions[cDataID].Item2;
-                champDesc = champions[cDataID].Item3;
-                roleA = champions[cDataID].Item4;
-                roleB = champions[cDataID].Item5;
-                attackPower = champions[cDataID].Item6.Item1;
-                defensePower = champions[cDataID].Item6.Item2;
-                abilityPower = champions[cDataID].Item6.Item3;
-                difficultyPower = champions[cDataID].Item6.Item4;
-                return;
-            }
-            champID = -1;
-            champName = null;
-            champDesc = null;
-            roleA = null;
-            roleB = null;
-            attackPower = -1;
-            defensePower = -1;
-            abilityPower = -1;
-            difficultyPower = -1;
+            return pre_champions.ToList();
         }
 
-        public static List<object> GetData(int cDataID)
+        public class Champion
         {
-            if (cDataID < champions.Length)
+            private readonly int champID;
+            private readonly string champName;
+            private readonly string champDesc;
+            private readonly Role primaryRole;
+            private readonly Role secondaryRole;
+            private readonly Power champPower;
+            private readonly Stats champStats;
+
+            public Champion(int champID, string champName, string champDesc, Role primaryRole, Role secondaryRole, Power power, Stats stats)
             {
-                var list = new List<object>();
-                list.Add(champions[cDataID].Item1);
-                list.Add(champions[cDataID].Item2);
-                list.Add(champions[cDataID].Item3);
-                list.Add(champions[cDataID].Item4);
-                list.Add(champions[cDataID].Item5);
-                list.Add(champions[cDataID].Item6.Item1);
-                list.Add(champions[cDataID].Item6.Item2);
-                list.Add(champions[cDataID].Item6.Item3);
-                list.Add(champions[cDataID].Item6.Item4);
-                return list;
+                this.champID = champID;
+                this.champName = champName;
+                this.champDesc = champDesc;
+                this.primaryRole = primaryRole;
+                this.secondaryRole = secondaryRole;
+                this.champPower = power;
+                this.champStats = stats;
             }
-            return null;
+
+            public int GetId()
+            {
+                return champID;
+            }
+
+            public string GetName()
+            {
+                return champName;
+            }
+
+            public string GetDescription()
+            {
+                return champDesc;
+            }
+
+            public Role GetPrimaryRole()
+            {
+                return primaryRole;
+            }
+
+            public Role GetSecondaryRole()
+            {
+                return secondaryRole;
+            }
+
+            public Power GetPower()
+            {
+                return champPower;
+            }
+
+            public Stats GetStats()
+            {
+                return champStats;
+            }
+
+            public override string ToString()
+            {
+                return champName + "[" + champID + "]";
+            }
         }
 
-        public static int GetChampionID(int cDataID)
+        public class Power
         {
-            if (cDataID < champions.Length)
+            private readonly int attackPower;
+            private readonly int defensePower;
+            private readonly int abilityPower;
+            private readonly int difficultyPower;
+
+            public Power(int attackPower, int defensePower, int abilityPower, int difficultyPower)
             {
-                return champions[cDataID].Item1;
+                this.attackPower = attackPower;
+                this.defensePower = defensePower;
+                this.abilityPower = abilityPower;
+                this.difficultyPower = difficultyPower;
             }
-            return -1;
+
+            public int getAttackPower()
+            {
+                return attackPower;
+            }
+
+            public int getDefensePower()
+            {
+                return defensePower;
+            }
+
+            public int getAbilityPower()
+            {
+                return abilityPower;
+            }
+
+            public int getDifficultyPower()
+            {
+                return difficultyPower;
+            }
+
+            public override string ToString()
+            {
+                return "attackPower[" + attackPower + "] / defensePower[" + defensePower + "] / abilityPower[" + abilityPower + "] / difficultyPower[" + difficultyPower + "]";
+            }
         }
 
-        public static string GetChampionName(int cDataID)
+        public class Stats
         {
-            if (cDataID < champions.Length)
+            public Stats()
             {
-                return champions[cDataID].Item2;
-            }
-            return null;
-        }
 
-        public static string GetChampionDesc(int cDataID)
-        {
-            if (cDataID < champions.Length)
-            {
-                return champions[cDataID].Item3;
             }
-            return null;
         }
-
-        public static string GetChampionRole(int cDataID)
-        {
-            if (cDataID < champions.Length)
-            {
-                return champions[cDataID].Item4;
-            }
-            return null;
-        }
-
-        public static string GetChampionSecondaryRole(int cDataID)
-        {
-            if (cDataID < champions.Length)
-            {
-                return champions[cDataID].Item5;
-            }
-            return null;
-        }
-
-        public static void GetChampionStats(int cDataID,
-            out int attackPower,
-            out int defensePower,
-            out int abilityPower,
-            out int difficultyPower)
-        {
-            if (cDataID < champions.Length)
-            {
-                attackPower = champions[cDataID].Item6.Item1;
-                defensePower = champions[cDataID].Item6.Item2;
-                abilityPower = champions[cDataID].Item6.Item3;
-                difficultyPower = champions[cDataID].Item6.Item4;
-                return;
-            }
-            attackPower = -1;
-            defensePower = -1;
-            abilityPower = -1;
-            difficultyPower = -1;
-        }
-
-        public static List<int> GetChampionStats(int cDataID)
-        {
-            if (cDataID < champions.Length)
-            {
-                var list = new List<int>();
-                list.Add(champions[cDataID].Item6.Item1);
-                list.Add(champions[cDataID].Item6.Item2);
-                list.Add(champions[cDataID].Item6.Item3);
-                list.Add(champions[cDataID].Item6.Item4);
-                return list;
-            }
-            return null;
-        }
-
-        public static int GetChampionAttackPower(int cDataID)
-        {
-            if (cDataID < champions.Length)
-            {
-                return champions[cDataID].Item6.Item1;
-            }
-            return -1;
-        }
-
-        public static int GetChampionDefensePower(int cDataID)
-        {
-            if (cDataID < champions.Length)
-            {
-                return champions[cDataID].Item6.Item2;
-            }
-            return -1;
-        }
-
-        public static int GetChampionAbilityPower(int cDataID)
-        {
-            if (cDataID < champions.Length)
-            {
-                return champions[cDataID].Item6.Item3;
-            }
-            return -1;
-        }
-
-        public static int GetChampionDifficultyPower(int cDataID)
-        {
-            if (cDataID < champions.Length)
-            {
-                return champions[cDataID].Item6.Item4;
-            }
-            return -1;
-        }
-
-        #endregion
     }
 }
