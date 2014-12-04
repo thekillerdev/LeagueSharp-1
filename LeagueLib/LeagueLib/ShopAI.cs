@@ -14,10 +14,17 @@ namespace LeagueLib
         public ShopAI(Hashtable shop = null, int? shopIndex = int.MaxValue)
         {
             this.shop = shop ?? new Hashtable();
-            this.shopIndex = shopIndex ?? int.MaxValue;
-
-            if (shopIndex == int.MaxValue && shop.Count < int.MaxValue)
-                shopIndex = (shop.Count + 1);
+            if(shop.Count > 0)
+            {
+                if (shop.Count == int.MaxValue)
+                {
+                    this.shopIndex = int.MaxValue;
+                    return;
+                }
+                this.shopIndex = GetFreeIndex();
+                return;
+            }
+            this.shopIndex = 0;
         }
 
         public bool AddItem(ShopItem shopItem)
