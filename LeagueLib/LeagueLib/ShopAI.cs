@@ -1,54 +1,81 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
+
+#endregion
 
 namespace LeagueLib
 {
     public class ShopAI
     {
         private readonly Hashtable shop;
-        private int? shopIndex;
+        private int shopIndex;
+        private const int maxShop = 10;
 
-        public ShopAI(Hashtable shop = null, int? shopIndex = int.MaxValue)
+        public ShopAI(Hashtable shop = null, int shopIndex = int.MaxValue)
         {
             this.shop = shop ?? new Hashtable();
-            if(shop.Count > 0)
-            {
-                if (shop.Count == int.MaxValue)
-                {
-                    this.shopIndex = int.MaxValue;
-                    return;
-                }
-                this.shopIndex = GetFreeIndex();
-                return;
-            }
-            this.shopIndex = 0;
+
+            if (shop.Count > 0 && shop.Count < maxShop)
+                this.shopIndex = shop.Count;
+            else if (shop.Count < maxShop)
+                this.shopIndex = 0;
+            else
+                this.shopIndex = maxShop;
         }
 
-        public bool AddItem(ShopItem shopItem)
+        public int AddItem(int itemId)
         {
-            var index = shopIndex;
-            if (shop.ContainsKey(shopIndex))
-                index = GetFreeIndex();
+            Console.WriteLine("debug: " + Items.GetItem(itemId));
+            return this.AddItem(new ShopItem(Items.GetItem(itemId)));
+        }
 
-            if(index < int.MaxValue)
+        public int AddItem(ItemId itemId)
+        {
+            Console.WriteLine("debug: " + Items.GetItem((int)itemId));
+            return this.AddItem(new ShopItem(Items.GetItem((int)itemId)));
+        }
+
+        public int AddItem(string itemName)
+        {
+            Console.WriteLine("debug: " + Items.GetItemByName(itemName));
+            return this.AddItem(new ShopItem(Items.GetItemByName(itemName)));
+        }
+
+        public int AddItem(ShopItem shopItem)
+        {
+            if (shop.ContainsKey(shopIndex) && shopIndex < maxShop)
+                GetFreeIndex();
+
+            if(shopIndex < maxShop)
             {
-                shop.Add(index, shopItem);
-                shopIndex = GetFreeIndex();
-                return true;
+                shop.Add(shopIndex, shopItem);
+                ++shopIndex;
+                return shopIndex;
             }
+
+            return -1;
+        }
+
+        public bool RemoveItem(ShopItem shopItem)
+        {
+            if (shop.ContainsValue(shopItem))
+                foreach (var i in shop.Keys)
+                    if (shop[i].Equals(shopItem))
+                        return RemoveItem((int)i);
+
             return false;
         }
 
-        public bool RemoveItem(int itemIndex, bool force = false)
+        public bool RemoveItem(int shopIndex)
         {
-            if(shop.ContainsKey(itemIndex))
+            if (shopIndex < maxShop && shop.ContainsKey(shopIndex))
             {
-                if (((ShopItem)shop[itemIndex]).IsProtected() && !force)
-                    return false;
-                shop.Remove(itemIndex);
+                shop.Remove(shopIndex);
                 return true;
             }
             return false;
@@ -56,14 +83,11 @@ namespace LeagueLib
 
         private int GetFreeIndex()
         {
-            var fIndex = 0;
-            while (fIndex != int.MaxValue)
-            {
-                if (!shop.ContainsKey(fIndex))
-                    return fIndex;
-                ++fIndex;
-            }
-            return int.MaxValue;
+            for(var c = 0; c < maxShop; ++c)
+                if (!shop.ContainsKey(c))
+                    return c;
+
+            return maxShop;
         }
     }
 
