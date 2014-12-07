@@ -110,9 +110,9 @@ namespace LeagueLib
                 return components;
             }
 
-            public List<Item> GetComponentsList()
+            public List<ShopItem> GetComponentsList()
             {
-                return (from item in pre_items from id in components where item.itemID == id select item).ToList();
+                return (from item in pre_items from id in components where item.itemID == id select new ShopItem(item)).ToList();
             }
 
             public override string ToString()
