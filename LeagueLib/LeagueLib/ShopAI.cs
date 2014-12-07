@@ -136,18 +136,18 @@ namespace LeagueLib
     {
         private bool itemBought;
         private Command itemOrder;
-        private readonly Items.Item Item;
+        private readonly Item Item;
         private readonly List<ShopItem> itemComponents;
         private readonly int itemFullPrice;
         private readonly ItemId itemId;
         private readonly int itemPrice;
 
-        public ShopItem(Items.Item item)
+        public ShopItem(Item item)
         {
             Item = item;
             itemId = (ItemId) item.GetId();
             itemFullPrice = item.GetFullPriceValue();
-            itemPrice = item.GetPriceValue();
+            itemPrice = item.GetPrice();
             itemComponents = item.GetComponentsList();
         }
 
