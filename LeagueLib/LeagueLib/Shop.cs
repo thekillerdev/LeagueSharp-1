@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,13 +12,20 @@ namespace LeagueLib
 {
     public class Shop
     {
+        private int failCount;
         private readonly int MAX_SHOP_ITEMS = 7;
         private readonly Hashtable shopItems = new Hashtable();
-        private int failCount = 0;
 
         public void AddList(List<ItemId> items)
         {
-            foreach (var item in items)
+            var list = items;
+            foreach (
+                var i in from item in ObjectManager.Player.InventoryItems from i in items where item.Id == i select i)
+            {
+                list.Remove(i);
+            }
+
+            foreach (var item in list)
             {
                 Add(new ShopItem(Items.GetItem(item)));
             }
@@ -36,9 +42,8 @@ namespace LeagueLib
 
         public void Remove(ShopItem shopItem)
         {
-            foreach (
-                var pair in
-                    from DictionaryEntry pair in shopItems let item = pair.Value where item == shopItem select pair)
+            foreach (var pair in
+                from DictionaryEntry pair in shopItems let item = pair.Value where item == shopItem select pair)
             {
                 shopItems.Remove(pair.Key);
             }
@@ -66,7 +71,7 @@ namespace LeagueLib
 
             for (var i = 0; i < MAX_SHOP_ITEMS; ++i)
             {
-                var item = (ShopItem)shopItems[i];
+                var item = (ShopItem) shopItems[i];
                 if (item.IsBought() || ObjectManager.Player.GoldCurrent < item.GetPrice())
                 {
                     continue;
@@ -103,10 +108,12 @@ namespace LeagueLib
         {
             return item.GetPrice();
         }
+
         public bool IsBought()
         {
             return isBought;
         }
+
         public void Buy()
         {
             if (isBought)
