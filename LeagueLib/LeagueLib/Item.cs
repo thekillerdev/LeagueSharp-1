@@ -183,6 +183,11 @@ namespace LeagueLib
 
         public List<Item> GetComponentsList()
         {
+            if (RecipeItems == null)
+            {
+                Console.WriteLine("FAIL");
+                return new List<Item>();
+            }
             return GetComponents().Select(item => Items.GetItem(ItemId)).ToList();
         }
 
