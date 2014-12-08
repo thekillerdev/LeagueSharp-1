@@ -67,7 +67,7 @@ namespace LeagueLib
             for (var i = 0; i < MAX_SHOP_ITEMS; ++i)
             {
                 var item = (ShopItem)shopItems[i];
-                if (item.IsBought())
+                if (item.IsBought() || ObjectManager.Player.GoldCurrent < item.GetPrice())
                 {
                     continue;
                 }
@@ -99,6 +99,10 @@ namespace LeagueLib
             return item;
         }
 
+        public int GetPrice()
+        {
+            return item.GetPrice();
+        }
         public bool IsBought()
         {
             return isBought;
