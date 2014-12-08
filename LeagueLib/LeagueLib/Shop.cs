@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -76,6 +77,7 @@ namespace LeagueLib
                 {
                     continue;
                 }
+                Console.WriteLine("BUY");
                 item.Buy();
                 failCount = 0;
                 break;
