@@ -153,6 +153,7 @@ namespace LeagueLib
 
         public void Buy()
         {
+            Console.WriteLine("debug shopai.cs buy:" + itemId);
             if (itemBought)
             {
                 return;

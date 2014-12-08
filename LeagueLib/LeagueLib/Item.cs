@@ -162,6 +162,7 @@ namespace LeagueLib
 
         public bool Buy()
         {
+            Console.WriteLine("debug items.cs buy: " + GetItemId());
             return ObjectManager.Player.BuyItem(GetItemId());
         }
 
