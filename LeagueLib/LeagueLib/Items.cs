@@ -1052,6 +1052,10 @@ namespace LeagueLib
 
         public static Item GetItem(int itemID)
         {
+            if (itemID == null)
+            {
+                Console.Write("ITEM IS NULL");
+            }
             var p = items.FirstOrDefault(i => i.GetId() == itemID);
             if (p == null)
             {
