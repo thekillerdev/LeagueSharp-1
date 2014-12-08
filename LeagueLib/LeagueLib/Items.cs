@@ -1,7 +1,9 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using LeagueSharp;
 
 #endregion
 
@@ -1050,7 +1052,12 @@ namespace LeagueLib
 
         public static Item GetItem(int itemID)
         {
-            return items.FirstOrDefault(i => i.GetId() == itemID);
+            var p = items.FirstOrDefault(i => i.GetId() == itemID);
+            if (p == null)
+            {
+                Console.WriteLine(itemID);
+            }
+            return p ?? GetItem((int)ItemId.Abyssal_Scepter);
         }
     }
 }
