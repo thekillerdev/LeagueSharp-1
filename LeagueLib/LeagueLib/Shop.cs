@@ -19,11 +19,11 @@ namespace LeagueLib
         public static void AddList(List<ItemId> items)
         {
             var list = items;
-            foreach (
+           /* foreach (
                 var i in from item in ObjectManager.Player.InventoryItems from i in items where item.Id == i select i)
             {
                 list.Remove(i);
-            }
+            }*/
 
             foreach (var item in list)
             {
