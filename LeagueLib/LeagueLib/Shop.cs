@@ -10,13 +10,13 @@ using LeagueSharp.Common;
 
 namespace LeagueLib
 {
-    public class Shop
+    public static class Shop
     {
-        private int failCount;
-        private readonly int MAX_SHOP_ITEMS = 7;
-        private readonly Hashtable shopItems = new Hashtable();
+        private static int failCount;
+        private static readonly int MAX_SHOP_ITEMS = 7;
+        private static readonly Hashtable shopItems = new Hashtable();
 
-        public void AddList(List<ItemId> items)
+        public static void AddList(List<ItemId> items)
         {
             var list = items;
             foreach (
@@ -31,7 +31,7 @@ namespace LeagueLib
             }
         }
 
-        public void Add(ShopItem shopItem)
+        public static void Add(ShopItem shopItem)
         {
             var i = GetIndex();
             if (i != -1)
@@ -40,7 +40,7 @@ namespace LeagueLib
             }
         }
 
-        public void Remove(ShopItem shopItem)
+        public static void Remove(ShopItem shopItem)
         {
             foreach (var pair in
                 from DictionaryEntry pair in shopItems let item = pair.Value where item == shopItem select pair)
@@ -49,7 +49,7 @@ namespace LeagueLib
             }
         }
 
-        private int GetIndex()
+        private static int GetIndex()
         {
             for (var i = 0; i < MAX_SHOP_ITEMS; ++i)
             {
@@ -62,7 +62,7 @@ namespace LeagueLib
             return -1;
         }
 
-        public bool Tick()
+        public static bool Tick()
         {
             if (ObjectManager.Player.GoldCurrent < 10)
             {
@@ -151,6 +151,7 @@ namespace LeagueLib
                 return;
             }
             isBought = true;
+            
         }
 
         public bool SellItem()
