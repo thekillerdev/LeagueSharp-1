@@ -1222,7 +1222,7 @@ namespace LeagueLib
             return Price;
         }
 
-        public int GetFullPrice()
+        public int GetTotalPrice()
         {
             return GetRecipePrice() + Price;
         }
@@ -1233,7 +1233,7 @@ namespace LeagueLib
             {
                 return 0;
             }
-            return RecipeItems.Sum(i => Items.GetItem(i).GetFullPrice());
+            return RecipeItems.Sum(i => Items.GetItem(i).GetTotalPrice());
         }
 
         public int GetSellPrice()
