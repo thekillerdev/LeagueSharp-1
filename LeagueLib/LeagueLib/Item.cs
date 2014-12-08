@@ -176,6 +176,8 @@ namespace LeagueLib
         Enchantment,
         Consumable,
         RengarsTrinket,
+        BasicTrinket,
+        AdvancedTrinket,
         None
     }
 
