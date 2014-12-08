@@ -1,13 +1,17 @@
 ﻿#region
+
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using LeagueSharp;
+
 #endregion
 
 namespace LeagueLib
 {
+
     #region Items
+
     public class Items
     {
         #region Items
@@ -1050,81 +1054,52 @@ namespace LeagueLib
             return items.FirstOrDefault(i => i.GetName().Equals(name));
         }
 
-        public static Item GetItem(int itemID)
+        public static Item GetItem(int itemId)
         {
-            return items.FirstOrDefault(i => i.GetId() == itemID);
+            return items.FirstOrDefault(i => i.GetId() == itemId);
+        }
+
+        public static Item GetItem(ItemId id)
+        {
+            return items.FirstOrDefault(i => i.GetItemId() == id);
         }
     }
+
     #endregion
 
     #region Item
+
     public class Item
     {
-        #region Item Variables
-        public readonly float FlatArmorMod;
-        public readonly float FlatCritChanceMod;
-
-        public readonly float FlatCritDamageMod;
-        public readonly float FlatHPPoolMod;
-        public readonly float FlatHPRegenMod;
-        public readonly float FlatMagicDamageMod;
-        public readonly float FlatMovementSpeedMod;
-        public readonly float FlatPhysicalDamageMod;
-        public readonly float FlatSpellBlockMod;
-
-        private readonly bool IsRecipe;
-
-        private readonly ItemCategory ItemCategory;
-        private readonly ItemTier ItemTier;
-
-        private readonly int ItemId;
-        private readonly string ItemName;
-        private readonly int MaxStacks;
-
-        public readonly float PercentArmorMod;
-        public readonly float PercentCritDamageMod;
-        public readonly float PercentEXPBonus;
-        public readonly float PercentHPPoolMod;
-        public readonly float PercentHPRegenMod;
-        public readonly float PercentMagicDamageMod;
-        public readonly float PercentMovementSpeedMod;
-        public readonly float PercentPhysicalDamageMod;
-        public readonly float PercentSpellBlockMod;
-        public readonly float PrecentAttackSpeedMod;
-
-        private readonly int Price;
-        private readonly int[] RecipeItems;
-        private readonly int SellValue;
-        #endregion
-
         #region Constructor
+
         public Item(int ItemId,
-        string ItemName,
-        int MaxStacks,
-        int Price,
-        bool IsRecipe,
-        ItemTier ItemTier,
-        ItemCategory ItemCategory,
-        float FlatCritDamageMod,
-        float FlatPhysicalDamageMod,
-        float FlatMovementSpeedMod,
-        float FlatCritChanceMod,
-        float FlatMagicDamageMod,
-        float FlatHPRegenMod,
-        float FlatHPPoolMod,
-        float FlatSpellBlockMod,
-        float FlatArmorMod,
-        float PrecentAttackSpeedMod,
-        float PercentSpellBlockMod,
-        float PercentHPPoolMod,
-        float PercentCritDamageMod,
-        float PercentArmorMod,
-        float PercentEXPBonus,
-        float PercentHPRegenMod,
-        float PercentMagicDamageMod,
-        float PercentMovementSpeedMod,
-        float PercentPhysicalDamageMod,
-        int[] RecipeItems = null)
+            string ItemName,
+            int MaxStacks,
+            int Price,
+            bool IsRecipe,
+            ItemTier ItemTier,
+            ItemCategory ItemCategory,
+            float FlatCritDamageMod,
+            float FlatPhysicalDamageMod,
+            float FlatMovementSpeedMod,
+            float FlatCritChanceMod,
+            float FlatMagicDamageMod,
+            float FlatHPRegenMod,
+            float FlatHPPoolMod,
+            float FlatSpellBlockMod,
+            float FlatArmorMod,
+            float PrecentAttackSpeedMod,
+            float PercentSpellBlockMod,
+            float PercentHPPoolMod,
+            float PercentCritDamageMod,
+            float PercentArmorMod,
+            float PercentEXPBonus,
+            float PercentHPRegenMod,
+            float PercentMagicDamageMod,
+            float PercentMovementSpeedMod,
+            float PercentPhysicalDamageMod,
+            int[] RecipeItems = null)
         {
             // BASE STATS
             this.ItemId = ItemId;
@@ -1162,9 +1137,71 @@ namespace LeagueLib
             this.PercentMovementSpeedMod = PercentMovementSpeedMod;
             this.PercentPhysicalDamageMod = PercentPhysicalDamageMod;
         }
+
+        #endregion
+
+        #region Other Functions
+
+        private bool IsReducedSellItem()
+        {
+            switch (ItemId)
+            {
+                case 3069:
+                case 3092:
+                case 1055:
+                case 1054:
+                case 1039:
+                case 1062:
+                case 1063:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        #endregion
+
+        #region Item Variables
+
+        public readonly float FlatArmorMod;
+        public readonly float FlatCritChanceMod;
+
+        public readonly float FlatCritDamageMod;
+        public readonly float FlatHPPoolMod;
+        public readonly float FlatHPRegenMod;
+        public readonly float FlatMagicDamageMod;
+        public readonly float FlatMovementSpeedMod;
+        public readonly float FlatPhysicalDamageMod;
+        public readonly float FlatSpellBlockMod;
+
+        private readonly bool IsRecipe;
+
+        private readonly ItemCategory ItemCategory;
+        private readonly ItemTier ItemTier;
+
+        private readonly int ItemId;
+        private readonly string ItemName;
+        private readonly int MaxStacks;
+
+        public readonly float PercentArmorMod;
+        public readonly float PercentCritDamageMod;
+        public readonly float PercentEXPBonus;
+        public readonly float PercentHPPoolMod;
+        public readonly float PercentHPRegenMod;
+        public readonly float PercentMagicDamageMod;
+        public readonly float PercentMovementSpeedMod;
+        public readonly float PercentPhysicalDamageMod;
+        public readonly float PercentSpellBlockMod;
+        public readonly float PrecentAttackSpeedMod;
+
+        private readonly int Price;
+        private readonly int[] RecipeItems;
+        private readonly int SellValue;
+
         #endregion
 
         #region Get Functions
+
         public int GetId()
         {
             return ItemId;
@@ -1193,9 +1230,10 @@ namespace LeagueLib
         public int GetRecipePrice()
         {
             if (RecipeItems == null)
+            {
                 return 0;
-            else
-                return RecipeItems.Sum(i => Items.GetItem(i).GetFullPrice());
+            }
+            return RecipeItems.Sum(i => Items.GetItem(i).GetFullPrice());
         }
 
         public int GetSellPrice()
@@ -1218,34 +1256,29 @@ namespace LeagueLib
             return RecipeItems;
         }
 
+        public List<Item> GetCopmponentList()
+        {
+            var list = new List<Item>();
+            var components = GetComponents();
+            if (components != null && components.Count() > 0)
+            {
+                list.AddRange(components.Select(Items.GetItem));
+            }
+            return list;
+        }
+
         public ItemId GetItemId()
         {
-            return (ItemId)ItemId;
+            return (ItemId) ItemId;
         }
-        #endregion
 
-        #region Other Functions
-        private bool IsReducedSellItem()
-        {
-            switch (ItemId)
-            {
-                case 3069:
-                case 3092:
-                case 1055:
-                case 1054:
-                case 1039:
-                case 1062:
-                case 1063:
-                    return true;
-                default:
-                    return false;
-            }
-        }
         #endregion
     }
+
     #endregion
 
     #region ItemTier
+
     public enum ItemTier
     {
         None,
@@ -1259,10 +1292,12 @@ namespace LeagueLib
         BasicTrinket,
         AdvancedTrinket
     }
+
     #endregion
 
     #region ItemCategory
-    [FlagsAttribute]
+
+    [Flags]
     public enum ItemCategory
     {
         None = 0,
@@ -1279,5 +1314,6 @@ namespace LeagueLib
         Mana = 1 << 10,
         Armor = 1 << 11
     }
+
     #endregion
 }
