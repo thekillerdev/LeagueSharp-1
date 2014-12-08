@@ -59,6 +59,11 @@ namespace LeagueLib
 
         public bool Tick()
         {
+            if (ObjectManager.Player.GoldCurrent < 10)
+            {
+                return true;
+            }
+
             for (var i = 0; i < MAX_SHOP_ITEMS; ++i)
             {
                 var item = (ShopItem)shopItems[i];
