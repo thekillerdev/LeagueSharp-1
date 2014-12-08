@@ -15,6 +15,7 @@ namespace LeagueLib
     {
         private readonly int MAX_SHOP_ITEMS = 7;
         private readonly Hashtable shopItems = new Hashtable();
+        private int failCount = 0;
 
         public void AddList(List<ItemId> items)
         {
@@ -66,9 +67,11 @@ namespace LeagueLib
                     continue;
                 }
                 item.Buy();
-                return true;
+                failCount = 0;
+                break;
             }
-            return false;
+            failCount++;
+            return failCount > 5;
         }
     }
 
