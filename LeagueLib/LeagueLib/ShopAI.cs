@@ -42,17 +42,17 @@ namespace LeagueLib
 
         public int AddItem(int itemId)
         {
-            Console.WriteLine("debug: " + Items.itemId));
-            return AddItem(new ShopItem(Items.itemId)));
+            Console.WriteLine("debug: " + Items.GetItem(itemId));
+            return AddItem(new ShopItem(Items.GetItem(itemId)));
         }
 
         public int AddItem(ItemId itemId)
         {
-            Console.WriteLine("debug: " + Items.(int) itemId));
+            Console.WriteLine("debug: " + Items.GetItem((int)itemId));
             ShopItem shopitem;
             try
             {
-                shopitem = new ShopItem(Items.(int) itemId));
+                shopitem = new ShopItem(Items.GetItem((int) itemId));
             }
             catch
             {

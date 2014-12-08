@@ -1063,7 +1063,7 @@ namespace LeagueLib
             {
                 Console.WriteLine(itemID);
             }
-            return p ?? ((int)ItemId.Abyssal_Scepter);
+            return p ?? GetItem((int)ItemId.Abyssal_Scepter);
         }
     }
 }

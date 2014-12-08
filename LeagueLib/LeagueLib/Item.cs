@@ -183,7 +183,7 @@ namespace LeagueLib
 
         public List<Item> GetComponentsList()
         {
-            return GetComponents().Select(item => Items.items.ItemId)).ToList();
+            return GetComponents().Select(item => Items.GetItem(ItemId)).ToList();
         }
 
         private bool IsReducedSellItem()
