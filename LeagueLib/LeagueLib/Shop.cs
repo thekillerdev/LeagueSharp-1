@@ -56,7 +56,7 @@ namespace LeagueLib
             return -1;
         }
 
-        public void Tick()
+        public bool Tick()
         {
             for (var i = 0; i < MAX_SHOP_ITEMS; ++i)
             {
@@ -66,8 +66,9 @@ namespace LeagueLib
                     continue;
                 }
                 item.Buy();
-                break;
+                return true;
             }
+            return false;
         }
     }
 
