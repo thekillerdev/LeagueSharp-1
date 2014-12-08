@@ -48,7 +48,7 @@ namespace LeagueLib
 
         public int AddItem(ItemId itemId)
         {
-            Console.WriteLine("debug: " + Items.GetItem((int)itemId));
+            Console.WriteLine("debug: " + Items.GetItem((int)itemId).GetName());
             ShopItem shopitem;
             try
             {
@@ -165,6 +165,12 @@ namespace LeagueLib
             {
                 Game.OnGameProcessPacket += Game_OnGameProcessPacket;
                 Item.Buy();
+                return;
+            }
+
+            if (itemComponents == null || itemComponents.Count == 0)
+            {
+                Console.WriteLine("fail");
                 return;
             }
 
