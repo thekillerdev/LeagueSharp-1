@@ -1054,16 +1054,24 @@ namespace LeagueLib
 
         public static Item GetItem(int itemID)
         {
-            if (itemID == null)
+            try
             {
-                Console.Write("ITEM IS NULL");
+                if (itemID == null)
+                {
+                    Console.Write("ITEM IS NULL");
+                }
+                var p = items.FirstOrDefault(i => i.GetId() == itemID);
+                if (p == null)
+                {
+                    Console.WriteLine(itemID);
+                }
+                return p;
             }
-            var p = items.FirstOrDefault(i => i.GetId() == itemID);
-            if (p == null)
+            catch (Exception e)
             {
-                Console.WriteLine(itemID);
+                Console.WriteLine(e);
             }
-            return p ?? GetItem((int)ItemId.Abyssal_Scepter);
+           return GetItem((int)ItemId.Abyssal_Scepter);
         }
     }
 }
