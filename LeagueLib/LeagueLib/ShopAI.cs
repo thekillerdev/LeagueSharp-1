@@ -137,7 +137,7 @@ namespace LeagueLib
         private bool itemBought;
         private Command itemOrder;
         private readonly Item Item;
-        private readonly List<ShopItem> itemComponents;
+        private readonly List<Item> itemComponents;
         private readonly int itemFullPrice;
         private readonly ItemId itemId;
         private readonly int itemPrice;
@@ -169,7 +169,7 @@ namespace LeagueLib
             }
 
             // buy components
-            foreach (var item in itemComponents.Where(item => ObjectManager.Player.Gold > item.itemPrice))
+            foreach (var item in itemComponents.Where(item => ObjectManager.Player.Gold > item.GetFullPriceValue()))
             {
                 item.Buy();
             }
