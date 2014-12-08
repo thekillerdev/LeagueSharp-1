@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 using System.Resources;
 
 [assembly: AssemblyTitle("LeagueLib")]
-[assembly: AssemblyDescription("Leauge of Legends library, contains all sort of game information (for example items,champions,masteries,maps,runes,etc.)")]
+[assembly: AssemblyDescription("Leauge of Legends library")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("LeagueSharp")]
 [assembly: AssemblyProduct("LeagueLib")]
-[assembly: AssemblyCopyright("Copyright ©  2014")]
+[assembly: AssemblyCopyright("Copyright © 2014 by WorstPing and trees-software")]
 [assembly: AssemblyTrademark("LeagueSharp")]
 [assembly: AssemblyCulture("")]
 [assembly: ComVisible(false)]
