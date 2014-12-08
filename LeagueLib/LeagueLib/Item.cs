@@ -41,7 +41,7 @@ namespace LeagueLib
         public readonly float PrecentAttackSpeedMod;
         private readonly int Price;
         // RECIPE
-        private readonly Item[] RecipeItems;
+        private readonly int[] RecipeItems;
         private readonly int SellValue;
 
         public Item(int ItemId,
@@ -70,7 +70,7 @@ namespace LeagueLib
             float PercentMagicDamageMod,
             float PercentMovementSpeedMod,
             float PercentPhysicalDamageMod,
-            Item[] RecipeItems = null)
+            int[] RecipeItems = null)
         {
             // BASE STATS
             this.ItemId = ItemId;
@@ -144,7 +144,7 @@ namespace LeagueLib
             return ItemClass;
         }
 
-        public Item[] GetComponents()
+        public int[] GetComponents()
         {
             return RecipeItems;
         }
@@ -183,7 +183,7 @@ namespace LeagueLib
 
         public List<Item> GetComponentsList()
         {
-            return GetComponents().Select(item => Items.GetItem(item.ItemId)).ToList();
+            return GetComponents().Select(item => Items.items.ItemId)).ToList();
         }
 
         private bool IsReducedSellItem()
