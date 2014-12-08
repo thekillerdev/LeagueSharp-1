@@ -8,7 +8,7 @@ using LeagueSharp;
 namespace LeagueLib
 {
     #region Items
-    public static class Items
+    public class Items
     {
         #region Items
         private static readonly Item[] pre_items =
