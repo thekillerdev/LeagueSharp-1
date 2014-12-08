@@ -16,11 +16,11 @@ namespace LeagueLib
         private readonly int MAX_SHOP_ITEMS = 7;
         private readonly Hashtable shopItems = new Hashtable();
 
-        public void AddList(List<ShopItem> items)
+        public void AddList(List<ItemId> items)
         {
             foreach (var item in items)
             {
-                Add(item);
+                Add(new ShopItem(Items.GetItem(item)));
             }
         }
 
