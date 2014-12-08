@@ -17,24 +17,13 @@ namespace LeagueLib
         private readonly int Price;
         private readonly int SellValue;
         private readonly bool IsRecipe;
-        private readonly IClass ItemClass;
+        private readonly ItemClass ItemClass;
 
         // RECIPE
         private readonly Item[] RecipeItems;
 
         // CATEGORY
-        public readonly bool categoryCriticalStrike;
-        public readonly bool categoryHealthRegen;
-        public readonly bool categoryConsumable;
-        public readonly bool categoryHealth;
-        public readonly bool categoryDamage;
-        public readonly bool categoryManaRegen;
-        public readonly bool categorySpellBlock;
-        public readonly bool categoryAttackSpeed;
-        public readonly bool categoryLifeSteal;
-        public readonly bool categorySpellDamage;
-        public readonly bool categoryMana;
-        public readonly bool categoryArmor;
+        private readonly ItemCategory ItemCategory;
 
         // Data
         public readonly float FlatCritDamageMod;
@@ -57,8 +46,7 @@ namespace LeagueLib
         public readonly float PercentMovementSpeedMod;
         public readonly float PercentPhysicalDamageMod;
 
-        public Item(int ItemId, string ItemName, int MaxStacks, int Price, bool IsRecipe, IClass ItemClass,
-            bool categoryCriticalStrike, bool categoryHealthRegen, bool categoryConsumable, bool categoryHealth, bool categoryDamage, bool categoryManaRegen, bool categorySpellBlock, bool categoryAttackSpeed, bool categoryLifeSteal, bool categorySpellDamage, bool categoryMana, bool categoryArmor,
+        public Item(int ItemId, string ItemName, int MaxStacks, int Price, bool IsRecipe, ItemClass ItemClass, ItemCategory ItemCategory,
             float FlatCritDamageMod, float FlatPhysicalDamageMod, float FlatMovementSpeedMod, float FlatCritChanceMod, float FlatMagicDamageMod, float FlatHPRegenMod, float FlatHPPoolMod, float FlatSpellBlockMod, float FlatArmorMod,
             float PrecentAttackSpeedMod, float PercentSpellBlockMod, float PercentHPPoolMod, float PercentCritDamageMod, float PercentArmorMod, float PercentEXPBonus, float PercentHPRegenMod, float PercentMagicDamageMod, float PercentMovementSpeedMod, float PercentPhysicalDamageMod,
             Item[] RecipeItems = null)
@@ -68,12 +56,7 @@ namespace LeagueLib
             this.ItemName = ItemName;
             this.MaxStacks = MaxStacks;
             this.Price = Price;
-
-            if (ItemId == 3069 || ItemId == 3092 || ItemId == 1055 || ItemId == 1054 || ItemId == 1039 || ItemId == 1062 || ItemId == 1063)
-                this.SellValue = (Price * 30) / 100;
-            else
-                this.SellValue = (Price * 70) / 100;
-
+            this.SellValue = this.IsReducedSellItem() ? ((Price * 30) / 100) : ((Price * 70) / 100);
             this.IsRecipe = IsRecipe;
             this.ItemClass = ItemClass;
 
@@ -81,18 +64,7 @@ namespace LeagueLib
             this.RecipeItems = RecipeItems;
 
             // CATEGORY
-            this.categoryCriticalStrike = categoryCriticalStrike;
-            this.categoryHealthRegen = categoryHealthRegen;
-            this.categoryConsumable = categoryConsumable;
-            this.categoryHealth = categoryHealth;
-            this.categoryDamage = categoryDamage;
-            this.categoryManaRegen = categoryManaRegen;
-            this.categorySpellBlock = categorySpellBlock;
-            this.categoryAttackSpeed = categoryAttackSpeed;
-            this.categoryLifeSteal = categoryLifeSteal;
-            this.categorySpellDamage = categorySpellDamage;
-            this.categoryMana = categoryMana;
-            this.categoryArmor = categoryArmor;
+            this.ItemCategory = ItemCategory;
 
             // Data
             this.FlatCritDamageMod = FlatCritDamageMod;
@@ -146,7 +118,7 @@ namespace LeagueLib
             return this.IsRecipe;
         }
 
-        public IClass GetTier()
+        public ItemClass GetTier()
         {
             return this.ItemClass;
         }
@@ -176,9 +148,25 @@ namespace LeagueLib
         {
             return null; // TODO
         }
+
+        private bool IsReducedSellItem()
+        {
+            switch(this.ItemId)
+            {
+                case 3069:
+                case 3092:
+                case 1055:
+                case 1054:
+                case 1039:
+                case 1062:
+                case 1063:
+                    return true;
+                default: return false;
+            }
+        }
     }
 
-    public enum IClass
+    public enum ItemClass
     { // Tier.
         Basic,
         Advanced,
@@ -188,5 +176,23 @@ namespace LeagueLib
         Consumable,
         RengarsTrinket,
         None
+    }
+
+    [Flags]
+    public enum ItemCategory
+    {
+        None = 0,
+        CriticalStrike = 1 << 0,
+        HealthRegen = 1 << 1,
+        Consumable = 1 << 2,
+        Health = 1 << 3,
+        Damage = 1 << 4,
+        ManaRegen = 1 << 5,
+        SpellBlock = 1 << 6,
+        AttackSpeed = 1 << 7,
+        LifeSteal = 1 << 8,
+        SpellDamage = 1 << 9,
+        Mana = 1 << 10,
+        Armor = 1 << 11
     }
 }
