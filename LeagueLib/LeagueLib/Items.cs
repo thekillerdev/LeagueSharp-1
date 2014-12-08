@@ -14,41 +14,41 @@ namespace LeagueLib
         private static readonly Item[] pre_items =
         {
             new Item(
-                3001, "Abyssal Scepter", 0, 580, true, ItemTier.None,
+                3001, "Abyssal Scepter", 0, 580, true, ItemTier.Advanced,
                 (ItemCategory.SpellBlock & ItemCategory.SpellDamage), 0f, 0f, 0f, 0f, 70f, 0f, 0f, 50f, 0f, 0f, 0f, 0f,
                 0f, 0f, 0f, 0f, 0f, 0f, 0f, new int[] { (1026), (1033), (1033) }),
             new Item(
-                3105, "Aegis of the Legion", 0, 820, true, ItemTier.None,
+                3105, "Aegis of the Legion", 0, 820, true, ItemTier.Advanced,
                 (ItemCategory.HealthRegen & ItemCategory.Health & ItemCategory.SpellBlock), 0f, 0f, 0f, 0f, 0f, 0f, 200f,
                 20f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f,
                 new int[] { (1028), (1033), (1006) }),
             new Item(
-                3113, "Aether Wisp", 0, 515, true, ItemTier.None, (ItemCategory.SpellDamage), 0f, 0f, 0f, 0f, 30f, 0f,
+                3113, "Aether Wisp", 0, 515, true, ItemTier.Advanced, (ItemCategory.SpellDamage), 0f, 0f, 0f, 0f, 30f, 0f,
                 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, new int[] { (1052) }),
             new Item(
-                1052, "Amplifying Tome", 0, 435, false, ItemTier.None, (ItemCategory.SpellDamage), 0f, 0f, 0f, 0f, 20f,
+                1052, "Amplifying Tome", 0, 435, false, ItemTier.Basic, (ItemCategory.SpellDamage), 0f, 0f, 0f, 0f, 20f,
                 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f),
             new Item(
-                3301, "Ancient Coin", 0, 365, false, ItemTier.None, (ItemCategory.ManaRegen), 0f, 0f, 0f, 0f, 0f, 0f,
+                3301, "Ancient Coin", 0, 365, false, ItemTier.Basic, (ItemCategory.ManaRegen), 0f, 0f, 0f, 0f, 0f, 0f,
                 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f),
             new Item(
-                3007, "Archangel's Staff (Crystal Scar)", 0, 1120, true, ItemTier.None,
+                3007, "Archangel's Staff (Crystal Scar)", 0, 1120, true, ItemTier.Legendary,
                 (ItemCategory.ManaRegen & ItemCategory.SpellDamage & ItemCategory.Mana), 0f, 0f, 0f, 0f, 60f, 0f, 0f, 0f,
                 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, new int[] { (3073), (1026) }),
             new Item(
-                3003, "Archangel's Staff", 0, 1120, true, ItemTier.None,
+                3003, "Archangel's Staff", 0, 1120, true, ItemTier.Legendary,
                 (ItemCategory.ManaRegen & ItemCategory.SpellDamage & ItemCategory.Mana), 0f, 0f, 0f, 0f, 60f, 0f, 0f, 0f,
                 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, new int[] { (3070), (1026) }),
             new Item(
-                3504, "Ardent Censer", 0, 550, true, ItemTier.None, (ItemCategory.ManaRegen & ItemCategory.SpellDamage),
+                3504, "Ardent Censer", 0, 550, true, ItemTier.Legendary, (ItemCategory.ManaRegen & ItemCategory.SpellDamage),
                 0f, 0f, 0f, 0f, 40f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f,
                 new int[] { (3114), (3113) }),
             new Item(
-                3174, "Athene's Unholy Grail", 0, 880, true, ItemTier.None,
+                3174, "Athene's Unholy Grail", 0, 880, true, ItemTier.Legendary,
                 (ItemCategory.ManaRegen & ItemCategory.SpellBlock & ItemCategory.SpellDamage), 0f, 0f, 0f, 0f, 60f, 0f,
                 0f, 25f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, new int[] { (3108), (3028) }),
             new Item(
-                3005, "Atma's Impaler", 0, 700, true, ItemTier.None,
+                3005, "Atma's Impaler", 0, 700, true, ItemTier.Legendary,
                 (ItemCategory.CriticalStrike & ItemCategory.Damage & ItemCategory.Armor), 0f, 0f, 0f, 0.15f, 0f, 0f, 0f,
                 0f, 45f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f, new int[] { (1031), (3093) }),
             new Item(
