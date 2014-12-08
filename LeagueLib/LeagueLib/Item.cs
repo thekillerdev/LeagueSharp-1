@@ -11,45 +11,65 @@ namespace LeagueLib
 {
     public class Item
     {
+        public readonly float FlatArmorMod;
+        public readonly float FlatCritChanceMod;
+        // Data
+        public readonly float FlatCritDamageMod;
+        public readonly float FlatHPPoolMod;
+        public readonly float FlatHPRegenMod;
+        public readonly float FlatMagicDamageMod;
+        public readonly float FlatMovementSpeedMod;
+        public readonly float FlatPhysicalDamageMod;
+        public readonly float FlatSpellBlockMod;
+        private readonly bool IsRecipe;
+        // CATEGORY
+        private readonly ItemCategory ItemCategory;
+        private readonly ItemClass ItemClass;
         // BASE STATS
         private readonly int ItemId;
         private readonly string ItemName;
         private readonly int MaxStacks;
-        private readonly int Price;
-        private readonly int SellValue;
-        private readonly bool IsRecipe;
-        private readonly ItemClass ItemClass;
-
-        // RECIPE
-        private readonly Item[] RecipeItems;
-
-        // CATEGORY
-        private readonly ItemCategory ItemCategory;
-
-        // Data
-        public readonly float FlatCritDamageMod;
-        public readonly float FlatPhysicalDamageMod;
-        public readonly float FlatMovementSpeedMod;
-        public readonly float FlatCritChanceMod;
-        public readonly float FlatMagicDamageMod;
-        public readonly float FlatHPRegenMod;
-        public readonly float FlatHPPoolMod;
-        public readonly float FlatSpellBlockMod;
-        public readonly float FlatArmorMod;
-        public readonly float PrecentAttackSpeedMod;
-        public readonly float PercentSpellBlockMod;
-        public readonly float PercentHPPoolMod;
-        public readonly float PercentCritDamageMod;
         public readonly float PercentArmorMod;
+        public readonly float PercentCritDamageMod;
         public readonly float PercentEXPBonus;
+        public readonly float PercentHPPoolMod;
         public readonly float PercentHPRegenMod;
         public readonly float PercentMagicDamageMod;
         public readonly float PercentMovementSpeedMod;
         public readonly float PercentPhysicalDamageMod;
+        public readonly float PercentSpellBlockMod;
+        public readonly float PrecentAttackSpeedMod;
+        private readonly int Price;
+        // RECIPE
+        private readonly Item[] RecipeItems;
+        private readonly int SellValue;
 
-        public Item(int ItemId, string ItemName, int MaxStacks, int Price, bool IsRecipe, ItemClass ItemClass, ItemCategory ItemCategory,
-            float FlatCritDamageMod, float FlatPhysicalDamageMod, float FlatMovementSpeedMod, float FlatCritChanceMod, float FlatMagicDamageMod, float FlatHPRegenMod, float FlatHPPoolMod, float FlatSpellBlockMod, float FlatArmorMod,
-            float PrecentAttackSpeedMod, float PercentSpellBlockMod, float PercentHPPoolMod, float PercentCritDamageMod, float PercentArmorMod, float PercentEXPBonus, float PercentHPRegenMod, float PercentMagicDamageMod, float PercentMovementSpeedMod, float PercentPhysicalDamageMod,
+        public Item(int ItemId,
+            string ItemName,
+            int MaxStacks,
+            int Price,
+            bool IsRecipe,
+            ItemClass ItemClass,
+            ItemCategory ItemCategory,
+            float FlatCritDamageMod,
+            float FlatPhysicalDamageMod,
+            float FlatMovementSpeedMod,
+            float FlatCritChanceMod,
+            float FlatMagicDamageMod,
+            float FlatHPRegenMod,
+            float FlatHPPoolMod,
+            float FlatSpellBlockMod,
+            float FlatArmorMod,
+            float PrecentAttackSpeedMod,
+            float PercentSpellBlockMod,
+            float PercentHPPoolMod,
+            float PercentCritDamageMod,
+            float PercentArmorMod,
+            float PercentEXPBonus,
+            float PercentHPRegenMod,
+            float PercentMagicDamageMod,
+            float PercentMovementSpeedMod,
+            float PercentPhysicalDamageMod,
             Item[] RecipeItems = null)
         {
             // BASE STATS
@@ -57,7 +77,7 @@ namespace LeagueLib
             this.ItemName = ItemName;
             this.MaxStacks = MaxStacks;
             this.Price = Price;
-            this.SellValue = this.IsReducedSellItem() ? ((Price * 30) / 100) : ((Price * 70) / 100);
+            SellValue = IsReducedSellItem() ? ((Price * 30) / 100) : ((Price * 70) / 100);
             this.IsRecipe = IsRecipe;
             this.ItemClass = ItemClass;
 
@@ -91,68 +111,84 @@ namespace LeagueLib
 
         public int GetId()
         {
-            return this.ItemId;
+            return ItemId;
         }
 
         public string GetName()
         {
-            return this.ItemName;
+            return ItemName;
         }
 
         public int GetMaxStacks()
         {
-            return this.MaxStacks;
+            return MaxStacks;
         }
 
         public int GetPrice()
         {
-            return this.Price;
+            return Price;
         }
 
         public int GetSellPrice()
         {
-            return this.SellValue;
+            return SellValue;
         }
 
         public bool IsRecipeComponent()
         {
-            return this.IsRecipe;
+            return IsRecipe;
         }
 
         public ItemClass GetTier()
         {
-            return this.ItemClass;
+            return ItemClass;
         }
 
         public Item[] GetComponents()
         {
-            return this.RecipeItems;
+            return RecipeItems;
         }
 
-        // Trees stuff, idk
         public int GetFullPriceValue()
         {
-            return 0; // TODO
+            var components = GetComponentsList();
+
+            if (components == null || components.Count == 0)
+            {
+                return GetPrice();
+            }
+            return components.Sum(component => component.GetFullPriceValue());
         }
 
-        public void Buy()
+        public bool Buy()
         {
-            ObjectManager.Player.BuyItem(GetItemId());
+            return ObjectManager.Player.BuyItem(GetItemId());
         }
 
-        public LeagueSharp.ItemId GetItemId()
+        public bool Sell()
         {
-            return (LeagueSharp.ItemId)ItemId;
+            var slot = -1;
+            foreach (var item in ObjectManager.Player.InventoryItems.Where(item => item.Id == GetItemId()))
+            {
+                slot = item.Slot;
+                break;
+            }
+            return ObjectManager.Player.SellItem(slot);
         }
 
-        public List<ShopItem> GetComponentsList()
+        public ItemId GetItemId()
         {
-            return null; // TODO
+            return (ItemId) ItemId;
+        }
+
+        public List<Item> GetComponentsList()
+        {
+            return GetComponents().Select(item => Items.GetItem(item.ItemId)).ToList();
         }
 
         private bool IsReducedSellItem()
         {
-            switch(this.ItemId)
+            switch (ItemId)
             {
                 case 3069:
                 case 3092:
@@ -162,13 +198,15 @@ namespace LeagueLib
                 case 1062:
                 case 1063:
                     return true;
-                default: return false;
+                default:
+                    return false;
             }
         }
     }
 
     public enum ItemClass
-    { // Tier.
+    {
+        // Tier.
         Basic,
         Advanced,
         Legendary,

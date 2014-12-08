@@ -56,7 +56,7 @@ namespace LeagueLib
             }
             catch
             {
-                Console.WriteLine(itemId.ToString() + " failed!");
+                Console.WriteLine(itemId + " failed!");
                 return -1;
             }
             return AddItem(shopitem);
