@@ -11,7 +11,8 @@ namespace LeagueLib
 {
     public class Items
     {
-        internal static readonly Item[] pre_items =
+        #region Items
+        private static readonly Item[] pre_items =
         {
             new Item(
                 3001, "Abyssal Scepter", 0, 580, true, ItemClass.None,
@@ -1042,6 +1043,7 @@ namespace LeagueLib
                 (ItemCategory.SpellDamage & ItemCategory.Armor), 0f, 0f, 0f, 0f, 120f, 0f, 0f, 0f, 50f, 0f, 0f, 0f, 0f,
                 0f, 0f, 0f, 0f, 0f, 0f, new Item[] { GetItem(3191), GetItem(1058) })
         };
+        #endregion
 
         private static readonly List<Item> items = new List<Item>(pre_items);
 
