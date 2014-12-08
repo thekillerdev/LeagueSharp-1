@@ -151,7 +151,7 @@ namespace LeagueLib
                 return;
             }
             isBought = true;
-            
+            Shop.Remove(this);
         }
 
         public bool SellItem()
