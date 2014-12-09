@@ -16,7 +16,41 @@ namespace LeagueLib
         private static int failCount;
         private static readonly int MAX_SHOP_ITEMS = 7;
         private static readonly Hashtable shopItems = new Hashtable();
+        private static bool finishedShopping = false;
+        private static float lastShop = 0;
 
+        public static bool IsFinishedShopping()
+        {
+            return finishedShopping;
+        }
+
+        static Shop()
+        {
+            Game.OnGameUpdate += Game_OnGameUpdate;
+        }
+
+        static void Game_OnGameUpdate(EventArgs args)
+        {
+            if (ObjectManager.Player.IsDead)
+            {
+                finishedShopping = false;
+            }
+            else if (!Utility.InShopRange())
+            {
+                finishedShopping = true;
+                return;
+            }
+
+            if (finishedShopping && Environment.TickCount - lastShop > 10000)
+            {
+                finishedShopping = false;
+            }
+
+            if (!finishedShopping)
+            {
+                Tick();
+            }
+        }
         public static void AddList(List<ItemId> items)
         {
             var list = items;
@@ -63,11 +97,12 @@ namespace LeagueLib
             return -1;
         }
 
-        public static bool Tick()
+        private static void Tick()
         {
             if (ObjectManager.Player.GoldCurrent < 10)
             {
-                return true;
+                finishedShopping = true;
+                return;
             }
 
             for (var i = 0; i < MAX_SHOP_ITEMS; ++i)
@@ -83,7 +118,10 @@ namespace LeagueLib
                 break;
             }
             failCount++;
-            return failCount > 5;
+            if (failCount >= 5)
+            {
+                finishedShopping = true;
+            }
         }
     }
 
