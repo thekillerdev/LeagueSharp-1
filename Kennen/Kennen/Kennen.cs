@@ -7,9 +7,9 @@ using LeagueSharp.Common;
 
 #endregion
 
-namespace WorstKennen
+namespace Kennen
 {
-    internal class Kennen
+    class Kennen
     {
         private static readonly Spell Q;
         private static readonly Spell W;
@@ -94,7 +94,7 @@ namespace WorstKennen
             }
 
             if (Menu.GetValue<bool>(KennenMenu.ComboR) && R.IsReady() &&
-                Player.CountEnemysInRange((int) R.Range) > Menu.GetValue<int>(KennenMenu.ComboRChampInRange))
+                Player.CountEnemysInRange((int)R.Range) > Menu.GetValue<int>(KennenMenu.ComboRChampInRange))
             {
                 R.CastIfWillHit(objAiBase, Menu.GetValue<int>(KennenMenu.ComboRChampInRange),
                     Menu.GetValue<bool>(KennenMenu.MiscPackets));

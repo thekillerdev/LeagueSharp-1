@@ -1,8 +1,8 @@
 ﻿using LeagueSharp.Common;
 
-namespace WorstKennen
+namespace Kennen
 {
-    internal class KennenMenu
+    class KennenMenu
     {
         private const string RootName = "worstping_kennen";
         public static readonly string ComboQ = "_combo_useq";
