@@ -1070,7 +1070,7 @@ namespace LeagueLib
         #region StaticItems
 
         // Example? ==> Items.ABYSSAL_SCEPTER?.func?(par?); (C#6)
-        public static Item ABYSSAL_SCEPTER = GetItem(3001);
+        //public static Item ABYSSAL_SCEPTER = GetItem(3001);
 
         #endregion
 
