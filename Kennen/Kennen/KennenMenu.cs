@@ -2,20 +2,8 @@
 
 namespace Kennen
 {
-    class KennenMenu
+    internal class KennenMenu
     {
-        private const string RootName = "worstping_kennen";
-        public static readonly string ComboQ = "_combo_useq";
-        public static readonly string ComboW = "_combo_usew";
-        public static readonly string ComboE = "_combo_usee";
-        public static readonly string ComboR = "_combo_user";
-        public static readonly string ComboRChampInRange = "_combo_minuser";
-        public static readonly string ComboEMode = "_combo_emode";
-        public static readonly string HarassQ = "_harass_useq";
-        public static readonly string MiscPackets = "_misc_packets";
-        private readonly Menu _menu;
-        private readonly Orbwalking.Orbwalker _orbwalker;
-
         public KennenMenu()
         {
             _menu = new Menu("WorstPing | Kennen", RootName, true);
@@ -37,6 +25,24 @@ namespace Kennen
             _menu.AddToMainMenu();
         }
 
+        #region Vars
+
+        private const string RootName = "worstping_kennen";
+        public static readonly string ComboQ = "_combo_useq";
+        public static readonly string ComboW = "_combo_usew";
+        public static readonly string ComboE = "_combo_usee";
+        public static readonly string ComboR = "_combo_user";
+        public static readonly string ComboRChampInRange = "_combo_minuser";
+        public static readonly string ComboEMode = "_combo_emode";
+        public static readonly string HarassQ = "_harass_useq";
+        public static readonly string MiscPackets = "_misc_packets";
+        private readonly Menu _menu;
+        private readonly Orbwalking.Orbwalker _orbwalker;
+
+        #endregion
+
+        #region Get Methods
+
         public Menu GetMenu()
         {
             return _menu;
@@ -51,5 +57,7 @@ namespace Kennen
         {
             return _menu.Item(RootName + str).GetValue<T>();
         }
+
+        #endregion
     }
 }

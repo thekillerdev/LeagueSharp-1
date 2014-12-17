@@ -9,15 +9,8 @@ using LeagueSharp.Common;
 
 namespace Kennen
 {
-    class Kennen
+    internal class Kennen
     {
-        private static readonly Spell Q;
-        private static readonly Spell W;
-        private static readonly Spell E;
-        private static readonly Spell R;
-        private static readonly Obj_AI_Hero Player;
-        private static readonly KennenMenu Menu;
-
         static Kennen()
         {
             Menu = new KennenMenu();
@@ -53,6 +46,8 @@ namespace Kennen
                     break;
             }
         }
+
+        #region Combo
 
         private static void KennenCombo(Obj_AI_Base objAiBase)
         {
@@ -94,11 +89,24 @@ namespace Kennen
             }
 
             if (Menu.GetValue<bool>(KennenMenu.ComboR) && R.IsReady() &&
-                Player.CountEnemysInRange((int)R.Range) > Menu.GetValue<int>(KennenMenu.ComboRChampInRange))
+                Player.CountEnemysInRange((int) R.Range) > Menu.GetValue<int>(KennenMenu.ComboRChampInRange))
             {
                 R.CastIfWillHit(objAiBase, Menu.GetValue<int>(KennenMenu.ComboRChampInRange),
                     Menu.GetValue<bool>(KennenMenu.MiscPackets));
             }
         }
+
+        #endregion
+
+        #region Vars
+
+        private static readonly Spell Q;
+        private static readonly Spell W;
+        private static readonly Spell E;
+        private static readonly Spell R;
+        private static readonly Obj_AI_Hero Player;
+        private static readonly KennenMenu Menu;
+
+        #endregion
     }
 }
