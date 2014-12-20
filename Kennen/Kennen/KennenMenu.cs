@@ -54,7 +54,7 @@ namespace Kennen
             var miscellaneous = _menu.AddSubMenu(new Menu("Miscellaneous", RootName + "_misc"));
             miscellaneous.AddItem(new MenuItem(RootName + MiscPackets, "Use Packets")).SetValue(true);
             miscellaneous.AddItem(new MenuItem(RootName + MiscIgnoreSpellShields, "Ignore Spell Shields")).SetValue(true);
-            miscellaneous.AddItem(new MenuItem(RootName + MiscHighChance, "Hit Chance")).SetValue(new StringList(new [] {"Low", "Medium", "High", "Very High"}, 2));
+            miscellaneous.AddItem(new MenuItem(RootName + MiscHitChance, "Hit Chance")).SetValue(new StringList(new[] { "Low", "Medium", "High", "Very High" }, 2));
 
             _menu.AddItem(new MenuItem(RootName + "_spacer0", ""));
             _menu.AddItem(new MenuItem(RootName + RootMode, "Mode")).SetValue(new StringList(new [] {"Team Fight", "Lanining"}, 1));
@@ -98,7 +98,7 @@ namespace Kennen
 
         public static readonly string MiscPackets = "_misc_packets";
         public static readonly string MiscIgnoreSpellShields = "_misc_ignorespellshields";
-        public static readonly string MiscHighChance = "_misc_hitchance";
+        public static readonly string MiscHitChance = "_misc_hitchance";
 
         private readonly Menu _menu;
         private readonly Orbwalking.Orbwalker _orbwalker;
@@ -120,6 +120,11 @@ namespace Kennen
         public T GetValue<T>(string str)
         {
             return _menu.Item(RootName + str).GetValue<T>();
+        }
+
+        public MenuItem GetItem(string str)
+        {
+            return _menu.Item(RootName + str);
         }
 
         #endregion

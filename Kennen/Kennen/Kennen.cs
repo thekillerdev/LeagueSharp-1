@@ -44,7 +44,10 @@ namespace Kennen
             {
                 var enemies =
                     ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(e => e.IsValidTarget() && e.Distance(Player.Position) < W.Range)
+                        .Where(
+                            e =>
+                                e.IsValidTarget() && e.Distance(Player.Position) < W.Range &&
+                                HasBlockableBuff(e, tfMode))
                         .SelectMany(
                             e =>
                                 e.Buffs.Where(
@@ -54,22 +57,40 @@ namespace Kennen
                                         (Menu.GetValue<StringList>(KennenMenu.ComboWMode).SelectedIndex + 1)))
                         .Count();
 
-                if (((!tfMode && enemies <= Menu.GetValue<int>(KennenMenu.ComboWChampsInRange)) ||
-                     (tfMode && (Player.CountEnemysInRange((int) W.Range)/2) >= enemies)) &&
-                    target != null)
-                {
+                if ((!tfMode && enemies >= Menu.GetValue<int>(KennenMenu.ComboWChampsInRange)) &&
+                    (!(Player.CountEnemysInRange((int) W.Range) > enemies) && !R.IsReady()))
+                { // TODO: Verify this expression
                     W.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                }
+                else
+                {
+                    R.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
                 }
             }
 
-            if (Q.IsReady())
+            /* Q Logic / Casting */
+            if (Q.IsReady() && target != null)
             {
-                
+                if (!Q.GetPrediction(target).CollisionObjects.Any())
+                {
+                    var hitChance = HitChance.High;
+                    if (Menu != null && Menu.GetItem(KennenMenu.MiscHitChance) != null)
+                    {
+                        var menuItem = Menu.GetValue<StringList>(KennenMenu.MiscHitChance);
+                        Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out hitChance);
+                    }
+                    Q.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                }
             }
 
+            /* R Logic / Casting */
             if (R.IsReady())
             {
-                
+                R.CastIfWillHit(Player,
+                    tfMode
+                        ? Player.CountEnemysInRange((int) R.Range)
+                        : Menu.GetValue<int>(KennenMenu.ComboRChampsInRange),
+                    Menu.GetValue<bool>(KennenMenu.MiscPackets));
             }
         }
 
@@ -83,15 +104,12 @@ namespace Kennen
 
         #endregion
 
-        #region Voids
+        #region Functions
 
         private static bool HasBlockableBuff(Obj_AI_Base objAiBase, bool ignoreVeil = false)
         {
-            // TODO: Banshee's Veil, Sivir's Spell Shield, Nocturne's Shourd of Darkness
-            if (ignoreVeil)
-                return objAiBase.HasBuff("BlackShield") || objAiBase.HasBuff("buff2") || objAiBase.HasBuff("buff3");
-            return objAiBase.HasBuff("BlackShield") || objAiBase.HasBuff("buff2") || objAiBase.HasBuff("buff3") ||
-                   objAiBase.HasBuff("buff4");
+            var rValue = objAiBase.HasBuff("BlackShield") || objAiBase.HasBuff("buff2") || objAiBase.HasBuff("buff3");
+            return ignoreVeil ? rValue : rValue | objAiBase.HasBuff("buff4");
         }
 
         #endregion
