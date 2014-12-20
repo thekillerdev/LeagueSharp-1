@@ -12,94 +12,81 @@ namespace Kennen
 {
     internal class Kennen
     {
-        #region Combo
+        #region Spells
 
-        private static void KennenCombo()
+        private static void KennenSpells(bool isCombo)
         {
-            var tfMode = (Menu.GetValue<StringList>(KennenMenu.RootMode).SelectedIndex == 0);
+            var isTeamFight = (Menu.GetValue<StringList>(KennenMenu.RootMode).SelectedIndex == 0);
             var target = SimpleTs.GetTarget(Player, 1200f, SimpleTs.DamageType.Magical);
 
-            /* E Logic / Casting */
-            if (E.IsReady())
+            /* E CASTING */
+            if (E.IsReady() && Menu.GetValue<bool>(isCombo ? KennenMenu.ComboE : KennenMenu.HarassE))
             {
                 var enemies = Player.CountEnemysInRange(1200);
 
-                if (((!tfMode && enemies <= Menu.GetValue<int>(KennenMenu.ComboEChampsInRange)) || tfMode) &&
-                    target != null)
+                if (((!isTeamFight &&
+                      enemies <=
+                      Menu.GetValue<int>(isCombo ? KennenMenu.ComboEChampsInRange : KennenMenu.HarassEChampsInRange)) ||
+                     isTeamFight) && target != null)
                 {
                     var time = ((Vector3.Distance(target.Position, Player.Position)/((Player.MoveSpeed*2)/1000))/1000);
-                    Console.WriteLine(time); // TODO: Remove DEBUG
 
-                    if (!(time <= 3.5f)) return;
-
-                    // TODO: check time units (m/s/ms?)
-                    E.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
-                    Menu.GetOrbwalker().SetAttack(false);
-                    Utility.DelayAction.Add(4000, () => Menu.GetOrbwalker().SetAttack(true));
+                    if (time <= 3.5f)
+                    {
+                        Menu.GetOrbwalker().SetAttack(false);
+                        E.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                        Utility.DelayAction.Add(4000, () => Menu.GetOrbwalker().SetAttack(true));
+                    }
                 }
             }
 
-            /* W Logic / Casting */
-            if (W.IsReady())
+            /* W CASTING */
+            if (W.IsReady() && Menu.GetValue<bool>(isCombo ? KennenMenu.ComboW : KennenMenu.HarassW))
             {
                 var enemies =
                     ObjectManager.Get<Obj_AI_Hero>()
                         .Where(
                             e =>
                                 e.IsValidTarget() && e.Distance(Player.Position) < W.Range &&
-                                HasBlockableBuff(e, tfMode))
+                                HasBlockableBuff(e, isTeamFight))
                         .SelectMany(
                             e =>
                                 e.Buffs.Where(
                                     buff =>
                                         buff.Name.Equals("markofthestorm") && // TODO: buff name?
                                         buff.Count >=
-                                        (Menu.GetValue<StringList>(KennenMenu.ComboWMode).SelectedIndex + 1)))
+                                        (Menu.GetValue<StringList>(isCombo ? KennenMenu.ComboWMode : KennenMenu.HarassWMode).SelectedIndex + 1)))
                         .Count();
 
-                if ((!tfMode && enemies >= Menu.GetValue<int>(KennenMenu.ComboWChampsInRange)) &&
-                    (!(Player.CountEnemysInRange((int) W.Range) > enemies) && !R.IsReady()))
-                { // TODO: Verify this expression
+                if (enemies >=
+                    Menu.GetValue<int>(isCombo ? KennenMenu.ComboWChampsInRange : KennenMenu.HarassWChampsInRange))
+                {
                     W.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
                 }
-                else
-                {
-                    R.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
-                }
             }
 
-            /* Q Logic / Casting */
-            if (Q.IsReady() && target != null)
+            /* Q CASTING */
+            if (Q.IsReady() && target != null && Menu.GetValue<bool>(isCombo ? KennenMenu.ComboQ : KennenMenu.HarassQ) &&
+                !Q.GetPrediction(target).CollisionObjects.Any())
             {
-                if (!Q.GetPrediction(target).CollisionObjects.Any())
+                var hitChance = HitChance.High;
+                if (Menu != null && Menu.GetItem(KennenMenu.MiscHitChance) != null)
                 {
-                    var hitChance = HitChance.High;
-                    if (Menu != null && Menu.GetItem(KennenMenu.MiscHitChance) != null)
-                    {
-                        var menuItem = Menu.GetValue<StringList>(KennenMenu.MiscHitChance);
-                        Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out hitChance);
-                    }
-                    Q.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                    var menuItem = Menu.GetValue<StringList>(KennenMenu.MiscHitChance);
+                    Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out hitChance);
                 }
+                Q.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(KennenMenu.MiscPackets));
             }
 
-            /* R Logic / Casting */
-            if (R.IsReady())
+            /* R CASTING */
+            if (R.IsReady() && isCombo && Menu.GetValue<bool>(KennenMenu.ComboR))
             {
                 R.CastIfWillHit(Player,
-                    tfMode
+                    isTeamFight
                         ? Player.CountEnemysInRange((int) R.Range)
                         : Menu.GetValue<int>(KennenMenu.ComboRChampsInRange),
                     Menu.GetValue<bool>(KennenMenu.MiscPackets));
             }
-        }
-
-        #endregion
-
-        #region Harass
-
-        private static void KennenHarass()
-        {
         }
 
         #endregion
@@ -147,16 +134,13 @@ namespace Kennen
             switch (Menu.GetOrbwalker().ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    KennenCombo();
+                    KennenSpells(true);
                     break;
                 case Orbwalking.OrbwalkingMode.LaneClear:
                     KennenLaneClear();
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
-                    KennenHarass();
-                    break;
-                case Orbwalking.OrbwalkingMode.LastHit:
-                    KennenLastHit();
+                    KennenSpells(false);
                     break;
             }
         }
@@ -193,10 +177,6 @@ namespace Kennen
             {
                 W.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
             }
-        }
-
-        private static void KennenLastHit()
-        {
         }
 
         #endregion

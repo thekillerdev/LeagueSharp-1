@@ -26,12 +26,12 @@ namespace Kennen
             harass.AddItem(new MenuItem(RootName + HarassQ, "Use Q")).SetValue(true);
             harass.AddItem(new MenuItem(RootName + HarassW, "Use W")).SetValue(true);
             harass.AddItem(new MenuItem(RootName + HarassE, "Use E")).SetValue(false);
-            harass.AddItem(new MenuItem(RootName + HarassR, "Use R")).SetValue(false);
             harass.AddItem(new MenuItem(RootName + "_harass_spacer", ""));
             harass.AddItem(new MenuItem(RootName + HarassWMode, "Min. Stacks to W. Enemy"))
                 .SetValue(new StringList(new[] {"None", "> 1 stack", "> 2 stacks", "Stunnable only"}, 3));
-            harass.AddItem(new MenuItem(RootName + HarassWChampInRange, "Min. Enemy to W"))
+            harass.AddItem(new MenuItem(RootName + HarassWChampsInRange, "Min. Enemy to W"))
                 .SetValue(new Slider(1, 1, 5));
+            combo.AddItem(new MenuItem(RootName + HarassEChampsInRange, "Max. Enemy to E Gap Closer")).SetValue(new Slider(1, 1, 5));
 
             var laneclear = _menu.AddSubMenu(new Menu("Lane Clear", RootName + "_laneclear"));
             laneclear.AddItem(new MenuItem(RootName + LaneClear, "Use Lane Clear")).SetValue(true);
@@ -45,9 +45,6 @@ namespace Kennen
                 .SetValue(new Slider(3, 1, 8));
             laneclear.AddItem(new MenuItem(RootName + LaneClearEMin, "Min. Monsters to E"))
                 .SetValue(new Slider(5, 1, 8));
-
-
-            var lasthitting = _menu.AddSubMenu(new Menu("Lane Clear", RootName + "_laneclear"));
 
             var drawing = _menu.AddSubMenu(new Menu("Drawing", RootName + "_drawing"));
 
@@ -74,7 +71,7 @@ namespace Kennen
         public static readonly string ComboQ = "_combo_useq";
         public static readonly string ComboW = "_combo_usew";
         public static readonly string ComboWMode = "_combo_wmode";
-        public static readonly string ComboWChampsInRange = "_harass_wmode";
+        public static readonly string ComboWChampsInRange = "_harass_minusew";
         public static readonly string ComboE = "_combo_usee";
         public static readonly string ComboEChampsInRange = "_combo_minusee";
         public static readonly string ComboR = "_combo_user";
@@ -83,10 +80,9 @@ namespace Kennen
         public static readonly string HarassQ = "_harass_useq";
         public static readonly string HarassW = "_harass_usew";
         public static readonly string HarassWMode = "_harass_wmode";
-        public static readonly string HarassWChampInRange = "_harass_wmode";
+        public static readonly string HarassWChampsInRange = "_harass_minusew";
         public static readonly string HarassE = "_harass_usee";
-        public static readonly string HarassR = "_harass_user";
-        public static readonly string HarassRChampInRange = "_harass_minuser";
+        public static readonly string HarassEChampsInRange = "_harass_minusee";
 
         public static readonly string LaneClear = "_laneclear_activate";
         public static readonly string LaneClearQ = "_laneclear_useq";
