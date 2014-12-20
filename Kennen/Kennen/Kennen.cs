@@ -12,6 +12,92 @@ namespace Kennen
 {
     internal class Kennen
     {
+        #region Combo
+
+        private static void KennenCombo()
+        {
+            var tfMode = (Menu.GetValue<StringList>(KennenMenu.RootMode).SelectedIndex == 0);
+            var target = SimpleTs.GetTarget(Player, 1200f, SimpleTs.DamageType.Magical);
+
+            /* E Logic / Casting */
+            if (E.IsReady())
+            {
+                var enemies = Player.CountEnemysInRange(1200);
+
+                if (((!tfMode && enemies <= Menu.GetValue<int>(KennenMenu.ComboEChampsInRange)) || tfMode) &&
+                    target != null)
+                {
+                    var time = ((Vector3.Distance(target.Position, Player.Position)/((Player.MoveSpeed*2)/1000))/1000);
+                    Console.WriteLine(time); // TODO: Remove DEBUG
+
+                    if (!(time <= 3.5f)) return;
+
+                    // TODO: check time units (m/s/ms?)
+                    E.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                    Menu.GetOrbwalker().SetAttack(false);
+                    Utility.DelayAction.Add(4000, () => Menu.GetOrbwalker().SetAttack(true));
+                }
+            }
+
+            /* W Logic / Casting */
+            if (W.IsReady())
+            {
+                var enemies =
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(e => e.IsValidTarget() && e.Distance(Player.Position) < W.Range)
+                        .SelectMany(
+                            e =>
+                                e.Buffs.Where(
+                                    buff =>
+                                        buff.Name.Equals("markofthestorm") && // TODO: buff name?
+                                        buff.Count >=
+                                        (Menu.GetValue<StringList>(KennenMenu.ComboWMode).SelectedIndex + 1)))
+                        .Count();
+
+                if (((!tfMode && enemies <= Menu.GetValue<int>(KennenMenu.ComboWChampsInRange)) ||
+                     (tfMode && (Player.CountEnemysInRange((int) W.Range)/2) >= enemies)) &&
+                    target != null)
+                {
+                    W.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                }
+            }
+
+            if (Q.IsReady())
+            {
+                
+            }
+
+            if (R.IsReady())
+            {
+                
+            }
+        }
+
+        #endregion
+
+        #region Harass
+
+        private static void KennenHarass()
+        {
+        }
+
+        #endregion
+
+        #region Voids
+
+        private static bool HasBlockableBuff(Obj_AI_Base objAiBase, bool ignoreVeil = false)
+        {
+            // TODO: Banshee's Veil, Sivir's Spell Shield, Nocturne's Shourd of Darkness
+            if (ignoreVeil)
+                return objAiBase.HasBuff("BlackShield") || objAiBase.HasBuff("buff2") || objAiBase.HasBuff("buff3");
+            return objAiBase.HasBuff("BlackShield") || objAiBase.HasBuff("buff2") || objAiBase.HasBuff("buff3") ||
+                   objAiBase.HasBuff("buff4");
+        }
+
+        #endregion
+
+        #region Main
+
         static Kennen()
         {
             Menu = new KennenMenu();
@@ -51,114 +137,48 @@ namespace Kennen
                 case Orbwalking.OrbwalkingMode.Mixed:
                     KennenHarass();
                     break;
-            }
-        }
-
-        #region Combo
-
-        private static void KennenCombo()
-        {
-            /* E CAST */
-            if (Menu.GetValue<bool>(KennenMenu.ComboE) &&
-                (Menu.GetValue<StringList>(KennenMenu.RootMode).SelectedIndex == 0) && E.IsReady() &&
-                (ObjectManager.Get<Obj_AI_Base>().Count(e => e.IsValidTarget() && e.Distance(Player.Position) <= 1200f) <
-                 Menu.GetValue<int>(KennenMenu.ComboEChampsInRange)))
-            {
-                var target = SimpleTs.GetTarget(Player, 1200f, SimpleTs.DamageType.Magical);
-
-                if (target != null)
-                {
-                    var time = ((Vector3.Distance(target.Position, Player.Position)/((Player.MoveSpeed*2)/1000))/1000);
-                    Console.WriteLine(time);
-
-                    if (time <= 4f)
-                    {
-                        // TODO: check time units (m/s/ms?)
-                        E.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
-                    }
-                }
-            }
-
-            /* W CAST */
-            if (Menu.GetValue<bool>(KennenMenu.ComboW) && W.IsReady())
-            {
-                if (Menu.GetValue<StringList>(KennenMenu.ComboWMode).SelectedIndex != 0)
-                {
-                    var hitcount =
-                        ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(
-                                e => e.IsValidTarget() && e.Distance(Player.Position) < W.Range && !HasBlockableBuff(e))
-                            .SelectMany(
-                                enemy => /* buff.Name.Equals("") &&*/ // TODO: Check buff name
-                                    enemy.Buffs.Where(buff => buff.Count >= Menu.GetValue<int>(KennenMenu.ComboWMode)))
-                            .Count();
-                    var count =
-                        ObjectManager.Get<Obj_AI_Hero>()
-                            .Count(e => e.IsValidTarget() && e.Distance(Player.Position) < W.Range);
-
-                    if (hitcount >= Menu.GetValue<StringList>(KennenMenu.ComboWMode).SelectedIndex &&
-                        ((Player.CountEnemysInRange((int) R.Range) < Menu.GetValue<int>(KennenMenu.ComboRChampsInRange)) ||
-                         (count <= hitcount && !R.IsReady())))
-                        W.CastIfWillHit(Player, Menu.GetValue<int>(KennenMenu.ComboWChampInRange),
-                            Menu.GetValue<bool>(KennenMenu.MiscPackets));
-                }
-                else
-                {
-                    W.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
-                }
-            }
-
-            /* Q CAST */
-            if (Menu.GetValue<bool>(KennenMenu.ComboQ) && Q.IsReady())
-            {
-                var target = SimpleTs.GetTarget(Player, Q.Range, SimpleTs.DamageType.Magical);
-
-                if (target != null && (!Menu.GetValue<bool>(KennenMenu.MiscIgnoreSpellShields) && !HasBlockableBuff(target, true)))
-                {
-                    HitChance hitChance;
-                    Enum.TryParse(
-                        Menu.GetValue<StringList>(KennenMenu.MiscHighChance).SList[
-                            Menu.GetValue<StringList>(KennenMenu.MiscHighChance).SelectedIndex], out hitChance);
-                    Q.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(KennenMenu.MiscPackets));
-                }
-            }
-
-            /* R CAST */
-            if (Menu.GetValue<bool>(KennenMenu.ComboR) && R.IsReady() &&
-                Player.CountEnemysInRange((int)R.Range) >= Menu.GetValue<int>(KennenMenu.ComboRChampsInRange))
-            {
-                R.CastIfWillHit(Player, Menu.GetValue<int>(KennenMenu.ComboRChampsInRange),
-                    Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                case Orbwalking.OrbwalkingMode.LastHit:
+                    KennenLastHit();
+                    break;
             }
         }
 
         #endregion
 
-        #region LaneClear
+        #region Farming
 
         private static void KennenLaneClear()
         {
-            
+            if (!Menu.GetValue<bool>(KennenMenu.LaneClear)) return;
+
+            var chargedCount =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(m => m.IsValidTarget() && m.Distance(Player.Position) <= (Player.AttackRange*1.5))
+                    .SelectMany(
+                        m =>
+                            m.Buffs.Where(
+                                buffs => buffs.Name.Equals("marofthestorm") && // TODO
+                                         buffs.Count >=
+                                         (Menu.GetValue<StringList>(KennenMenu.LaneClearWStacks).SelectedIndex + 1)))
+                    .Count();
+
+            if (Player.CountEnemysInRange((int) (Player.AttackRange*2)) == 0)
+            {
+                if (Menu.GetValue<bool>(KennenMenu.LaneClearE) &&
+                    chargedCount < Menu.GetValue<int>(KennenMenu.LaneClearEMin) && E.IsReady())
+                {
+                    E.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                }
+            }
+            if (Menu.GetValue<bool>(KennenMenu.LaneClearW) &&
+                chargedCount >= Menu.GetValue<int>(KennenMenu.LaneClearWMin) && W.IsReady())
+            {
+                W.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
+            }
         }
 
-        #endregion
-
-        #region Harass
-
-        private static void KennenHarass()
+        private static void KennenLastHit()
         {
-
-        }
-
-        #endregion
-
-        #region Voids
-
-        private static bool HasBlockableBuff(Obj_AI_Base objAiBase, bool ignoreVeil = false)
-        { // TODO: Banshee's Veil, Sivir's Spell Shield, Nocturne's Shourd of Darkness
-            if(ignoreVeil)
-                return objAiBase.HasBuff("BlackShield") || objAiBase.HasBuff("buff2") || objAiBase.HasBuff("buff3");
-            return objAiBase.HasBuff("BlackShield") || objAiBase.HasBuff("buff2") || objAiBase.HasBuff("buff3") || objAiBase.HasBuff("buff4");
         }
 
         #endregion
