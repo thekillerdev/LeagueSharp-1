@@ -1,9 +1,11 @@
 ﻿#region
 
 using System;
+using System.CodeDom;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
 
 #endregion
 
@@ -30,7 +32,11 @@ namespace Kennen
 
             Q.SetSkillshot(0.65f, 50f, 1700f, true, SkillshotType.SkillshotLine);
 
-            Game.OnGameUpdate += OnGameUpdate;
+            CustomEvents.Game.OnGameLoad += args =>
+            {
+                Game.OnGameUpdate += OnGameUpdate;
+                Game.PrintChat("WorstPing | Kennen the Heart of the Tempest, loaded.");
+            };
         }
 
         private static void OnGameUpdate(EventArgs args)
@@ -38,30 +44,46 @@ namespace Kennen
             switch (Menu.GetOrbwalker().ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    KennenCombo(SimpleTs.GetTarget(Player, Q.Range, SimpleTs.DamageType.Magical));
+                    KennenCombo();
                     break;
                 case Orbwalking.OrbwalkingMode.LaneClear:
+                    KennenLaneClear();
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
+                    KennenHarass();
                     break;
             }
         }
 
         #region Combo
 
-        private static void KennenCombo(Obj_AI_Base objAiBase)
+        private static void KennenCombo()
         {
-            if (objAiBase == null) return;
-
-            if (Menu.GetValue<bool>(KennenMenu.ComboQ) && objAiBase.IsValidTarget() && Q.IsReady() &&
-                objAiBase.HasBuff("BlackShield"))
+            /* E CAST */
+            if (Menu.GetValue<bool>(KennenMenu.ComboE) &&
+                (Menu.GetValue<StringList>(KennenMenu.RootMode).SelectedIndex == 0) && E.IsReady() &&
+                (ObjectManager.Get<Obj_AI_Base>().Count(e => e.IsValidTarget() && e.Distance(Player.Position) <= 1200f) <
+                 Menu.GetValue<int>(KennenMenu.ComboEChampsInRange)))
             {
-                Q.CastIfHitchanceEquals(objAiBase, HitChance.High, Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                var target = SimpleTs.GetTarget(Player, 1200f, SimpleTs.DamageType.Magical);
+
+                if (target != null)
+                {
+                    var time = ((Vector3.Distance(target.Position, Player.Position)/((Player.MoveSpeed*2)/1000))/1000);
+                    Console.WriteLine(time);
+
+                    if (time <= 4)
+                    {
+                        // TODO: check time units (m/s/ms?)
+                        E.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                    }
+                }
             }
 
+            /* W CAST */
             if (Menu.GetValue<bool>(KennenMenu.ComboW) && W.IsReady())
             {
-                if (Menu.GetValue<int>(KennenMenu.ComboEMode) != 0)
+                if (Menu.GetValue<int>(KennenMenu.ComboWMode) != 0)
                 {
                     foreach (
                         var buff in
@@ -71,10 +93,10 @@ namespace Kennen
                                     enemy =>
                                         enemy.Buffs.Where(
                                             buff => /* buff.Name.Equals("") &&*/
-                                                buff.Count >= Menu.GetValue<int>(KennenMenu.ComboEMode))))
+                                                buff.Count >= Menu.GetValue<int>(KennenMenu.ComboWMode))))
                     {
                         Console.WriteLine("{0} / {1} / {2}", buff.Name, buff.DisplayName, buff.SourceName);
-                        // TODO
+                        // TODO: get buff name
                     }
                 }
                 else
@@ -83,17 +105,56 @@ namespace Kennen
                 }
             }
 
-            if (Menu.GetValue<bool>(KennenMenu.ComboE) && E.IsReady() && objAiBase.Distance(Player.Position) > R.Range)
+            /* Q CAST */
+            if (Menu.GetValue<bool>(KennenMenu.ComboQ) && Q.IsReady())
             {
-                // TODO
+                var target = SimpleTs.GetTarget(Player, Q.Range, SimpleTs.DamageType.Magical);
+
+                if (target != null && (!Menu.GetValue<bool>(KennenMenu.MiscIgnoreSpellShields) && HasBlockableBuff(target)))
+                {
+                    var hitChance = HitChance.High;
+                    Enum.TryParse(
+                        Menu.GetValue<StringList>(KennenMenu.MiscHighChance).SList[
+                            Menu.GetValue<StringList>(KennenMenu.MiscHighChance).SelectedIndex], out hitChance);
+                    Q.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                }
             }
 
+            /* R CAST */
             if (Menu.GetValue<bool>(KennenMenu.ComboR) && R.IsReady() &&
-                Player.CountEnemysInRange((int) R.Range) > Menu.GetValue<int>(KennenMenu.ComboRChampInRange))
+                Player.CountEnemysInRange((int)R.Range) > Menu.GetValue<int>(KennenMenu.ComboRChampInRange))
             {
-                R.CastIfWillHit(objAiBase, Menu.GetValue<int>(KennenMenu.ComboRChampInRange),
+                var target = SimpleTs.GetTarget(Player, R.Range, SimpleTs.DamageType.Magical);
+                R.CastIfWillHit(target, Menu.GetValue<int>(KennenMenu.ComboRChampInRange),
                     Menu.GetValue<bool>(KennenMenu.MiscPackets));
             }
+        }
+
+        #endregion
+
+        #region LaneClear
+
+        private static void KennenLaneClear()
+        {
+            
+        }
+
+        #endregion
+
+        #region Harass
+
+        private static void KennenHarass()
+        {
+
+        }
+
+        #endregion
+
+        #region Voids
+
+        private static bool HasBlockableBuff(Obj_AI_Base objAiBase)
+        {
+            return objAiBase.HasBuff("buff") || objAiBase.HasBuff("buff2");
         }
 
         #endregion
