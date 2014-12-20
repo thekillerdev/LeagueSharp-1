@@ -1,7 +1,6 @@
 ﻿#region
 
 using System;
-using System.CodeDom;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
@@ -72,7 +71,7 @@ namespace Kennen
                     var time = ((Vector3.Distance(target.Position, Player.Position)/((Player.MoveSpeed*2)/1000))/1000);
                     Console.WriteLine(time);
 
-                    if (time <= 4)
+                    if (time <= 4f)
                     {
                         // TODO: check time units (m/s/ms?)
                         E.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
@@ -83,21 +82,18 @@ namespace Kennen
             /* W CAST */
             if (Menu.GetValue<bool>(KennenMenu.ComboW) && W.IsReady())
             {
-                if (Menu.GetValue<int>(KennenMenu.ComboWMode) != 0)
+                if (Menu.GetValue<StringList>(KennenMenu.ComboWMode).SelectedIndex != 0)
                 {
-                    foreach (
-                        var buff in
-                            ObjectManager.Get<Obj_AI_Hero>()
-                                .Where(e => e.IsValidTarget() && e.Distance(Player.Position) <= W.Range)
-                                .SelectMany(
-                                    enemy =>
-                                        enemy.Buffs.Where(
-                                            buff => /* buff.Name.Equals("") &&*/
-                                                buff.Count >= Menu.GetValue<int>(KennenMenu.ComboWMode))))
-                    {
-                        Console.WriteLine("{0} / {1} / {2}", buff.Name, buff.DisplayName, buff.SourceName);
-                        // TODO: get buff name
-                    }
+                    var hitcount =
+                        ObjectManager.Get<Obj_AI_Hero>()
+                            .Where(e => e.IsValidTarget() && e.Distance(Player.Position) < W.Range && !HasBlockableBuff(e))
+                            .SelectMany(
+                                enemy => /* buff.Name.Equals("") &&*/ // TODO: Check buff name
+                                    enemy.Buffs.Where(buff => buff.Count >= Menu.GetValue<int>(KennenMenu.ComboWMode)))
+                            .Count();
+
+                    if(hitcount >= Menu.GetValue<StringList>(KennenMenu.ComboWMode).SelectedIndex)
+                        W.CastIfWillHit(Player, Menu.GetValue<int>(KennenMenu.ComboWChampInRange), Menu.GetValue<bool>(KennenMenu.MiscPackets));
                 }
                 else
                 {
@@ -110,9 +106,9 @@ namespace Kennen
             {
                 var target = SimpleTs.GetTarget(Player, Q.Range, SimpleTs.DamageType.Magical);
 
-                if (target != null && (!Menu.GetValue<bool>(KennenMenu.MiscIgnoreSpellShields) && HasBlockableBuff(target)))
+                if (target != null && (!Menu.GetValue<bool>(KennenMenu.MiscIgnoreSpellShields) && !HasBlockableBuff(target, true)))
                 {
-                    var hitChance = HitChance.High;
+                    HitChance hitChance;
                     Enum.TryParse(
                         Menu.GetValue<StringList>(KennenMenu.MiscHighChance).SList[
                             Menu.GetValue<StringList>(KennenMenu.MiscHighChance).SelectedIndex], out hitChance);
@@ -122,10 +118,9 @@ namespace Kennen
 
             /* R CAST */
             if (Menu.GetValue<bool>(KennenMenu.ComboR) && R.IsReady() &&
-                Player.CountEnemysInRange((int)R.Range) > Menu.GetValue<int>(KennenMenu.ComboRChampInRange))
+                Player.CountEnemysInRange((int)R.Range) > Menu.GetValue<int>(KennenMenu.ComboRChampsInRange))
             {
-                var target = SimpleTs.GetTarget(Player, R.Range, SimpleTs.DamageType.Magical);
-                R.CastIfWillHit(target, Menu.GetValue<int>(KennenMenu.ComboRChampInRange),
+                R.CastIfWillHit(Player, Menu.GetValue<int>(KennenMenu.ComboRChampsInRange),
                     Menu.GetValue<bool>(KennenMenu.MiscPackets));
             }
         }
@@ -152,9 +147,11 @@ namespace Kennen
 
         #region Voids
 
-        private static bool HasBlockableBuff(Obj_AI_Base objAiBase)
-        {
-            return objAiBase.HasBuff("buff") || objAiBase.HasBuff("buff2");
+        private static bool HasBlockableBuff(Obj_AI_Base objAiBase, bool ignoreVeil = false)
+        { // TODO: Banshee's Veil, Sivir's Spell Shield, Nocturne's Shourd of Darkness
+            if(ignoreVeil)
+                return objAiBase.HasBuff("BlackShield") || objAiBase.HasBuff("buff2") || objAiBase.HasBuff("buff3");
+            return objAiBase.HasBuff("BlackShield") || objAiBase.HasBuff("buff2") || objAiBase.HasBuff("buff3") || objAiBase.HasBuff("buff4");
         }
 
         #endregion

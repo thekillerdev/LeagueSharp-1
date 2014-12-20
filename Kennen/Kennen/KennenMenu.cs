@@ -1,6 +1,4 @@
-﻿using System;
-using System.Security.Policy;
-using LeagueSharp.Common;
+﻿using LeagueSharp.Common;
 
 namespace Kennen
 {
@@ -22,6 +20,7 @@ namespace Kennen
                 .SetValue(new StringList(new[] {"None", "> 1 stack", "> 2 stacks", "Stunnable only"}));
             combo.AddItem(new MenuItem(RootName + ComboWChampInRange, "Min. Enemy to W")).SetValue(new Slider(1, 1, 5));
             combo.AddItem(new MenuItem(RootName + ComboEChampsInRange, "Max. Enemy to E Gap Closer")).SetValue(new Slider(1, 1, 5));
+            combo.AddItem(new MenuItem(RootName + ComboRChampsInRange, "Min. Enemy to R")).SetValue(new Slider(1, 1, 5));
 
             var harass = _menu.AddSubMenu(new Menu("Harass", RootName + "_harass"));
             harass.AddItem(new MenuItem(RootName + HarassQ, "Use Q")).SetValue(true);
@@ -43,8 +42,10 @@ namespace Kennen
             miscellaneous.AddItem(new MenuItem(RootName + MiscIgnoreSpellShields, "Ignore Spell Shields")).SetValue(true);
             miscellaneous.AddItem(new MenuItem(RootName + MiscHighChance, "Hit Chance")).SetValue(new StringList(new [] {"Low", "Medium", "High", "Very High"}, 2));
 
+            _menu.AddItem(new MenuItem(RootName + "_spacer0", ""));
             _menu.AddItem(new MenuItem(RootName + RootMode, "Mode")).SetValue(new StringList(new [] {"Full Combo", "Reguler"}, 1));
-            _menu.AddItem(new MenuItem(RootName + "_spacer", ""));
+            _menu.AddItem(new MenuItem(RootName + RootModeKey, "Mode Switch")).SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press));
+            _menu.AddItem(new MenuItem(RootName + "_spacer1", ""));
 
             _menu.AddItem(new MenuItem(RootName + "_spacer_desc", "Kennen - the Heart of the Tempest"));
             _menu.AddToMainMenu();
@@ -54,6 +55,7 @@ namespace Kennen
 
         private const string RootName = "worstping_kennen";
         public static readonly string RootMode = "_mode";
+        public static readonly string RootModeKey = "_modekey";
 
         public static readonly string ComboQ = "_combo_useq";
         public static readonly string ComboW = "_combo_usew";
@@ -62,7 +64,7 @@ namespace Kennen
         public static readonly string ComboE = "_combo_usee";
         public static readonly string ComboEChampsInRange = "_combo_minusee";
         public static readonly string ComboR = "_combo_user";
-        public static readonly string ComboRChampInRange = "_combo_minuser";
+        public static readonly string ComboRChampsInRange = "_combo_minuser";
 
         public static readonly string HarassQ = "_harass_useq";
         public static readonly string HarassW = "_harass_usew";
