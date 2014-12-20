@@ -86,14 +86,21 @@ namespace Kennen
                 {
                     var hitcount =
                         ObjectManager.Get<Obj_AI_Hero>()
-                            .Where(e => e.IsValidTarget() && e.Distance(Player.Position) < W.Range && !HasBlockableBuff(e))
+                            .Where(
+                                e => e.IsValidTarget() && e.Distance(Player.Position) < W.Range && !HasBlockableBuff(e))
                             .SelectMany(
                                 enemy => /* buff.Name.Equals("") &&*/ // TODO: Check buff name
                                     enemy.Buffs.Where(buff => buff.Count >= Menu.GetValue<int>(KennenMenu.ComboWMode)))
                             .Count();
+                    var count =
+                        ObjectManager.Get<Obj_AI_Hero>()
+                            .Count(e => e.IsValidTarget() && e.Distance(Player.Position) < W.Range);
 
-                    if(hitcount >= Menu.GetValue<StringList>(KennenMenu.ComboWMode).SelectedIndex)
-                        W.CastIfWillHit(Player, Menu.GetValue<int>(KennenMenu.ComboWChampInRange), Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                    if (hitcount >= Menu.GetValue<StringList>(KennenMenu.ComboWMode).SelectedIndex &&
+                        ((Player.CountEnemysInRange((int) R.Range) < Menu.GetValue<int>(KennenMenu.ComboRChampsInRange)) ||
+                         (count <= hitcount && !R.IsReady())))
+                        W.CastIfWillHit(Player, Menu.GetValue<int>(KennenMenu.ComboWChampInRange),
+                            Menu.GetValue<bool>(KennenMenu.MiscPackets));
                 }
                 else
                 {
@@ -118,7 +125,7 @@ namespace Kennen
 
             /* R CAST */
             if (Menu.GetValue<bool>(KennenMenu.ComboR) && R.IsReady() &&
-                Player.CountEnemysInRange((int)R.Range) > Menu.GetValue<int>(KennenMenu.ComboRChampsInRange))
+                Player.CountEnemysInRange((int)R.Range) >= Menu.GetValue<int>(KennenMenu.ComboRChampsInRange))
             {
                 R.CastIfWillHit(Player, Menu.GetValue<int>(KennenMenu.ComboRChampsInRange),
                     Menu.GetValue<bool>(KennenMenu.MiscPackets));
