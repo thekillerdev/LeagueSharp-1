@@ -19,7 +19,8 @@ namespace Kennen
             combo.AddItem(new MenuItem(RootName + ComboWMode, "Min. Stacks to W. Enemy"))
                 .SetValue(new StringList(new[] {"> 1 stack", "> 2 stacks", "Stunnable only"}));
             combo.AddItem(new MenuItem(RootName + ComboWChampsInRange, "Min. Enemy to W")).SetValue(new Slider(1, 1, 5));
-            combo.AddItem(new MenuItem(RootName + ComboEChampsInRange, "Max. Enemy to E Gap Closer")).SetValue(new Slider(1, 1, 5));
+            combo.AddItem(new MenuItem(RootName + ComboEChampsInRange, "Max. Enemy to E Gap Closer"))
+                .SetValue(new Slider(1, 1, 5));
             combo.AddItem(new MenuItem(RootName + ComboRChampsInRange, "Min. Enemy to R")).SetValue(new Slider(1, 1, 5));
 
             var harass = _menu.AddSubMenu(new Menu("Harass", RootName + "_harass"));
@@ -31,7 +32,8 @@ namespace Kennen
                 .SetValue(new StringList(new[] {"None", "> 1 stack", "> 2 stacks", "Stunnable only"}, 3));
             harass.AddItem(new MenuItem(RootName + HarassWChampsInRange, "Min. Enemy to W"))
                 .SetValue(new Slider(1, 1, 5));
-            combo.AddItem(new MenuItem(RootName + HarassEChampsInRange, "Max. Enemy to E Gap Closer")).SetValue(new Slider(1, 1, 5));
+            combo.AddItem(new MenuItem(RootName + HarassEChampsInRange, "Max. Enemy to E Gap Closer"))
+                .SetValue(new Slider(1, 1, 5));
 
             var laneclear = _menu.AddSubMenu(new Menu("Lane Clear", RootName + "_laneclear"));
             laneclear.AddItem(new MenuItem(RootName + LaneClear, "Use Lane Clear")).SetValue(true);
@@ -40,7 +42,7 @@ namespace Kennen
             laneclear.AddItem(new MenuItem(RootName + LaneClearE, "Use E")).SetValue(true);
             laneclear.AddItem(new MenuItem(RootName + "_laneclear_spacer", ""));
             laneclear.AddItem(new MenuItem(RootName + LaneClearWStacks, "Min. Stacks to W"))
-                .SetValue(new StringList(new[] { "> 1 stack", "> 2 stacks", "Stunnable only" }));
+                .SetValue(new StringList(new[] {"> 1 stack", "> 2 stacks", "Stunnable only"}));
             laneclear.AddItem(new MenuItem(RootName + LaneClearWMin, "Min. Monsters to W"))
                 .SetValue(new Slider(3, 1, 8));
             laneclear.AddItem(new MenuItem(RootName + LaneClearEMin, "Min. Monsters to E"))
@@ -50,12 +52,16 @@ namespace Kennen
 
             var miscellaneous = _menu.AddSubMenu(new Menu("Miscellaneous", RootName + "_misc"));
             miscellaneous.AddItem(new MenuItem(RootName + MiscPackets, "Use Packets")).SetValue(true);
-            miscellaneous.AddItem(new MenuItem(RootName + MiscIgnoreSpellShields, "Ignore Spell Shields")).SetValue(true);
-            miscellaneous.AddItem(new MenuItem(RootName + MiscHitChance, "Hit Chance")).SetValue(new StringList(new[] { "Low", "Medium", "High", "Very High" }, 2));
+            miscellaneous.AddItem(new MenuItem(RootName + MiscIgnoreSpellShields, "Ignore Spell Shields"))
+                .SetValue(true);
+            miscellaneous.AddItem(new MenuItem(RootName + MiscHitChance, "Hit Chance"))
+                .SetValue(new StringList(new[] {"Low", "Medium", "High", "Very High"}, 2));
 
             _menu.AddItem(new MenuItem(RootName + "_spacer0", ""));
-            _menu.AddItem(new MenuItem(RootName + RootMode, "Mode")).SetValue(new StringList(new [] {"Team Fight", "Lanining"}, 1));
-            _menu.AddItem(new MenuItem(RootName + RootModeKey, "Mode Switch")).SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press));
+            _menu.AddItem(new MenuItem(RootName + RootMode, "Mode"))
+                .SetValue(new StringList(new[] {"Team Fight", "Lanining"}, 1));
+            _menu.AddItem(new MenuItem(RootName + RootModeKey, "Mode Switch"))
+                .SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press));
             _menu.AddItem(new MenuItem(RootName + "_spacer1", ""));
 
             _menu.AddItem(new MenuItem(RootName + "_spacer_desc", "Kennen - the Heart of the Tempest"));

@@ -55,7 +55,9 @@ namespace Kennen
                                     buff =>
                                         buff.Name.Equals("markofthestorm") && // TODO: buff name?
                                         buff.Count >=
-                                        (Menu.GetValue<StringList>(isCombo ? KennenMenu.ComboWMode : KennenMenu.HarassWMode).SelectedIndex + 1)))
+                                        (Menu.GetValue<StringList>(isCombo
+                                            ? KennenMenu.ComboWMode
+                                            : KennenMenu.HarassWMode).SelectedIndex + 1)))
                         .Count();
 
                 if (enemies >=
@@ -101,6 +103,40 @@ namespace Kennen
 
         #endregion
 
+        #region Farming
+
+        private static void KennenLaneClear()
+        {
+            if (!Menu.GetValue<bool>(KennenMenu.LaneClear)) return;
+
+            var chargedCount =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(m => m.IsValidTarget() && m.Distance(Player.Position) <= (Player.AttackRange*1.5))
+                    .SelectMany(
+                        m =>
+                            m.Buffs.Where(
+                                buffs => buffs.Name.Equals("marofthestorm") && // TODO
+                                         buffs.Count >=
+                                         (Menu.GetValue<StringList>(KennenMenu.LaneClearWStacks).SelectedIndex + 1)))
+                    .Count();
+
+            if (Player.CountEnemysInRange((int) (Player.AttackRange*2)) == 0)
+            {
+                if (Menu.GetValue<bool>(KennenMenu.LaneClearE) &&
+                    chargedCount < Menu.GetValue<int>(KennenMenu.LaneClearEMin) && E.IsReady())
+                {
+                    E.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
+                }
+            }
+            if (Menu.GetValue<bool>(KennenMenu.LaneClearW) &&
+                chargedCount >= Menu.GetValue<int>(KennenMenu.LaneClearWMin) && W.IsReady())
+            {
+                W.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
+            }
+        }
+
+        #endregion
+
         #region Main
 
         static Kennen()
@@ -142,40 +178,6 @@ namespace Kennen
                 case Orbwalking.OrbwalkingMode.Mixed:
                     KennenSpells(false);
                     break;
-            }
-        }
-
-        #endregion
-
-        #region Farming
-
-        private static void KennenLaneClear()
-        {
-            if (!Menu.GetValue<bool>(KennenMenu.LaneClear)) return;
-
-            var chargedCount =
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .Where(m => m.IsValidTarget() && m.Distance(Player.Position) <= (Player.AttackRange*1.5))
-                    .SelectMany(
-                        m =>
-                            m.Buffs.Where(
-                                buffs => buffs.Name.Equals("marofthestorm") && // TODO
-                                         buffs.Count >=
-                                         (Menu.GetValue<StringList>(KennenMenu.LaneClearWStacks).SelectedIndex + 1)))
-                    .Count();
-
-            if (Player.CountEnemysInRange((int) (Player.AttackRange*2)) == 0)
-            {
-                if (Menu.GetValue<bool>(KennenMenu.LaneClearE) &&
-                    chargedCount < Menu.GetValue<int>(KennenMenu.LaneClearEMin) && E.IsReady())
-                {
-                    E.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
-                }
-            }
-            if (Menu.GetValue<bool>(KennenMenu.LaneClearW) &&
-                chargedCount >= Menu.GetValue<int>(KennenMenu.LaneClearWMin) && W.IsReady())
-            {
-                W.Cast(Menu.GetValue<bool>(KennenMenu.MiscPackets));
             }
         }
 
