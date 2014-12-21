@@ -160,12 +160,18 @@ namespace Kennen
 
             CustomEvents.Game.OnGameLoad += args =>
             {
-                Game.OnGameUpdate += OnGameUpdate;
+                Game.OnGameUpdate += GameOnOnGameUpdate;
+                Drawing.OnDraw += DrawingOnOnDraw;
                 Game.PrintChat("WorstPing | Kennen the Heart of the Tempest, loaded.");
             };
         }
 
-        private static void OnGameUpdate(EventArgs args)
+        private static void DrawingOnOnDraw(EventArgs args)
+        {
+            
+        }
+
+        private static void GameOnOnGameUpdate(EventArgs args)
         {
             switch (Menu.GetOrbwalker().ActiveMode)
             {
