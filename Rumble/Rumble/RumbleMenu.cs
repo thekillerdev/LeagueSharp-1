@@ -63,6 +63,7 @@ namespace Rumble
             misc.AddItem(new MenuItem(RootName + MiscEDelay, "Seconds delay between Harpoons (E)"))
                 .SetValue(new Slider(1, 0, 3));
             misc.AddItem(new MenuItem(RootName + MiscEmDelay, "Delay Harpoons(E) at Melee Range")).SetValue(true);
+            misc.AddItem(new MenuItem(RootName + MiscKeepInR, "Keep in Equalizer (R) for")).SetValue(new Slider(2, 0, 5));
             misc.AddItem(new MenuItem(RootName + MiscHitChance, "Hit Chance"))
                 .SetValue(new StringList(new[] {"Low", "Medium", "High", "Very High"}, 1));
             misc.AddItem(new MenuItem(RootName + MiscPackets, "Use Packets")).SetValue(true);
@@ -112,6 +113,7 @@ namespace Rumble
         public static readonly string MiscAutoE = "_misc_autoe";
         public static readonly string MiscEDelay = "_misc_edelay";
         public static readonly string MiscEmDelay = "_misc_emdelay";
+        public static readonly string MiscKeepInR = "_misc_keepinr";
         public static readonly string MiscHitChance = "_misc_hitchance";
         public static readonly string MiscPackets = "_misc_packets";
 

@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
-using SharpDX.Design;
 using Color = System.Drawing.Color;
 
 namespace Rumble
@@ -308,8 +306,8 @@ namespace Rumble
         {
             var cWaypoints = targetObjAiBase.GetWaypoints();
 
-            Vector3 bestCastPosition0Vector3 = new Vector3(-1f, -1f, -1f);
-            Vector3 bestCastPosition1Vector3 = new Vector3(-1f, -1f, -1f);
+            var bestCastPosition0Vector3 = new Vector3(-1f, -1f, -1f);
+            var bestCastPosition1Vector3 = new Vector3(-1f, -1f, -1f);
             var bestHits = 0;
 
             var spellPredictionPos = Prediction.GetPrediction(targetObjAiBase, 0.250f, 0f, RSpell.Speed);
@@ -319,7 +317,7 @@ namespace Rumble
                         .Where(e => e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < 1000))
             {
                 var predictedPos = Prediction.GetPrediction(enemy, 0.250f);
-                if (Vector3.Distance(predictedPos.UnitPosition, spellPredictionPos.CastPosition) < RSpell.Width) // TODO?
+                if (Vector3.Distance(predictedPos.UnitPosition, spellPredictionPos.CastPosition) < RSpell.Instance.SData.LineWidth)
                 {
                     var midPos = GetMidPoint(predictedPos.UnitPosition, spellPredictionPos.CastPosition);
                     var midVector = predictedPos.UnitPosition - spellPredictionPos.CastPosition;
@@ -347,6 +345,65 @@ namespace Rumble
                     enemyHit = bestHits;
                     return;
                 }
+            }
+
+            var isLinear = true;
+            if (cWaypoints.Count > 3)
+            {
+                for(var j = 2; j < cWaypoints.Count; ++j)
+                {
+                    bool isInsideBox;
+                    Vector3 boxVector3;
+                    Vector3 lineVector3;
+                    VectorBoxCalculation(out boxVector3, out lineVector3, out isInsideBox,
+                        new Vector3(cWaypoints[1].X, cWaypoints[1].Y, 0f),
+                        new Vector3(cWaypoints[cWaypoints.Count - 1].X, cWaypoints[cWaypoints.Count - 1].Y, 0f),
+                        new Vector3(cWaypoints[j].X, cWaypoints[j].Y, 0f));
+                    // TODO: check this ^ (X,Y) or (X,Z)??
+                    if (Vector3.Distance(boxVector3, lineVector3) > RSpell.Width + 100)
+                    {
+                        isLinear = false;
+                    }
+                }
+            }
+
+            if (cWaypoints.Count >= 2)
+            {
+                var eDurations = false;
+                var travelTime = 0f;
+
+                if (isLinear)
+                {
+                    for (var index = 1; index < cWaypoints.Count - 1; ++index)
+                    {
+                        var cTime = Vector2.Distance(cWaypoints[index], cWaypoints[index + 1]) / targetObjAiBase.MoveSpeed;
+                        travelTime += cTime;
+                    }
+                    if (travelTime >= Menu.GetValue<Slider>(RumbleMenu.MiscKeepInR).Value)
+                    {
+                        eDurations = true;
+                    }
+                }
+
+                var midPointer = new Vector2((cWaypoints[1].X + cWaypoints[cWaypoints.Count - 1].X)/2,
+                    (cWaypoints[1].Y + cWaypoints[cWaypoints.Count - 1].Y)/2);
+                var fiuVector = cWaypoints[cWaypoints.Count - 1] - cWaypoints[1];
+                fiuVector.Normalize();
+
+                if (Vector2.Distance(cWaypoints[1], midPointer) > 425f)
+                {
+                    var pos0 = midPointer;
+                    var pos1 = cWaypoints[1] - fiuVector*200;
+                    if (!CheckWall(new Vector3(pos0.X, pos0.Y, 0f), new Vector3(pos1.X, pos1.Y, 0f)))
+                    {
+                        var currentHit = CheckHitCount(new Vector3(pos0.X, pos0.Y, 0f), new Vector3(pos1.X, pos1.Y, 0f), targetObjAiBase);
+                        fromVector2 = new Vector2(pos0.X, pos0.Y);
+                        toVector2 = new Vector2(pos1.X, pos1.Y);
+                        enemyHit = currentHit;
+                        return;
+                    }
+                }
+                // TODO: CONTINUE
             }
 
             fromVector2 = new Vector2(-1f, -1f);
@@ -377,7 +434,7 @@ namespace Rumble
             var posMid = new Vector3((posVector.X + posVector3.X)/2, 0, (posVector.Z + posVector3.Z)/2);
             var eiVector = (posVector - posVector3);
             eiVector.Normalize();
-            var extensionAmount = RSpell.Width/2; // TODO ?
+            var extensionAmount = RSpell.Instance.SData.LineWidth / 2;
             var extpos0 = posMid + eiVector*extensionAmount;
             var extpos1 = posMid - eiVector*extensionAmount;
 
@@ -403,18 +460,21 @@ namespace Rumble
         private static void VectorBoxCalculation(out Vector3 boxVector3, out Vector3 lineVector3, out bool insideBox,
             Vector3 v0Vector3, Vector3 v1Vector3, Vector3 v2Vector3)
         {
-            var cx = v2Vector3.X;
-            var cy = v2Vector3.Y;
-            var ax = v0Vector3.X;
-            var ay = v0Vector3.Y;
-            var bx = v1Vector3.X;
-            var by = v1Vector3.Y;
+            var prdXf = v2Vector3.X;
+            var prdYf = v2Vector3.Y;
+            var plusXf = v0Vector3.X;
+            var plusYf = v0Vector3.Y;
+            var minusXf = v1Vector3.X;
+            var minusYf = v1Vector3.Y;
 
-            var stack = ((cx - ax)*(bx - ax) + (cy - ay)*(by - ay))/((bx - ax)*(bx - ax) + (by - ay)*(by - ay));
-            lineVector3 = new Vector3(ax + stack*(bx - ax), ay + stack*(by - ay), 0f);
+            var stack = ((prdXf - plusXf)*(minusXf - plusXf) + (prdYf - plusYf)*(minusYf - plusYf))/
+                        ((minusXf - plusXf)*(minusXf - plusXf) + (minusYf - plusYf)*(minusYf - plusYf));
+            lineVector3 = new Vector3(plusXf + stack*(minusXf - plusXf), plusYf + stack*(minusYf - plusYf), 0f);
             var stack2 = (stack < 0) ? 0 : (stack > 1 ? 1 : stack);
             insideBox = (stack.Equals(stack2));
-            boxVector3 = insideBox ? lineVector3 : new Vector3(ax + stack2*(bx - ax), ay + stack2*(by - ay), 0f);
+            boxVector3 = insideBox
+                ? lineVector3
+                : new Vector3(plusXf + stack2*(minusXf - plusXf), plusYf + stack2*(minusYf - plusYf), 0f);
         }
 
         private static Vector3 GetMidPoint(Vector3 vector3, Vector3 otherVector3)
