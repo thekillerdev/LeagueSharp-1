@@ -11,7 +11,7 @@ namespace Rumble
 
         private static void RumbleCombo()
         {
-            var target = SimpleTs.GetTarget(1200f, SimpleTs.DamageType.Magical);
+            var target = TargetSelector.GetTarget(1200f, TargetSelector.DamageType.Magical);
             if (!target.IsValidTarget()) return;
 
             // ==== [ CHECKS ] ====
@@ -92,6 +92,7 @@ namespace Rumble
                 // TODO
             }
 
+            /* OVERHEAT */
             if (Menu.GetValue<bool>(RumbleMenu.ComboOverheat) && _shouldOverheat &&
                 Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
             {
@@ -115,6 +116,66 @@ namespace Rumble
 
         private static void RumbleHarass()
         {
+            var target = TargetSelector.GetTarget(1200f, TargetSelector.DamageType.Magical);
+            if (!target.IsValidTarget()) return;
+
+            // ==== [ CHECKS ] ====
+
+            CalculateHeatFunctions(target);
+
+            var hitChance = HitChance.Medium;
+            if (Menu.GetMenu() != null && Menu.GetItem(RumbleMenu.MiscHitChance) != null)
+            {
+                var menuItem = Menu.GetValue<StringList>(RumbleMenu.MiscHitChance);
+                Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out hitChance);
+            }
+
+            // ==== [  HARASS  ] ====
+            /* Q CASTING */
+            if (Menu.GetValue<bool>(RumbleMenu.HarassQ) && QSpell.IsReady() && _shouldCastQAndE &&
+                target.Distance(PlayerObjAiHero.Position) < 600f && PlayerObjAiHero.IsFacing(target, 600f) &&
+                Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+            {
+                QSpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+            }
+
+            /* E CASTING */
+            if (Menu.GetValue<bool>(RumbleMenu.HarassE) && ESpell.IsReady() && _shouldCastQAndE &&
+                target.Distance(PlayerObjAiHero.Position) < 850f &&
+                Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+            {
+                ESpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+                _lastETick = Environment.TickCount;
+            }
+
+            /* W CASTING */
+            if (Menu.GetValue<bool>(RumbleMenu.HarassW) && WSpell.IsReady() && _shouldCastW &&
+                target.Distance(PlayerObjAiHero.Position) < 900f &&
+                Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+            {
+                // TODO
+            }
+
+            /* OVERHEAT */
+            if (Menu.GetValue<bool>(RumbleMenu.HarassOverheat) && _shouldOverheat &&
+                Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+            {
+                if (Menu.GetValue<bool>(RumbleMenu.HarassQ) && QSpell.IsReady() &&
+                    target.Distance(PlayerObjAiHero.Position) < 600f && PlayerObjAiHero.IsFacing(target, 600f))
+                {
+                    QSpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+                }
+
+                if (Menu.GetValue<bool>(RumbleMenu.HarassE) &&
+                    ESpell.IsReady() &&
+                    target.Distance(PlayerObjAiHero.Position) < 850f)
+                {
+                    ESpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+                    _lastETick = Environment.TickCount;
+                }
+
+                WSpell.Cast(Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+            }
         }
 
         private static void RumbleFlee()
@@ -181,7 +242,7 @@ namespace Rumble
             foreach (
                 var enemy in
                     ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(e => e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < RSpell.Range && !IsInvulnerable(e)))
+                        .Where(e => e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < RSpell.Range && !IsInvulnerable(e, TargetSelector.DamageType.Magical)))
             {
                 if (enemy.Distance(PlayerObjAiHero.Position) < QSpell.Range && QSpell.IsReady() &&
                     Menu.GetValue<bool>(RumbleMenu.KsQ) &&
@@ -339,9 +400,9 @@ namespace Rumble
             }
         }
 
-        private static bool IsInvulnerable(Obj_AI_Base @base)
+        private static bool IsInvulnerable(Obj_AI_Base @base, TargetSelector.DamageType damageType)
         {
-            return SimpleTs.IsInvulnerable(@base);
+            return TargetSelector.IsInvulnerable(@base, damageType, false, true);
         }
 
         #endregion
