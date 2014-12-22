@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using SharpDX;
+using SharpDX.Design;
 using Color = System.Drawing.Color;
 
 namespace Rumble
@@ -90,7 +93,7 @@ namespace Rumble
 
                 if (!rc0 && !rc1 && !rc2) return;
 
-                // TODO
+                CastR(target);
             }
 
             /* OVERHEAT */
@@ -274,10 +277,155 @@ namespace Rumble
                 {
                     if (PlayerObjAiHero.GetSpellDamage(enemy, SpellSlot.R)*1.5 > enemy.Health)
                     {
-                        // TODO
+                        CastR(enemy);
                     }
                 }
             }
+        }
+
+        private static void CastR(Obj_AI_Base targetObjAiBase)
+        {
+            if (PlayerObjAiHero.CountEnemysInRange(1000) > 1)
+            {
+                Vector2 fromVector2;
+                Vector2 toVector2;
+                int enemyHit;
+                RLogic(targetObjAiBase, out fromVector2, out toVector2, out enemyHit);
+
+                if (enemyHit > 0)
+                {
+                    Packet.C2S.Cast.Encoded(new Packet.C2S.Cast.Struct(0, RSpell.Slot, -1, fromVector2.X, fromVector2.Y,
+                        toVector2.X, toVector2.Y)).Send();
+                }
+            }
+            else
+            {
+                
+            }
+        }
+
+        private static void RLogic(Obj_AI_Base targetObjAiBase, out Vector2 fromVector2, out Vector2 toVector2, out int enemyHit)
+        {
+            var cWaypoints = targetObjAiBase.GetWaypoints();
+
+            Vector3 bestCastPosition0Vector3 = new Vector3(-1f, -1f, -1f);
+            Vector3 bestCastPosition1Vector3 = new Vector3(-1f, -1f, -1f);
+            var bestHits = 0;
+
+            var spellPredictionPos = Prediction.GetPrediction(targetObjAiBase, 0.250f, 0f, RSpell.Speed);
+            foreach (
+                var enemy in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(e => e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < 1000))
+            {
+                var predictedPos = Prediction.GetPrediction(enemy, 0.250f);
+                if (Vector3.Distance(predictedPos.UnitPosition, spellPredictionPos.CastPosition) < RSpell.Width) // TODO?
+                {
+                    var midPos = GetMidPoint(predictedPos.UnitPosition, spellPredictionPos.CastPosition);
+                    var midVector = predictedPos.UnitPosition - spellPredictionPos.CastPosition;
+                    midVector.Normalize();
+
+                    var pos0 = midPos + midVector*(RSpell.Width/2);
+                    var pos1 = midPos + midVector*(RSpell.Width/2);
+                    var currentHit = CheckHitCount(pos0, pos1, targetObjAiBase);
+
+                    if (currentHit > bestHits)
+                    {
+                        bestHits = currentHit;
+                        bestCastPosition0Vector3 = pos0;
+                        bestCastPosition1Vector3 = pos1;
+                    }
+                }
+            }
+
+            if (bestHits >= 2 && !bestCastPosition0Vector3.Equals(new Vector3(-1f, -1f, -1f)) && !bestCastPosition1Vector3.Equals(new Vector3(-1f, -1f, -1f)))
+            {
+                if (!CheckWall(bestCastPosition0Vector3, bestCastPosition1Vector3))
+                {
+                    fromVector2 = new Vector2(bestCastPosition0Vector3.X, bestCastPosition0Vector3.Y);
+                    toVector2 = new Vector2(bestCastPosition1Vector3.X, bestCastPosition1Vector3.Y);
+                    enemyHit = bestHits;
+                    return;
+                }
+            }
+
+            fromVector2 = new Vector2(-1f, -1f);
+            toVector2 = new Vector2(-1f, -1f);
+            enemyHit = -1;
+        }
+
+        private static bool CheckWall(Vector3 posVector, Vector3 posVector3)
+        {
+            var eiVector = (posVector - posVector3);
+            eiVector.Normalize();
+            var wallCount = 0;
+            for (var i = 1; i < 20; ++i)
+            {
+                var currentM = 60*i;
+                var cVector = posVector + eiVector*currentM;
+                if (cVector.IsWall())
+                    ++wallCount;
+            }
+
+            return (wallCount >= 8);
+        }
+
+        private static int CheckHitCount(Vector3 posVector, Vector3 posVector3, Obj_AI_Base objAiBase)
+        {
+            if (!objAiBase.IsValidTarget()) return 0;
+
+            var posMid = new Vector3((posVector.X + posVector3.X)/2, 0, (posVector.Z + posVector3.Z)/2);
+            var eiVector = (posVector - posVector3);
+            eiVector.Normalize();
+            var extensionAmount = RSpell.Width/2; // TODO ?
+            var extpos0 = posMid + eiVector*extensionAmount;
+            var extpos1 = posMid - eiVector*extensionAmount;
+
+            var hit = 0;
+
+            foreach (var predictedPos in ObjectManager.Get<Obj_AI_Hero>()
+                .Where(e => e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < 1000f).Select(enemy => Prediction.GetPrediction(enemy, 0.250f)))
+            {
+                bool isInsideBox;
+                Vector3 boxVector3;
+                Vector3 lineVector3;
+
+                VectorBoxCalculation(out boxVector3, out lineVector3, out isInsideBox, extpos0, extpos1, predictedPos.UnitPosition);
+                if (Vector3.Distance(boxVector3, lineVector3) < RSpell.Width + 60)
+                {
+                    ++hit;
+                }
+            }
+
+            return hit;
+        }
+
+        private static void VectorBoxCalculation(out Vector3 boxVector3, out Vector3 lineVector3, out bool insideBox,
+            Vector3 v0Vector3, Vector3 v1Vector3, Vector3 v2Vector3)
+        {
+            var cx = v2Vector3.X;
+            var cy = v2Vector3.Y;
+            var ax = v0Vector3.X;
+            var ay = v0Vector3.Y;
+            var bx = v1Vector3.X;
+            var by = v1Vector3.Y;
+
+            var stack = ((cx - ax)*(bx - ax) + (cy - ay)*(by - ay))/((bx - ax)*(bx - ax) + (by - ay)*(by - ay));
+            lineVector3 = new Vector3(ax + stack*(bx - ax), ay + stack*(by - ay), 0f);
+            var stack2 = (stack < 0) ? 0 : (stack > 1 ? 1 : stack);
+            insideBox = (stack.Equals(stack2));
+            boxVector3 = insideBox ? lineVector3 : new Vector3(ax + stack2*(bx - ax), ay + stack2*(by - ay), 0f);
+        }
+
+        private static Vector3 GetMidPoint(Vector3 vector3, Vector3 otherVector3)
+        {
+            return new Vector3((vector3.X + vector3.X) / 2, 0f, (vector3.Z + otherVector3.Z)/2);
+        }
+
+        private static void SubRLogic(out Vector2 fromVector2, out Vector2 toVector2)
+        {
+            fromVector2 = new Vector2(-1f, -1f);
+            toVector2 = new Vector2(-1f, -1f);
         }
 
         #endregion
