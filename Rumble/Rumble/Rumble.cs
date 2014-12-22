@@ -2,6 +2,7 @@
 using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using Color = System.Drawing.Color;
 
 namespace Rumble
 {
@@ -48,15 +49,15 @@ namespace Rumble
             if (Menu.GetValue<bool>(RumbleMenu.ComboE) && PlayerObjAiHero.HasBuff("RumbleGrenade", true) &&
                 ESpell.IsReady() && target.Distance(PlayerObjAiHero.Position) < 850f)
             {
-                var c0 = Menu.GetValue<bool>(RumbleMenu.MiscEMDelay) &&
+                var c0 = Menu.GetValue<bool>(RumbleMenu.MiscEmDelay) &&
                          Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250 &&
                          target.Distance(PlayerObjAiHero.Position) >= 300f;
 
-                var c1 = Menu.GetValue<bool>(RumbleMenu.MiscEMDelay) &&
+                var c1 = Menu.GetValue<bool>(RumbleMenu.MiscEmDelay) &&
                          Environment.TickCount - _lastETick > 1000*Menu.GetValue<Slider>(RumbleMenu.MiscEDelay).Value &&
                          target.Distance(PlayerObjAiHero.Position) < 350f;
 
-                var c2 = !Menu.GetValue<bool>(RumbleMenu.MiscEMDelay) &&
+                var c2 = !Menu.GetValue<bool>(RumbleMenu.MiscEmDelay) &&
                          Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250;
 
                 if (!c0 && !c1 && !c2) return;
@@ -313,6 +314,52 @@ namespace Rumble
 
         private static void DrawingOnOnDraw(EventArgs args)
         {
+            if (Menu.GetValue<bool>(RumbleMenu.DrawQ))
+            {
+                Drawing.DrawCircle(PlayerObjAiHero.Position, QSpell.Range, Color.Red);
+            }
+            if (Menu.GetValue<bool>(RumbleMenu.DrawE))
+            {
+                Drawing.DrawCircle(PlayerObjAiHero.Position, ESpell.Range, Color.Green);
+            }
+            if (Menu.GetValue<bool>(RumbleMenu.DrawR))
+            {
+                Drawing.DrawCircle(PlayerObjAiHero.Position, ESpell.Range, Color.Yellow);
+            }
+            if (Menu.GetValue<bool>(RumbleMenu.DrawKillText))
+            {
+                var target = TargetSelector.GetTarget(1200f, TargetSelector.DamageType.Magical, true);
+                if (!target.IsValidTarget()) return;
+
+                if (PlayerObjAiHero.GetSpellDamage(target, SpellSlot.Q) / 3 > target.Health)
+                {
+                    Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "Short Q");
+                }
+                else if (PlayerObjAiHero.GetSpellDamage(target, SpellSlot.Q) > target.Health)
+                {
+                    Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "Q");
+                }
+                else if (PlayerObjAiHero.GetSpellDamage(target, SpellSlot.R) > target.Health)
+                {
+                    Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "R");
+                }
+                else if (PlayerObjAiHero.GetSpellDamage(target, SpellSlot.E) > target.Health)
+                {
+                    Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "E");
+                }
+                else if (PlayerObjAiHero.GetComboDamage(target, new[] {SpellSlot.Q, SpellSlot.E, SpellSlot.E}) > target.Health)
+                {
+                    Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "Q + Twice E");
+                }
+                else if (PlayerObjAiHero.GetComboDamage(target, new[] { SpellSlot.Q, SpellSlot.E, SpellSlot.E, SpellSlot.R}) > target.Health)
+                {
+                    Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "Full Combo");
+                }
+                else
+                {
+                    Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "Not Killable.");
+                }
+            }
         }
 
         private static void GameOnOnGameUpdate(EventArgs args)
@@ -345,10 +392,69 @@ namespace Rumble
 
         private static void RumbleLaneClear()
         {
+            if (Menu.GetValue<bool>(RumbleMenu.FarmQ) && QSpell.IsReady())
+            {
+                var hitQ = ObjectManager.Get<Obj_AI_Minion>().Count(m => m.IsValidTarget() && m.Distance(PlayerObjAiHero.Position) < QSpell.Range && PlayerObjAiHero.IsFacing(m, 600f));
+                if (hitQ >= Menu.GetValue<Slider>(RumbleMenu.FarmMinQ).Value && (PlayerObjAiHero.Mana < 80 && !Menu.GetValue<bool>(RumbleMenu.FarmOverheat)))
+                {
+                    QSpell.Cast(Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+                }
+                else
+                {
+                    QSpell.Cast(Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+                }
+            }
+
+            if (Menu.GetValue<bool>(RumbleMenu.FarmE) && ESpell.IsReady())
+            {
+                var minion =
+                    ObjectManager.Get<Obj_AI_Minion>()
+                        .Where(
+                            m =>
+                                m.IsValidTarget() && m.Distance(PlayerObjAiHero.Position) < ESpell.Range &&
+                                !ESpell.GetPrediction(m).CollisionObjects.Any())
+                        .OrderBy(m => m.Health)
+                        .FirstOrDefault();
+
+                var hitChance = HitChance.Medium;
+                if (Menu.GetMenu() != null && Menu.GetItem(RumbleMenu.MiscHitChance) != null)
+                {
+                    var menuItem = Menu.GetValue<StringList>(RumbleMenu.MiscHitChance);
+                    Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out hitChance);
+                }
+
+                if (PlayerObjAiHero.Mana < 80 && !Menu.GetValue<bool>(RumbleMenu.FarmOverheat))
+                {
+                    ESpell.CastIfHitchanceEquals(minion, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+                }
+                else
+                {
+                    ESpell.CastIfHitchanceEquals(minion, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+                }
+            }
         }
 
         private static void RumbleLastHit()
         {
+            if (!ESpell.IsReady()) return;
+
+            var hitChance = HitChance.Medium;
+            if (Menu.GetMenu() != null && Menu.GetItem(RumbleMenu.MiscHitChance) != null)
+            {
+                var menuItem = Menu.GetValue<StringList>(RumbleMenu.MiscHitChance);
+                Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out hitChance);
+            }
+
+            var minion =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(
+                        m =>
+                            m.IsValidTarget() && m.Distance(PlayerObjAiHero.Position) < ESpell.Range &&
+                            !ESpell.GetPrediction(m).CollisionObjects.Any() && PlayerObjAiHero.GetSpellDamage(m, SpellSlot.E) > m.Health)
+                    .OrderBy(m => m.Health)
+                    .FirstOrDefault();
+
+            ESpell.CastIfHitchanceEquals(minion, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
         }
 
         #endregion

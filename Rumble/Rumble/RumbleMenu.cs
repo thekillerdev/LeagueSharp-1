@@ -1,4 +1,5 @@
 ﻿using LeagueSharp.Common;
+using SharpDX;
 
 namespace Rumble
 {
@@ -8,7 +9,7 @@ namespace Rumble
         {
             /* HEADER */
             _menu = new Menu("WorstPing | Rumble", RootName, true);
-            SimpleTs.AddToMenu(_menu.AddSubMenu(new Menu("Target Selector", RootName + "_ts")));
+            TargetSelector.AddToMenu(_menu.AddSubMenu(new Menu("Target Selector", RootName + "_ts")));
             _orbwalker = new Orbwalking.Orbwalker(_menu.AddSubMenu(new Menu("Orbwalker", RootName + "_orb")));
 
             /* COMBO */
@@ -30,6 +31,7 @@ namespace Rumble
             /* FARMING */
             var farm = _menu.AddSubMenu(new Menu("Farming", RootName + "_farm"));
             farm.AddItem(new MenuItem(RootName + FarmQ, "Use Q")).SetValue(true);
+            farm.AddItem(new MenuItem(RootName + FarmMinQ, "Min. Minions to Q")).SetValue(new Slider(3, 1, 8));
             farm.AddItem(new MenuItem(RootName + FarmE, "Use E")).SetValue(true);
             farm.AddItem(new MenuItem(RootName + FarmOverheat, "Allow Overheating")).SetValue(true);
 
@@ -60,7 +62,7 @@ namespace Rumble
             misc.AddItem(new MenuItem(RootName + MiscAutoE, "Auto Harpoon(E)")).SetValue(true);
             misc.AddItem(new MenuItem(RootName + MiscEDelay, "Seconds delay between Harpoons (E)"))
                 .SetValue(new Slider(1, 0, 3));
-            misc.AddItem(new MenuItem(RootName + MiscEMDelay, "Delay Harpoons(E) at Melee Range")).SetValue(true);
+            misc.AddItem(new MenuItem(RootName + MiscEmDelay, "Delay Harpoons(E) at Melee Range")).SetValue(true);
             misc.AddItem(new MenuItem(RootName + MiscHitChance, "Hit Chance"))
                 .SetValue(new StringList(new[] {"Low", "Medium", "High", "Very High"}, 1));
             misc.AddItem(new MenuItem(RootName + MiscPackets, "Use Packets")).SetValue(true);
@@ -88,6 +90,7 @@ namespace Rumble
         public static readonly string HarassOverheat = "_harass_overheat";
 
         public static readonly string FarmQ = "_farm_useq";
+        public static readonly string FarmMinQ = "_farm_minq";
         public static readonly string FarmE = "_farm_usee";
         public static readonly string FarmOverheat = "_farm_overheat";
 
@@ -108,7 +111,7 @@ namespace Rumble
         public static readonly string MiscMinWGapcloser = "_misc_minwgapcloser";
         public static readonly string MiscAutoE = "_misc_autoe";
         public static readonly string MiscEDelay = "_misc_edelay";
-        public static readonly string MiscEMDelay = "_misc_emdelay";
+        public static readonly string MiscEmDelay = "_misc_emdelay";
         public static readonly string MiscHitChance = "_misc_hitchance";
         public static readonly string MiscPackets = "_misc_packets";
 
