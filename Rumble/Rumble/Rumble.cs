@@ -171,6 +171,51 @@ namespace Rumble
 
         private static void KillSteal()
         {
+            var hitChance = HitChance.Medium;
+            if (Menu.GetMenu() != null && Menu.GetItem(RumbleMenu.MiscHitChance) != null)
+            {
+                var menuItem = Menu.GetValue<StringList>(RumbleMenu.MiscHitChance);
+                Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out hitChance);
+            }
+
+            foreach (
+                var enemy in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(e => e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < RSpell.Range && !IsInvulnerable(e)))
+            {
+                if (enemy.Distance(PlayerObjAiHero.Position) < QSpell.Range && QSpell.IsReady() &&
+                    Menu.GetValue<bool>(RumbleMenu.KsQ) &&
+                    Menu.GetValue<bool>(RumbleMenu.KsOverheat) && _shouldCastQAndE &&
+                    PlayerObjAiHero.IsFacing(enemy, 600f) &&
+                    Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+                {
+                    if (PlayerObjAiHero.GetSpellDamage(enemy, SpellSlot.Q)/2 > enemy.Health)
+                    {
+                        QSpell.CastIfHitchanceEquals(enemy, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+                    }
+                }
+
+                if (enemy.Distance(PlayerObjAiHero.Position) < ESpell.Range && ESpell.IsReady() &&
+                    Menu.GetValue<bool>(RumbleMenu.KsE) &&
+                    Menu.GetValue<bool>(RumbleMenu.KsOverheat) && _shouldCastQAndE &&
+                    Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+                {
+                    if (PlayerObjAiHero.GetSpellDamage(enemy, SpellSlot.E) > enemy.Health)
+                    {
+                        ESpell.CastIfHitchanceEquals(enemy, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
+                    }
+                }
+
+                if (enemy.Distance(PlayerObjAiHero.Position) < RSpell.Range && RSpell.IsReady() &&
+                    Menu.GetValue<bool>(RumbleMenu.KsR) &&
+                    Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+                {
+                    if (PlayerObjAiHero.GetSpellDamage(enemy, SpellSlot.R)*1.5 > enemy.Health)
+                    {
+                        // TODO
+                    }
+                }
+            }
         }
 
         #endregion
@@ -292,6 +337,11 @@ namespace Rumble
                 _shouldCastQAndE = true;
                 _shouldCastW = true;
             }
+        }
+
+        private static bool IsInvulnerable(Obj_AI_Base @base)
+        {
+            return SimpleTs.IsInvulnerable(@base);
         }
 
         #endregion
