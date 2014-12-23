@@ -14,7 +14,10 @@ namespace Rumble
         private static void RumbleCombo()
         {
             var target = TargetSelector.GetTarget(1200f, TargetSelector.DamageType.Magical);
-            if (!target.IsValidTarget()) return;
+            if (!target.IsValidTarget())
+            {
+                return;
+            }
 
             // ==== [ CHECKS ] ====
 
@@ -38,30 +41,32 @@ namespace Rumble
             }
 
             /* E CASTING */
-            if (Menu.GetValue<bool>(RumbleMenu.ComboE) && !PlayerObjAiHero.HasBuff("RumbleGrenade", true) &&
-                ESpell.IsReady() && _shouldCastQAndE &&
-                target.Distance(PlayerObjAiHero.Position) < 850f &&
+            if (Menu.GetValue<bool>(RumbleMenu.ComboE) && !PlayerObjAiHero.HasBuff("RumbleGrenade") && ESpell.IsReady() &&
+                _shouldCastQAndE && target.Distance(PlayerObjAiHero.Position) < 850f &&
                 Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
             {
                 ESpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
                 _lastETick = Environment.TickCount;
             }
 
-            if (Menu.GetValue<bool>(RumbleMenu.ComboE) && PlayerObjAiHero.HasBuff("RumbleGrenade", true) &&
-                ESpell.IsReady() && target.Distance(PlayerObjAiHero.Position) < 850f)
+            if (Menu.GetValue<bool>(RumbleMenu.ComboE) && PlayerObjAiHero.HasBuff("RumbleGrenade") && ESpell.IsReady() &&
+                target.Distance(PlayerObjAiHero.Position) < 850f)
             {
                 var c0 = Menu.GetValue<bool>(RumbleMenu.MiscEmDelay) &&
                          Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250 &&
                          target.Distance(PlayerObjAiHero.Position) >= 300f;
 
                 var c1 = Menu.GetValue<bool>(RumbleMenu.MiscEmDelay) &&
-                         Environment.TickCount - _lastETick > 1000*Menu.GetValue<Slider>(RumbleMenu.MiscEDelay).Value &&
+                         Environment.TickCount - _lastETick > 1000 * Menu.GetValue<Slider>(RumbleMenu.MiscEDelay).Value &&
                          target.Distance(PlayerObjAiHero.Position) < 350f;
 
                 var c2 = !Menu.GetValue<bool>(RumbleMenu.MiscEmDelay) &&
                          Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250;
 
-                if (!c0 && !c1 && !c2) return;
+                if (!c0 && !c1 && !c2)
+                {
+                    return;
+                }
                 ESpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
                 _lastETick = Environment.TickCount;
             }
@@ -69,27 +74,30 @@ namespace Rumble
             /* W CASTNG */
             if (Menu.GetValue<bool>(RumbleMenu.ComboW) && WSpell.IsReady() && _shouldCastW &&
                 target.Distance(PlayerObjAiHero.Position) < 900f &&
-                Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+                Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250 &&
+                PlayerObjAiHero.Distance(Prediction.GetPrediction(target, 0.250f).UnitPosition) < 900f)
             {
-                // TODO
+                WSpell.Cast(Menu.GetValue<bool>(RumbleMenu.MiscPackets));
             }
 
             /* R CASTING */
             if (Menu.GetValue<bool>(RumbleMenu.ComboR))
             {
                 var rc0 = (RSpell.IsReady() && ESpell.IsReady() && QSpell.IsReady()) &&
-                          PlayerObjAiHero.GetComboDamage(target,
-                              new[] {SpellSlot.Q, SpellSlot.E, SpellSlot.E, SpellSlot.R}) >
-                          target.Health;
+                          PlayerObjAiHero.GetComboDamage(
+                              target, new[] { SpellSlot.Q, SpellSlot.E, SpellSlot.E, SpellSlot.R }) > target.Health;
 
                 var rc1 = (RSpell.IsReady() && QSpell.IsReady()) &&
-                          PlayerObjAiHero.GetComboDamage(target, new[] {SpellSlot.R, SpellSlot.Q}) > target.Health;
+                          PlayerObjAiHero.GetComboDamage(target, new[] { SpellSlot.R, SpellSlot.Q }) > target.Health;
 
                 var rc2 = (RSpell.IsReady() && ESpell.IsReady()) &&
-                          PlayerObjAiHero.GetComboDamage(target, new[] {SpellSlot.R, SpellSlot.E, SpellSlot.E}) >
+                          PlayerObjAiHero.GetComboDamage(target, new[] { SpellSlot.R, SpellSlot.E, SpellSlot.E }) >
                           target.Health;
 
-                if (!rc0 && !rc1 && !rc2) return;
+                if (!rc0 && !rc1 && !rc2)
+                {
+                    return;
+                }
 
                 CastR(target);
             }
@@ -104,8 +112,7 @@ namespace Rumble
                     QSpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
                 }
 
-                if (Menu.GetValue<bool>(RumbleMenu.ComboE) &&
-                    ESpell.IsReady() &&
+                if (Menu.GetValue<bool>(RumbleMenu.ComboE) && ESpell.IsReady() &&
                     target.Distance(PlayerObjAiHero.Position) < 850f)
                 {
                     ESpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
@@ -119,7 +126,10 @@ namespace Rumble
         private static void RumbleHarass()
         {
             var target = TargetSelector.GetTarget(1200f, TargetSelector.DamageType.Magical);
-            if (!target.IsValidTarget()) return;
+            if (!target.IsValidTarget())
+            {
+                return;
+            }
 
             // ==== [ CHECKS ] ====
 
@@ -153,9 +163,10 @@ namespace Rumble
             /* W CASTING */
             if (Menu.GetValue<bool>(RumbleMenu.HarassW) && WSpell.IsReady() && _shouldCastW &&
                 target.Distance(PlayerObjAiHero.Position) < 900f &&
-                Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+                Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250 &&
+                PlayerObjAiHero.Distance(Prediction.GetPrediction(target, 0.250f).UnitPosition) < 900f)
             {
-                // TODO
+                WSpell.Cast(Menu.GetValue<bool>(RumbleMenu.MiscPackets));
             }
 
             /* OVERHEAT */
@@ -168,8 +179,7 @@ namespace Rumble
                     QSpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
                 }
 
-                if (Menu.GetValue<bool>(RumbleMenu.HarassE) &&
-                    ESpell.IsReady() &&
+                if (Menu.GetValue<bool>(RumbleMenu.HarassE) && ESpell.IsReady() &&
                     target.Distance(PlayerObjAiHero.Position) < 850f)
                 {
                     ESpell.CastIfHitchanceEquals(target, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
@@ -207,8 +217,10 @@ namespace Rumble
 
         private static void RumbleHeatManager()
         {
-            if (PlayerObjAiHero.HasBuff("Recall", true))
+            if (PlayerObjAiHero.HasBuff("Recall"))
+            {
                 return;
+            }
 
             if (Menu.GetValue<bool>(RumbleMenu.HmStayInDanger) && PlayerObjAiHero.CountEnemysInRange(1000) < 2)
             {
@@ -218,7 +230,8 @@ namespace Rumble
                     _lastSavedTick = Environment.TickCount;
                     WSpell.Cast(Menu.GetValue<bool>(RumbleMenu.MiscPackets));
                 }
-                else if (QSpell.IsReady() && Menu.GetValue<bool>(RumbleMenu.HmQ))
+                else if (QSpell.IsReady() && !WSpell.IsReady() && Menu.GetValue<bool>(RumbleMenu.HmQ) &&
+                         PlayerObjAiHero.Mana < 35 && Environment.TickCount - _lastSavedTick > 750 && !CheckQCreeps())
                 {
                     QSpell.Cast(Menu.GetValue<bool>(RumbleMenu.MiscPackets));
                 }
@@ -226,7 +239,10 @@ namespace Rumble
             else if (Menu.GetValue<bool>(RumbleMenu.HmStayInDanger))
             {
                 if (!WSpell.IsReady() || !Menu.GetValue<bool>(RumbleMenu.HmW) || !(PlayerObjAiHero.Mana < 35) ||
-                    !(Environment.TickCount - _lastSavedTick > 750)) return;
+                    !(Environment.TickCount - _lastSavedTick > 750))
+                {
+                    return;
+                }
                 _lastSavedTick = Environment.TickCount;
                 WSpell.Cast(Menu.GetValue<bool>(RumbleMenu.HmW));
             }
@@ -241,27 +257,27 @@ namespace Rumble
                 Enum.TryParse(menuItem.SList[menuItem.SelectedIndex], out hitChance);
             }
 
-            foreach (
-                var enemy in
-                    ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(e => e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < RSpell.Range && !IsInvulnerable(e, TargetSelector.DamageType.Magical)))
+            foreach (var enemy in
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(
+                        e =>
+                            e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < RSpell.Range &&
+                            !IsInvulnerable(e, TargetSelector.DamageType.Magical)))
             {
                 if (enemy.Distance(PlayerObjAiHero.Position) < QSpell.Range && QSpell.IsReady() &&
-                    Menu.GetValue<bool>(RumbleMenu.KsQ) &&
-                    Menu.GetValue<bool>(RumbleMenu.KsOverheat) && _shouldCastQAndE &&
-                    PlayerObjAiHero.IsFacing(enemy, 600f) &&
+                    Menu.GetValue<bool>(RumbleMenu.KsQ) && Menu.GetValue<bool>(RumbleMenu.KsOverheat) &&
+                    _shouldCastQAndE && PlayerObjAiHero.IsFacing(enemy, 600f) &&
                     Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
                 {
-                    if (PlayerObjAiHero.GetSpellDamage(enemy, SpellSlot.Q)/2 > enemy.Health)
+                    if (PlayerObjAiHero.GetSpellDamage(enemy, SpellSlot.Q) / 2 > enemy.Health)
                     {
                         QSpell.CastIfHitchanceEquals(enemy, hitChance, Menu.GetValue<bool>(RumbleMenu.MiscPackets));
                     }
                 }
 
                 if (enemy.Distance(PlayerObjAiHero.Position) < ESpell.Range && ESpell.IsReady() &&
-                    Menu.GetValue<bool>(RumbleMenu.KsE) &&
-                    Menu.GetValue<bool>(RumbleMenu.KsOverheat) && _shouldCastQAndE &&
-                    Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
+                    Menu.GetValue<bool>(RumbleMenu.KsE) && Menu.GetValue<bool>(RumbleMenu.KsOverheat) &&
+                    _shouldCastQAndE && Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
                 {
                     if (PlayerObjAiHero.GetSpellDamage(enemy, SpellSlot.E) > enemy.Health)
                     {
@@ -273,7 +289,7 @@ namespace Rumble
                     Menu.GetValue<bool>(RumbleMenu.KsR) &&
                     Environment.TickCount - PlayerObjAiHero.LastCastedSpellT() > 250)
                 {
-                    if (PlayerObjAiHero.GetSpellDamage(enemy, SpellSlot.R)*1.5 > enemy.Health)
+                    if (PlayerObjAiHero.GetSpellDamage(enemy, SpellSlot.R) * 1.5 > enemy.Health)
                     {
                         CastR(enemy);
                     }
@@ -283,209 +299,411 @@ namespace Rumble
 
         private static void CastR(Obj_AI_Base targetObjAiBase)
         {
-            if (PlayerObjAiHero.CountEnemysInRange(1000) > 1)
-            {
-                Vector2 fromVector2;
-                Vector2 toVector2;
-                int enemyHit;
-                RLogic(targetObjAiBase, out fromVector2, out toVector2, out enemyHit);
+            var objAiBaseHit = 0;
+            var castFromVector2 = new Vector2();
+            var castToVector2 = new Vector2();
 
-                if (enemyHit > 0)
+            if (PlayerObjAiHero.CountEnemysInRange(1200) > 1)
+            {
+                var rumbleData = MultiR(targetObjAiBase);
+                if (rumbleData != null)
                 {
-                    Packet.C2S.Cast.Encoded(new Packet.C2S.Cast.Struct(0, RSpell.Slot, -1, fromVector2.X, fromVector2.Y,
-                        toVector2.X, toVector2.Y)).Send();
+                    objAiBaseHit = rumbleData.GetTargetsHit();
+                    castFromVector2 = rumbleData.GetFromVector2();
+                    castToVector2 = rumbleData.GetToVector2();
                 }
             }
             else
             {
-                
+                var rumbleData = SingleR(targetObjAiBase);
+                if (rumbleData != null)
+                {
+                    castFromVector2 = rumbleData.GetFromVector2();
+                    castToVector2 = rumbleData.GetToVector2();
+                }
+            }
+
+            if (castFromVector2.IsValid() && castToVector2.IsValid() &&
+                (objAiBaseHit > 0 || PlayerObjAiHero.CountEnemysInRange(1200) == 1))
+            {
+                Packet.C2S.Cast.Encoded(
+                    new Packet.C2S.Cast.Struct(
+                        0, RSpell.Slot, -1, castFromVector2.X, castFromVector2.Y, castToVector2.X, castToVector2.Y));
             }
         }
 
-        private static void RLogic(Obj_AI_Base targetObjAiBase, out Vector2 fromVector2, out Vector2 toVector2, out int enemyHit)
+        private static RumbleData MultiR(Obj_AI_Base objAiBase)
         {
-            var cWaypoints = targetObjAiBase.GetWaypoints();
-
-            var bestCastPosition0Vector3 = new Vector3(-1f, -1f, -1f);
-            var bestCastPosition1Vector3 = new Vector3(-1f, -1f, -1f);
-            var bestHits = 0;
-
-            var spellPredictionPos = Prediction.GetPrediction(targetObjAiBase, 0.250f, 0f, RSpell.Speed);
-            foreach (
-                var enemy in
-                    ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(e => e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < 1000))
+            var check0 = MutliRCheckOne(objAiBase);
+            if (check0 != null)
             {
-                var predictedPos = Prediction.GetPrediction(enemy, 0.250f);
-                if (Vector3.Distance(predictedPos.UnitPosition, spellPredictionPos.CastPosition) < RSpell.Instance.SData.LineWidth)
-                {
-                    var midPos = GetMidPoint(predictedPos.UnitPosition, spellPredictionPos.CastPosition);
-                    var midVector = predictedPos.UnitPosition - spellPredictionPos.CastPosition;
-                    midVector.Normalize();
-
-                    var pos0 = midPos + midVector*(RSpell.Width/2);
-                    var pos1 = midPos + midVector*(RSpell.Width/2);
-                    var currentHit = CheckHitCount(pos0, pos1, targetObjAiBase);
-
-                    if (currentHit > bestHits)
-                    {
-                        bestHits = currentHit;
-                        bestCastPosition0Vector3 = pos0;
-                        bestCastPosition1Vector3 = pos1;
-                    }
-                }
+                return check0;
             }
 
-            if (bestHits >= 2 && !bestCastPosition0Vector3.Equals(new Vector3(-1f, -1f, -1f)) && !bestCastPosition1Vector3.Equals(new Vector3(-1f, -1f, -1f)))
+            var check1 = MutliRCheckTwo(objAiBase);
+            if (check1 != null)
             {
-                if (!CheckWall(bestCastPosition0Vector3, bestCastPosition1Vector3))
-                {
-                    fromVector2 = new Vector2(bestCastPosition0Vector3.X, bestCastPosition0Vector3.Y);
-                    toVector2 = new Vector2(bestCastPosition1Vector3.X, bestCastPosition1Vector3.Y);
-                    enemyHit = bestHits;
-                    return;
-                }
+                return check1;
             }
 
+            var check2 = MutliRCheckThree(objAiBase);
+            return check2;
+        }
+
+        private static RumbleData MutliRCheckOne(Obj_AI_Base objAiBase)
+        {
+            var castFromVector2 = new Vector2();
+            var castToVector2 = new Vector2();
+            var targetsHit = 0;
+            var pTargetPos = Prediction.GetPrediction(objAiBase, 0.25f, 0f, RSpell.Speed).UnitPosition.To2D();
+
+            foreach (var pEnemyPos in
+                from enemy in
+                    ObjectManager.Get<Obj_AI_Hero>().Where(e => e.IsValidTarget() && e.NetworkId != objAiBase.NetworkId)
+                let pEnemyPos = Prediction.GetPrediction(enemy, 0.25f).UnitPosition.To2D()
+                where
+                    Vector2.Distance(enemy.Position.To2D(), objAiBase.Position.To2D()) < 1000f &&
+                    Vector2.Distance(pEnemyPos, pTargetPos) < RSpell.Instance.SData.LineWidth
+                select pEnemyPos)
+            {
+                var currentMid = GetMidVector2(pEnemyPos, pTargetPos);
+                var midVector = (pEnemyPos - pTargetPos).Normalized();
+                var pos = currentMid + midVector * (RSpell.Instance.SData.LineWidth / 2);
+                var pos2 = currentMid + midVector * (RSpell.Instance.SData.LineWidth / 2);
+                var tempHitCount = CheckHitCount(objAiBase, pos, pos2);
+
+                if (tempHitCount <= targetsHit)
+                {
+                    continue;
+                }
+
+                targetsHit = tempHitCount;
+                castFromVector2 = pos;
+                castToVector2 = pos2;
+            }
+
+            if (targetsHit < 2 || !castFromVector2.IsValid() || !castToVector2.IsValid())
+            {
+                return null;
+            }
+            return !CheckWall(castFromVector2.To3D(), castToVector2.To3D())
+                ? new RumbleData(castFromVector2, castToVector2, targetsHit)
+                : null;
+        }
+
+        private static RumbleData MutliRCheckTwo(Obj_AI_Base objAiBase)
+        {
+            var waypoints = PlayerObjAiHero.GetWaypoints();
             var isLinear = true;
-            if (cWaypoints.Count > 3)
+
+            if (waypoints.Count > 3)
             {
-                for(var j = 2; j < cWaypoints.Count; ++j)
+                for (var i = 2; i < waypoints.Count; ++i)
                 {
-                    bool isInsideBox;
-                    Vector3 boxVector3;
-                    Vector3 lineVector3;
-                    VectorBoxCalculation(out boxVector3, out lineVector3, out isInsideBox,
-                        new Vector3(cWaypoints[1].X, cWaypoints[1].Y, 0f),
-                        new Vector3(cWaypoints[cWaypoints.Count - 1].X, cWaypoints[cWaypoints.Count - 1].Y, 0f),
-                        new Vector3(cWaypoints[j].X, cWaypoints[j].Y, 0f));
-                    // TODO: check this ^ (X,Y) or (X,Z)??
-                    if (Vector3.Distance(boxVector3, lineVector3) > RSpell.Width + 100)
+                    var projectionInfo = waypoints[1].ProjectOn(waypoints[waypoints.Count - 1], waypoints[i]);
+                    if (!projectionInfo.IsOnSegment || !projectionInfo.SegmentPoint.IsValid() ||
+                        !projectionInfo.LinePoint.IsValid())
+                    {
+                        continue;
+                    }
+
+                    if (Vector2.Distance(projectionInfo.SegmentPoint, projectionInfo.LinePoint) > RSpell.Width + 100)
                     {
                         isLinear = false;
                     }
                 }
             }
 
-            if (cWaypoints.Count >= 2)
+            if (waypoints.Count < 2)
             {
-                var eDurations = false;
-                var travelTime = 0f;
-
-                if (isLinear)
-                {
-                    for (var index = 1; index < cWaypoints.Count - 1; ++index)
-                    {
-                        var cTime = Vector2.Distance(cWaypoints[index], cWaypoints[index + 1]) / targetObjAiBase.MoveSpeed;
-                        travelTime += cTime;
-                    }
-                    if (travelTime >= Menu.GetValue<Slider>(RumbleMenu.MiscKeepInR).Value)
-                    {
-                        eDurations = true;
-                    }
-                }
-
-                var midPointer = new Vector2((cWaypoints[1].X + cWaypoints[cWaypoints.Count - 1].X)/2,
-                    (cWaypoints[1].Y + cWaypoints[cWaypoints.Count - 1].Y)/2);
-                var fiuVector = cWaypoints[cWaypoints.Count - 1] - cWaypoints[1];
-                fiuVector.Normalize();
-
-                if (Vector2.Distance(cWaypoints[1], midPointer) > 425f)
-                {
-                    var pos0 = midPointer;
-                    var pos1 = cWaypoints[1] - fiuVector*200;
-                    if (!CheckWall(new Vector3(pos0.X, pos0.Y, 0f), new Vector3(pos1.X, pos1.Y, 0f)))
-                    {
-                        var currentHit = CheckHitCount(new Vector3(pos0.X, pos0.Y, 0f), new Vector3(pos1.X, pos1.Y, 0f), targetObjAiBase);
-                        fromVector2 = new Vector2(pos0.X, pos0.Y);
-                        toVector2 = new Vector2(pos1.X, pos1.Y);
-                        enemyHit = currentHit;
-                        return;
-                    }
-                }
-                // TODO: CONTINUE
+                return null;
             }
 
-            fromVector2 = new Vector2(-1f, -1f);
-            toVector2 = new Vector2(-1f, -1f);
-            enemyHit = -1;
+            var travelTime = 0f;
+
+            if (isLinear)
+            {
+                travelTime +=
+                    waypoints.Select((t, i) => Vector2.Distance(t, waypoints[i + 1]) / objAiBase.MoveSpeed).Sum();
+            }
+
+            var mid = new Vector2(
+                (waypoints[1].X + waypoints[waypoints.Count - 1].X) / 2,
+                (waypoints[1].Y + waypoints[waypoints.Count - 1].Y) / 2);
+            var finalInitialVector = (waypoints[waypoints.Count - 1] - waypoints[1]).Normalized();
+
+            if (Vector2.Distance(waypoints[1], mid) > 425f)
+            {
+                var pos = waypoints[1] - finalInitialVector * 200;
+                var pos2 = mid;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+            else if (Vector2.Distance(waypoints[1], waypoints[waypoints.Count - 1]) < RSpell.Instance.SData.LineWidth &&
+                     travelTime >= 0.7f)
+            {
+                var pos = mid - finalInitialVector * 250;
+                var pos2 = mid + finalInitialVector * 450;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+            else if (Vector2.Distance(waypoints[1], waypoints[waypoints.Count - 1]) < RSpell.Instance.SData.LineWidth &&
+                     travelTime >= 0.4f)
+            {
+                var pos = mid - finalInitialVector * 300;
+                var pos2 = mid + finalInitialVector * 400;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+            else if (Vector2.Distance(waypoints[1], waypoints[waypoints.Count - 1]) <
+                     RSpell.Instance.SData.LineWidth && travelTime >= 0f)
+            {
+                var pos = mid - finalInitialVector * 350;
+                var pos2 = mid + finalInitialVector * 350;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+
+            return null;
         }
 
-        private static bool CheckWall(Vector3 posVector, Vector3 posVector3)
+        private static RumbleData MutliRCheckThree(Obj_AI_Base objAiBase)
         {
-            var eiVector = (posVector - posVector3);
-            eiVector.Normalize();
-            var wallCount = 0;
-            for (var i = 1; i < 20; ++i)
+            var closestEnemy =
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(e => e.IsValidTarget() && e.NetworkId != objAiBase.NetworkId)
+                    .OrderBy(e => e.Distance(PlayerObjAiHero.Position))
+                    .FirstOrDefault();
+            var enemyDistance = closestEnemy.Distance(PlayerObjAiHero.Position);
+
+            if (closestEnemy != null && enemyDistance < 1000f)
             {
-                var currentM = 60*i;
-                var cVector = posVector + eiVector*currentM;
-                if (cVector.IsWall())
+                var finalInitialVector = (objAiBase.Position.To2D() - closestEnemy.Position.To2D()).Normalized();
+                var midPoint = GetMidVector2(objAiBase.Position.To2D(), closestEnemy.Position.To2D());
+
+                if (!(PlayerObjAiHero.Distance(objAiBase) < RSpell.Range))
+                {
+                    return null;
+                }
+
+                var pos = midPoint + finalInitialVector * 360;
+                var pos2 = midPoint - finalInitialVector * 360;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+            else
+            {
+                var finalInitialVector = (objAiBase.Position.To2D() - PlayerObjAiHero.Position.To2D()).Normalized();
+                if (!(PlayerObjAiHero.Distance(objAiBase) < RSpell.Range))
+                {
+                    return null;
+                }
+
+                var pos = objAiBase.Position.To2D() + finalInitialVector * 360;
+                var pos2 = objAiBase.Position.To2D() - finalInitialVector * 360;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+
+            return null;
+        }
+
+        private static RumbleData SingleR(Obj_AI_Base objAiBase)
+        {
+            var check0 = SingleRCheckOne(objAiBase);
+            if (check0 != null)
+            {
+                return check0;
+            }
+
+            var check1 = SingleRCheckTwo(objAiBase);
+            return check1;
+        }
+
+        private static RumbleData SingleRCheckOne(Obj_AI_Base objAiBase)
+        {
+            var waypoints = PlayerObjAiHero.GetWaypoints();
+            var isLinear = true;
+
+            if (waypoints.Count > 3)
+            {
+                for (var i = 2; i < waypoints.Count; ++i)
+                {
+                    var projectionInfo = waypoints[1].ProjectOn(waypoints[waypoints.Count - 1], waypoints[i]);
+                    if (!projectionInfo.IsOnSegment || !projectionInfo.SegmentPoint.IsValid() ||
+                        !projectionInfo.LinePoint.IsValid())
+                    {
+                        continue;
+                    }
+
+                    if (Vector2.Distance(projectionInfo.SegmentPoint, projectionInfo.LinePoint) > RSpell.Width + 100)
+                    {
+                        isLinear = false;
+                    }
+                }
+            }
+
+            if (waypoints.Count < 2)
+            {
+                return null;
+            }
+
+            var travelTime = 0f;
+
+            if (isLinear)
+            {
+                travelTime +=
+                    waypoints.Select((t, i) => Vector2.Distance(t, waypoints[i + 1]) / objAiBase.MoveSpeed).Sum();
+            }
+
+            var mid = new Vector2(
+                (waypoints[1].X + waypoints[waypoints.Count - 1].X) / 2,
+                (waypoints[1].Y + waypoints[waypoints.Count - 1].Y) / 2);
+            var finalInitialVector = (waypoints[waypoints.Count - 1] - waypoints[1]).Normalized();
+
+            if (Vector2.Distance(waypoints[1], mid) > 425f)
+            {
+                var pos = waypoints[1] - finalInitialVector * 200;
+                var pos2 = mid;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+            else if (Vector2.Distance(waypoints[1], waypoints[waypoints.Count - 1]) < RSpell.Instance.SData.LineWidth &&
+                     travelTime >= 0.7f)
+            {
+                var pos = mid - finalInitialVector * 420;
+                var pos2 = mid + finalInitialVector * 450;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+            else if (Vector2.Distance(waypoints[1], waypoints[waypoints.Count - 1]) < RSpell.Instance.SData.LineWidth &&
+                     travelTime >= 0.4f)
+            {
+                var pos = mid - finalInitialVector * 440;
+                var pos2 = mid + finalInitialVector * 400;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+            else if (Vector2.Distance(waypoints[1], waypoints[waypoints.Count - 1]) <
+                     RSpell.Instance.SData.LineWidth && travelTime >= 0f)
+            {
+                var pos = mid - finalInitialVector * 460;
+                var pos2 = mid + finalInitialVector * 350;
+                if (!CheckWall(pos.To3D(), pos2.To3D()))
+                {
+                    return new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2));
+                }
+            }
+
+            return null;
+        }
+
+        private static RumbleData SingleRCheckTwo(Obj_AI_Base objAiBase)
+        {
+            var finalInitialVector = (objAiBase.Position.To2D() - PlayerObjAiHero.Position.To2D()).Normalized();
+            if (!(PlayerObjAiHero.Distance(objAiBase) < RSpell.Range))
+            {
+                return null;
+            }
+
+            var pos = objAiBase.Position.To2D() + finalInitialVector * 360;
+            var pos2 = objAiBase.Position.To2D() - finalInitialVector * 360;
+            return !CheckWall(pos.To3D(), pos2.To3D())
+                ? new RumbleData(pos, pos2, CheckHitCount(objAiBase, pos, pos2))
+                : null;
+        }
+
+        private static bool CheckWall(Vector3 vector3, Vector3 otherVector3)
+        {
+            var endInitialVector = otherVector3 - vector3;
+            endInitialVector.Normalize();
+
+            var wallCount = 0;
+            for (var i = 0; i < 20; ++i)
+            {
+                var currentMulti = 60 * i;
+                var currentVector = vector3 + endInitialVector * currentMulti;
+                if (currentVector.IsWall())
+                {
                     ++wallCount;
+                }
             }
 
             return (wallCount >= 8);
         }
 
-        private static int CheckHitCount(Vector3 posVector, Vector3 posVector3, Obj_AI_Base objAiBase)
+        private static int CheckHitCount(Obj_AI_Base objAiBase, Vector2 vector2, Vector2 otherVector2)
         {
-            if (!objAiBase.IsValidTarget()) return 0;
+            var n = 0;
 
-            var posMid = new Vector3((posVector.X + posVector3.X)/2, 0, (posVector.Z + posVector3.Z)/2);
-            var eiVector = (posVector - posVector3);
-            eiVector.Normalize();
-            var extensionAmount = RSpell.Instance.SData.LineWidth / 2;
-            var extpos0 = posMid + eiVector*extensionAmount;
-            var extpos1 = posMid - eiVector*extensionAmount;
-
-            var hit = 0;
-
-            foreach (var predictedPos in ObjectManager.Get<Obj_AI_Hero>()
-                .Where(e => e.IsValidTarget() && e.Distance(PlayerObjAiHero.Position) < 1000f).Select(enemy => Prediction.GetPrediction(enemy, 0.250f)))
+            if (!objAiBase.IsValidTarget() || !vector2.IsValid() || !otherVector2.IsValid())
             {
-                bool isInsideBox;
-                Vector3 boxVector3;
-                Vector3 lineVector3;
-
-                VectorBoxCalculation(out boxVector3, out lineVector3, out isInsideBox, extpos0, extpos1, predictedPos.UnitPosition);
-                if (Vector3.Distance(boxVector3, lineVector3) < RSpell.Width + 60)
-                {
-                    ++hit;
-                }
+                return n;
             }
 
-            return hit;
+            var positionMid = new Vector2((vector2.X + otherVector2.X) / 2, (vector2.Y + otherVector2.Y) / 2);
+            var endInitialVector = (otherVector2 - vector2).Normalized();
+            var extension = RSpell.Instance.SData.LineWidth / 2; // Wall Length?
+
+            var extPos = positionMid + endInitialVector * extension;
+            var extPos2 = positionMid - endInitialVector * extension;
+
+            n +=
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(e => e.NetworkId != objAiBase.NetworkId && e.Distance(PlayerObjAiHero.Position) < 1000f)
+                    .Select(enemy => Prediction.GetPrediction(enemy, 0.25f).UnitPosition.To2D())
+                    .Where(predictedPos => predictedPos.IsValid())
+                    .Select(predictedPos => extPos.ProjectOn(extPos2, predictedPos))
+                    .Where(
+                        projectionInfo =>
+                            projectionInfo.IsOnSegment && projectionInfo.SegmentPoint.IsValid() &&
+                            projectionInfo.LinePoint.IsValid())
+                    .Count(
+                        projectionInfo =>
+                            Vector2.Distance(projectionInfo.SegmentPoint, projectionInfo.LinePoint) < RSpell.Width + 60);
+
+            return n;
         }
 
-        private static void VectorBoxCalculation(out Vector3 boxVector3, out Vector3 lineVector3, out bool insideBox,
-            Vector3 v0Vector3, Vector3 v1Vector3, Vector3 v2Vector3)
+        private static Vector2 GetMidVector2(Vector2 vector2, Vector2 otherVector2)
         {
-            var prdXf = v2Vector3.X;
-            var prdYf = v2Vector3.Y;
-            var plusXf = v0Vector3.X;
-            var plusYf = v0Vector3.Y;
-            var minusXf = v1Vector3.X;
-            var minusYf = v1Vector3.Y;
-
-            var stack = ((prdXf - plusXf)*(minusXf - plusXf) + (prdYf - plusYf)*(minusYf - plusYf))/
-                        ((minusXf - plusXf)*(minusXf - plusXf) + (minusYf - plusYf)*(minusYf - plusYf));
-            lineVector3 = new Vector3(plusXf + stack*(minusXf - plusXf), plusYf + stack*(minusYf - plusYf), 0f);
-            var stack2 = (stack < 0) ? 0 : (stack > 1 ? 1 : stack);
-            insideBox = (stack.Equals(stack2));
-            boxVector3 = insideBox
-                ? lineVector3
-                : new Vector3(plusXf + stack2*(minusXf - plusXf), plusYf + stack2*(minusYf - plusYf), 0f);
+            return new Vector2((vector2.X + vector2.X) / 2, (vector2.Y + otherVector2.Y) / 2);
         }
 
-        private static Vector3 GetMidPoint(Vector3 vector3, Vector3 otherVector3)
+        private static bool CheckQCreeps()
         {
-            return new Vector3((vector3.X + vector3.X) / 2, 0f, (vector3.Z + otherVector3.Z)/2);
-        }
+            if (!QSpell.IsReady())
+            {
+                return false;
+            }
 
-        private static void SubRLogic(out Vector2 fromVector2, out Vector2 toVector2)
-        {
-            fromVector2 = new Vector2(-1f, -1f);
-            toVector2 = new Vector2(-1f, -1f);
+            if (
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(m => m.Distance(PlayerObjAiHero.Position) < 600f)
+                    .Any(minion => PlayerObjAiHero.IsFacing(minion, 600f)))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         #endregion
@@ -507,7 +725,9 @@ namespace Rumble
         private static void Main()
         {
             if (!PlayerObjAiHero.ChampionName.Equals("Rumble"))
+            {
                 return;
+            }
 
             ESpell.SetSkillshot(0.25f, 70, 2000, true, SkillshotType.SkillshotLine);
             RSpell.SetSkillshot(1700, 120, 1400, false, SkillshotType.SkillshotLine);
@@ -537,7 +757,10 @@ namespace Rumble
             if (Menu.GetValue<bool>(RumbleMenu.DrawKillText))
             {
                 var target = TargetSelector.GetTarget(1200f, TargetSelector.DamageType.Magical, true);
-                if (!target.IsValidTarget()) return;
+                if (!target.IsValidTarget())
+                {
+                    return;
+                }
 
                 if (PlayerObjAiHero.GetSpellDamage(target, SpellSlot.Q) / 3 > target.Health)
                 {
@@ -555,11 +778,14 @@ namespace Rumble
                 {
                     Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "E");
                 }
-                else if (PlayerObjAiHero.GetComboDamage(target, new[] {SpellSlot.Q, SpellSlot.E, SpellSlot.E}) > target.Health)
+                else if (PlayerObjAiHero.GetComboDamage(target, new[] { SpellSlot.Q, SpellSlot.E, SpellSlot.E }) >
+                         target.Health)
                 {
                     Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "Q + Twice E");
                 }
-                else if (PlayerObjAiHero.GetComboDamage(target, new[] { SpellSlot.Q, SpellSlot.E, SpellSlot.E, SpellSlot.R}) > target.Health)
+                else if (
+                    PlayerObjAiHero.GetComboDamage(
+                        target, new[] { SpellSlot.Q, SpellSlot.E, SpellSlot.E, SpellSlot.R }) > target.Health)
                 {
                     Drawing.DrawText(target.Position.X, target.Position.Y, Color.White, "Full Combo");
                 }
@@ -602,8 +828,14 @@ namespace Rumble
         {
             if (Menu.GetValue<bool>(RumbleMenu.FarmQ) && QSpell.IsReady())
             {
-                var hitQ = ObjectManager.Get<Obj_AI_Minion>().Count(m => m.IsValidTarget() && m.Distance(PlayerObjAiHero.Position) < QSpell.Range && PlayerObjAiHero.IsFacing(m, 600f));
-                if (hitQ >= Menu.GetValue<Slider>(RumbleMenu.FarmMinQ).Value && (PlayerObjAiHero.Mana < 80 && !Menu.GetValue<bool>(RumbleMenu.FarmOverheat)))
+                var hitQ =
+                    ObjectManager.Get<Obj_AI_Minion>()
+                        .Count(
+                            m =>
+                                m.IsValidTarget() && m.Distance(PlayerObjAiHero.Position) < QSpell.Range &&
+                                PlayerObjAiHero.IsFacing(m, 600f));
+                if (hitQ >= Menu.GetValue<Slider>(RumbleMenu.FarmMinQ).Value &&
+                    (PlayerObjAiHero.Mana < 80 && !Menu.GetValue<bool>(RumbleMenu.FarmOverheat)))
                 {
                     QSpell.Cast(Menu.GetValue<bool>(RumbleMenu.MiscPackets));
                 }
@@ -644,7 +876,10 @@ namespace Rumble
 
         private static void RumbleLastHit()
         {
-            if (!ESpell.IsReady()) return;
+            if (!ESpell.IsReady())
+            {
+                return;
+            }
 
             var hitChance = HitChance.Medium;
             if (Menu.GetMenu() != null && Menu.GetItem(RumbleMenu.MiscHitChance) != null)
@@ -658,7 +893,8 @@ namespace Rumble
                     .Where(
                         m =>
                             m.IsValidTarget() && m.Distance(PlayerObjAiHero.Position) < ESpell.Range &&
-                            !ESpell.GetPrediction(m).CollisionObjects.Any() && PlayerObjAiHero.GetSpellDamage(m, SpellSlot.E) > m.Health)
+                            !ESpell.GetPrediction(m).CollisionObjects.Any() &&
+                            PlayerObjAiHero.GetSpellDamage(m, SpellSlot.E) > m.Health)
                     .OrderBy(m => m.Health)
                     .FirstOrDefault();
 
@@ -692,12 +928,15 @@ namespace Rumble
         {
             return ((PlayerObjAiHero.Mana > 80 && !QSpell.IsReady() && !ESpell.IsReady() &&
                      targetObjAiBase.Distance(PlayerObjAiHero.Position) < 350f) &&
-                    ((PlayerObjAiHero.GetAutoAttackDamage(targetObjAiBase, true))*3D > targetObjAiBase.Health));
+                    ((PlayerObjAiHero.GetAutoAttackDamage(targetObjAiBase, true)) * 3D > targetObjAiBase.Health));
         }
 
         private static void CalculateHeatFunctions(Obj_AI_Base targetObjAiBase)
         {
-            if (!targetObjAiBase.IsValidTarget()) return;
+            if (!targetObjAiBase.IsValidTarget())
+            {
+                return;
+            }
 
             if (PlayerObjAiHero.Mana > 80 && ShouldOverheat(targetObjAiBase))
             {
@@ -720,5 +959,34 @@ namespace Rumble
         }
 
         #endregion
+    }
+
+    internal class RumbleData
+    {
+        private readonly Vector2 fromVector2;
+        private readonly int targetsHit;
+        private readonly Vector2 toVector2;
+
+        public RumbleData(Vector2 fromVector2, Vector2 toVector2, int targetsHit)
+        {
+            this.fromVector2 = fromVector2;
+            this.toVector2 = toVector2;
+            this.targetsHit = targetsHit;
+        }
+
+        public Vector2 GetFromVector2()
+        {
+            return fromVector2;
+        }
+
+        public Vector2 GetToVector2()
+        {
+            return toVector2;
+        }
+
+        public int GetTargetsHit()
+        {
+            return targetsHit;
+        }
     }
 }

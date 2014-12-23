@@ -1,5 +1,4 @@
 ﻿using LeagueSharp.Common;
-using SharpDX;
 
 namespace Rumble
 {
@@ -63,9 +62,10 @@ namespace Rumble
             misc.AddItem(new MenuItem(RootName + MiscEDelay, "Seconds delay between Harpoons (E)"))
                 .SetValue(new Slider(1, 0, 3));
             misc.AddItem(new MenuItem(RootName + MiscEmDelay, "Delay Harpoons(E) at Melee Range")).SetValue(true);
-            misc.AddItem(new MenuItem(RootName + MiscKeepInR, "Keep in Equalizer (R) for")).SetValue(new Slider(2, 0, 5));
+            misc.AddItem(new MenuItem(RootName + MiscKeepInR, "Keep in Equalizer (R) for"))
+                .SetValue(new Slider(2, 0, 5));
             misc.AddItem(new MenuItem(RootName + MiscHitChance, "Hit Chance"))
-                .SetValue(new StringList(new[] {"Low", "Medium", "High", "Very High"}, 1));
+                .SetValue(new StringList(new[] { "Low", "Medium", "High", "Very High" }, 1));
             misc.AddItem(new MenuItem(RootName + MiscPackets, "Use Packets")).SetValue(true);
 
             /* FOOTER */
