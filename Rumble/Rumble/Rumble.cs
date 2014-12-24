@@ -695,15 +695,9 @@ namespace Rumble
                 return false;
             }
 
-            if (
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .Where(m => m.Distance(PlayerObjAiHero.Position) < 600f)
-                    .Any(minion => PlayerObjAiHero.IsFacing(minion, 600f)))
-            {
-                return true;
-            }
-
-            return false;
+            return ObjectManager.Get<Obj_AI_Minion>()
+                .Where(m => m.Distance(PlayerObjAiHero.Position) < 600f)
+                .Any(minion => PlayerObjAiHero.IsFacing(minion, 600f));
         }
 
         #endregion
