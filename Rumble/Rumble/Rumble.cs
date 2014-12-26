@@ -217,7 +217,7 @@ namespace Rumble
 
         private static void RumbleHeatManager()
         {
-            if (PlayerObjAiHero.HasBuff("Recall"))
+            if (PlayerObjAiHero.IsRecalling())
             {
                 return;
             }
@@ -326,7 +326,7 @@ namespace Rumble
             if (castFromVector2.IsValid() && castToVector2.IsValid() &&
                 (objAiBaseHit > 0 || PlayerObjAiHero.CountEnemysInRange(1200) == 1))
             {
-                Spellbook.CastSpell(RSpell.Slot, castFromVector2, castToVector2);
+                RSpell.Cast(castFromVector2, castToVector2);
             }
         }
 
@@ -693,9 +693,10 @@ namespace Rumble
                 return false;
             }
 
-            return ObjectManager.Get<Obj_AI_Minion>()
-                .Where(m => m.Distance(PlayerObjAiHero.Position) < 600f)
-                .Any(minion => PlayerObjAiHero.IsFacing(minion, 600f));
+            return
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Where(m => m.Distance(PlayerObjAiHero.Position) < 600f)
+                    .Any(minion => PlayerObjAiHero.IsFacing(minion, 600f));
         }
 
         #endregion
@@ -803,9 +804,6 @@ namespace Rumble
                     break;
                 case Orbwalking.OrbwalkingMode.LastHit:
                     RumbleLastHit();
-                    break;
-                case Orbwalking.OrbwalkingMode.Flee:
-                    RumbleFlee();
                     break;
             }
             KillSteal();
