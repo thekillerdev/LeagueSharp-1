@@ -326,9 +326,7 @@ namespace Rumble
             if (castFromVector2.IsValid() && castToVector2.IsValid() &&
                 (objAiBaseHit > 0 || PlayerObjAiHero.CountEnemysInRange(1200) == 1))
             {
-                Packet.C2S.Cast.Encoded(
-                    new Packet.C2S.Cast.Struct(
-                        0, RSpell.Slot, -1, castFromVector2.X, castFromVector2.Y, castToVector2.X, castToVector2.Y));
+                Spellbook.CastSpell(RSpell.Slot, castFromVector2, castToVector2);
             }
         }
 
