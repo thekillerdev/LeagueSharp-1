@@ -945,7 +945,7 @@ namespace Rumble
 
         private static bool IsInvulnerable(Obj_AI_Base @base, TargetSelector.DamageType damageType)
         {
-            return TargetSelector.IsInvulnerable(@base, damageType, false, true);
+            return TargetSelector.IsInvulnerable(@base, damageType);
         }
 
         #endregion
