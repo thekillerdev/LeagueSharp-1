@@ -84,5 +84,39 @@ namespace Yasuo
         }
 
         #endregion
+
+        #region SpellHandler
+
+        #region Combo
+
+        private static void Combo() {}
+
+        #endregion
+
+        #region Farming
+
+        private static void Farming(bool laneclear) {}
+
+        #endregion
+
+        #region Flee
+
+        private static void Flee() {}
+
+        #endregion
+
+        #region Killsteal
+
+        private static void Killsteal() {}
+
+        #endregion
+
+        #region Auto
+
+        private static void Auto() {}
+
+        #endregion
+
+        #endregion
     }
 }
