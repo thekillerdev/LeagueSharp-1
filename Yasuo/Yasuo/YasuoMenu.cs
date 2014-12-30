@@ -33,11 +33,13 @@ namespace Yasuo
             var farming = _menu.AddSubMenu(new Menu("Farming Settings", RootName + ".farming"));
             farming.AddItem(new MenuItem(RootName + FarmingLaneClearQ, "[LaneClear] Use Steel Tempest (Q)"))
                 .SetValue(true);
-            farming.AddItem(new MenuItem(RootName + FarmingLaneClearE, "[LaneClear] Use Steel Tempest (E)"))
+            farming.AddItem(new MenuItem(RootName + FarmingLaneClearE, "[LaneClear] Use Sweeping Blade (E)"))
                 .SetValue(true);
             farming.AddItem(new MenuItem(RootName + ".farming.spacer0", ""));
             farming.AddItem(new MenuItem(RootName + FarmingLastHitQ, "[LastHit] Use Steel Tempest (Q)")).SetValue(true);
-            farming.AddItem(new MenuItem(RootName + FarmingLastHitE, "[LastHit] Use Steel Tempest (E)")).SetValue(true);
+            farming.AddItem(new MenuItem(RootName + FarmingLastHitE, "[LastHit] Use Sweeping Blade (E)")).SetValue(true);
+            farming.AddItem(new MenuItem(RootName + ".farming.spacer1", ""));
+            farming.AddItem(new MenuItem(RootName + FarmingUseWind, "[Both] Use Whirlwind (3rd Q)")).SetValue(true);
 
             /* FLEE */
             var flee = _menu.AddSubMenu(new Menu("Flee Settings", RootName + ".flee"));
@@ -57,6 +59,7 @@ namespace Yasuo
             interrupt.AddItem(new MenuItem(RootName + InterruptWDelay, "Auto Wind Wall Delay"))
                 .SetValue(new Slider(0, 0, 5));
             interrupt.AddItem(new MenuItem(RootName + ".interrupter.space0", ""));
+            interrupt.AddItem(new MenuItem(RootName + InterruptActive, "Interrupt Skills")).SetValue(true);
 
             /* MISC */
             var misc = _menu.AddSubMenu(new Menu("Misc Settings", RootName + ".misc"));
@@ -64,6 +67,10 @@ namespace Yasuo
             misc.AddItem(new MenuItem(RootName + MiscAutoQUnderTower, "Auto Q under tower")).SetValue(true);
             misc.AddItem(new MenuItem(RootName + MiscQRange, "Q Range")).SetValue(new Slider(475, 0, 475));
             misc.AddItem(new MenuItem(RootName + ".misc.spacer0", ""));
+            misc.AddItem(new MenuItem(RootName + MiscAutoR, "Auto Last Breath (R)")).SetValue(true);
+            misc.AddItem(new MenuItem(RootName + MiscRMin, "Min. enemies to Auto Last Breath (R)")).SetValue(new Slider(1, 1, 5));
+            misc.AddItem(new MenuItem(RootName + ".misc.spacer1", ""));
+            misc.AddItem(new MenuItem(RootName + MiscHitChance, "Hit Chance")).SetValue(new StringList(new[] { "Low", "Medium", "High", "VeryHigh" }, 1));
             misc.AddItem(new MenuItem(RootName + MiscPackets, "Use Packets")).SetValue(true);
 
             /* FOOTER */
@@ -89,12 +96,14 @@ namespace Yasuo
         public const string FarmingLaneClearE = ".farming.lce";
         public const string FarmingLastHitQ = ".farming.lhq";
         public const string FarmingLastHitE = ".farming.lhe";
+        public const string FarmingUseWind = ".farming.useq3";
 
         public const string FleeMode = ".flee.active";
         public const string FleeModeKey = ".flee.key";
         public const string FleeE = ".flee.usee";
         public const string FleeW = ".flee.usew";
 
+        public const string InterruptActive = ".interrupt.active";
         public const string InterruptW = ".interrupt.usew";
         public const string InterruptWDelay = ".interrupt.usewdelay";
         public const string InterruptAceInTheHole = ".interrupt.caitlyn.aceinthehole";
@@ -115,7 +124,10 @@ namespace Yasuo
         public const string MiscAutoQ = ".misc.autoq";
         public const string MiscAutoQUnderTower = ".misc.autoqundertower";
         public const string MiscQRange = ".misc.qrange";
-        private const string MiscPackets = ".misc.packets";
+        public const string MiscAutoR = ".misc.autor";
+        public const string MiscRMin = ".misc.autormin";
+        public const string MiscHitChance = ".misc.hitchance";
+        public const string MiscPackets = ".misc.packets";
 
         private readonly Menu _menu;
         private readonly Orbwalking.Orbwalker _orbwalker;
