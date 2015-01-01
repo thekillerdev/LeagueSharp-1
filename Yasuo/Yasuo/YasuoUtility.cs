@@ -144,7 +144,7 @@ namespace Yasuo
 
                 var point = @base.Position + (e.Position - @base.Position).Normalized() * YasuoSpells.E.Range;
 
-                if (ignoreTower && point.UnderTurret(true))
+                if (!ignoreTower && point.UnderTurret(true))
                 {
                     continue;
                 }
