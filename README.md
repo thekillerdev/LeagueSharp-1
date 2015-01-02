@@ -3,6 +3,4 @@ LeagueSharp
 
 LeagueSharp assemblies
 
-* Kennen - COMING SOON
-* Rumble - COMING SOON
-* LeagueLib - COMING SOON
+* Yasuo - http://www.joduska.me/forum/topic/15781-421-yasuo-the-unforgiven-1002/
