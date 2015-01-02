@@ -55,18 +55,21 @@ namespace Yasuo
             // => Steel Tempest (Q)
             if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ComboQLoc) && Yasuo.Player.GetYasuoQState().IsReady())
             {
+                var prediction = Prediction.GetPrediction(
+                    target, Yasuo.Player.GetYasuoQState().Delay, 0f, Yasuo.Player.GetYasuoQState().Speed);
                 if (!Yasuo.Player.HasWhirlwind() &&
-                    Yasuo.Player.Distance(target.Position) <=
+                    Yasuo.Player.Distance(target.Position) <
                     Yasuo.Menu.GetItemValue<Slider>(YasuoMenu.ComboQRangeLoc).Value)
                 {
-                    Yasuo.Player.GetYasuoQState().Cast(target.Position, packets);
+                    Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
+                    Yasuo.QTick = Environment.TickCount;
                 }
                 else
                 {
                     if (Yasuo.Player.HasWhirlwind() &&
-                        Yasuo.Player.Distance(target.Position) <= Yasuo.Player.GetYasuoQState().Range)
+                        Yasuo.Player.Distance(target.Position) < Yasuo.Player.GetYasuoQState().Range)
                     {
-                        Yasuo.Player.GetYasuoQState().Cast(target.Position, packets);
+                        Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
                     }
                 }
             }
@@ -74,7 +77,7 @@ namespace Yasuo
             // => Sweeping Blade (E)
             if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ComboELoc) && YasuoSpells.E.IsReady())
             {
-                var dashData = Yasuo.Player.GetDashData(target.Position, target);
+                var dashData = Yasuo.Player.GetDashData(Game.CursorPos, target);
                 var dashPoint = (Vector3) dashData[0];
                 var dashAi = (Obj_AI_Base) dashData[1];
 
@@ -82,14 +85,11 @@ namespace Yasuo
                 {
                     if (Environment.TickCount - _sweepingBladeDelay > 300)
                     {
-                        if (Game.CursorPos.Distance(target.Position) <= 500)
+                        if (dashPoint.Distance(Game.CursorPos) < Yasuo.Player.Distance(Game.CursorPos) - 100 &&
+                            dashPoint.Distance(Game.CursorPos) < 250)
                         {
-                            if (dashPoint.Distance(target.Position) < Yasuo.Player.Distance(target.Position) - 100 &&
-                                dashPoint.Distance(target.Position) < 250)
-                            {
-                                YasuoSpells.E.Cast(dashAi, packets);
-                                _sweepingBladeDelay = Environment.TickCount;
-                            }
+                            YasuoSpells.E.Cast(dashAi, packets);
+                            _sweepingBladeDelay = Environment.TickCount;
                         }
                     }
                 }
@@ -114,34 +114,37 @@ namespace Yasuo
             {
                 if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.HarassItemsLoc))
                 {
-                    var item = (YasuoSpells.RavenousHydra.GetItem().IsOwned())
-                        ? YasuoSpells.RavenousHydra
-                        : YasuoSpells.Tiamat;
-
-                    // HYDRA/TIAMAT
-                    if (YasuoSpells.RavenousHydra.GetItem().IsOwned() &&
-                        Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ItemsHydraLoc) ||
-                        YasuoSpells.Tiamat.GetItem().IsOwned() &&
-                        Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ItemsTiamatLoc))
+                    if (YasuoSpells.RavenousHydra.GetItem().IsOwned())
                     {
-                        if (item.GetItem().IsInRange(target))
+                        var hydra = YasuoSpells.RavenousHydra;
+                        if (Yasuo.Player.Distance(target.Position) < hydra.Range)
                         {
-                            item.GetItem().Cast();
+                            hydra.GetItem().Cast();
+                        }
+                    }
+                    else if (YasuoSpells.Tiamat.GetItem().IsOwned())
+                    {
+                        var tiamat = YasuoSpells.Tiamat;
+                        if (Yasuo.Player.Distance(target.Position) < tiamat.Range)
+                        {
+                            tiamat.GetItem().Cast();
                         }
                     }
 
-                    // BILGEWATER/BOTRK
-                    item = (YasuoSpells.BladeoftheRuinedKing.GetItem().IsOwned())
-                        ? YasuoSpells.BladeoftheRuinedKing
-                        : YasuoSpells.BilgewaterCutlass;
-                    if (YasuoSpells.BladeoftheRuinedKing.GetItem().IsOwned() &&
-                        Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ItemsBladeLoc) ||
-                        YasuoSpells.BilgewaterCutlass.GetItem().IsOwned() &&
-                        Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ItemsBilgewaterLoc))
+                    if (YasuoSpells.BladeoftheRuinedKing.GetItem().IsOwned())
                     {
-                        if (item.GetItem().IsInRange(target))
+                        var botrk = YasuoSpells.BladeoftheRuinedKing;
+                        if (Yasuo.Player.Distance(target.Position) < botrk.Range)
                         {
-                            item.GetItem().Cast();
+                            botrk.GetItem().Cast(target);
+                        }
+                    }
+                    else if (YasuoSpells.BilgewaterCutlass.GetItem().IsOwned())
+                    {
+                        var cutlass = YasuoSpells.BilgewaterCutlass;
+                        if (Yasuo.Player.Distance(target.Position) < cutlass.Range)
+                        {
+                            cutlass.GetItem().Cast(target);
                         }
                     }
                 }
@@ -158,7 +161,6 @@ namespace Yasuo
 
             var packets = Yasuo.Menu.GetItemValue<bool>(YasuoMenu.MiscPacketsLoc);
 
-            // => Flee (E)
             if (Yasuo.ShouldDash && YasuoSpells.E.IsReady())
             {
                 var dashData = new object[2];
@@ -196,76 +198,68 @@ namespace Yasuo
                     Yasuo.ShouldDash = false;
                 }
             }
-            else if (Yasuo.Player.Distance(target.Position) <= YasuoSpells.Q.Range && YasuoSpells.Q.IsReady() &&
-                     YasuoSpells.E.IsReady())
+            else if (Yasuo.Player.Distance(target.Position) < Yasuo.Player.GetYasuoQState().Range)
             {
-                // => Q / E
-                if (Yasuo.Player.HasWhirlwind() && Yasuo.Player.IsDashable(target) &&
-                    Yasuo.Menu.GetItemValue<bool>(YasuoMenu.HarassQeComboLoc))
+                if (Yasuo.Player.GetYasuoQState().IsReady())
                 {
-                    YasuoSpells.E.Cast(target, packets);
-                    Utility.DelayAction.Add(
-                        250, () =>
-                        {
-                            YasuoSpells.Q.Cast(target, packets);
-
-                            // => Items
-                            if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.HarassItemsLoc))
-                            {
-                                var item = (YasuoSpells.RavenousHydra.GetItem().IsOwned())
-                                    ? YasuoSpells.RavenousHydra
-                                    : YasuoSpells.Tiamat;
-
-                                if (YasuoSpells.RavenousHydra.GetItem().IsOwned() &&
-                                    Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ItemsHydraLoc) ||
-                                    YasuoSpells.Tiamat.GetItem().IsOwned() &&
-                                    Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ItemsTiamatLoc))
-                                {
-                                    item.GetItem().Cast();
-                                }
-                            }
-
-                            Yasuo.ShouldDash = true;
-                        });
-                }
-                else
-                {
-                    YasuoSpells.Q.Cast(target, packets);
-
-                    // => Items
-                    if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.HarassItemsLoc))
+                    var prediction = Prediction.GetPrediction(
+                        target, Yasuo.Player.GetYasuoQState().Delay, 0f, Yasuo.Player.GetYasuoQState().Speed);
+                    if (Yasuo.Player.HasWhirlwind())
                     {
-                        var item = (YasuoSpells.RavenousHydra.GetItem().IsOwned())
-                            ? YasuoSpells.RavenousHydra
-                            : YasuoSpells.Tiamat;
-
-                        if (YasuoSpells.RavenousHydra.GetItem().IsOwned() &&
-                            Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ItemsHydraLoc) ||
-                            YasuoSpells.Tiamat.GetItem().IsOwned() &&
-                            Yasuo.Menu.GetItemValue<bool>(YasuoMenu.ItemsTiamatLoc))
+                        if (Yasuo.Player.CountEnemysInRange(1200) < 2)
                         {
-                            item.GetItem().Cast();
+                            if (YasuoSpells.E.IsReady())
+                            {
+                                YasuoSpells.E.Cast(target);
+                                Utility.DelayAction.Add(
+                                    250, () =>
+                                    {
+                                        Yasuo.QTick = Environment.TickCount;
+                                        Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
+                                        Yasuo.ShouldDash = true;
+                                        Utility.DelayAction.Add(
+                                            5000, () =>
+                                            {
+                                                if (Yasuo.ShouldDash)
+                                                {
+                                                    Yasuo.ShouldDash = false;
+                                                }
+                                            });
+                                    });
+                            }
                         }
+                        Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
                     }
-
-                    Yasuo.ShouldDash = true;
+                    else
+                    {
+                        Yasuo.QTick = Environment.TickCount;
+                        Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
+                        Yasuo.ShouldDash = true;
+                        Utility.DelayAction.Add(
+                            5000, () =>
+                            {
+                                if (Yasuo.ShouldDash)
+                                {
+                                    Yasuo.ShouldDash = false;
+                                }
+                            });
+                    }
                 }
             }
-            else if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.HarassEGapcloserLoc) && YasuoSpells.E.IsReady())
+            else if (Yasuo.Player.Distance(target.Position) > Yasuo.Player.GetYasuoQState().Range)
             {
-                // => Gap Closer
-                var dashData = Yasuo.Player.GetDashData(target.Position, target);
-                var dashPoint = (Vector3) dashData[0];
-                var dashAi = (Obj_AI_Base) dashData[1];
-
-                if (dashPoint.IsValid() && dashAi.IsValidTarget())
+                if (YasuoSpells.E.IsReady())
                 {
-                    if (Environment.TickCount - _sweepingBladeDelay > 300)
+                    var dashData = Yasuo.Player.GetDashData(Game.CursorPos, target);
+                    var dashPoint = (Vector3) dashData[0];
+                    var dashAi = (Obj_AI_Base) dashData[1];
+
+                    if (dashPoint.IsValid() && dashAi.IsValidTarget())
                     {
-                        if (Game.CursorPos.Distance(target.Position) <= 400)
+                        if (Environment.TickCount - _sweepingBladeDelay > 300)
                         {
-                            if (dashPoint.Distance(target.Position) < Yasuo.Player.Distance(target.Position) - 100 &&
-                                dashPoint.Distance(target.Position) < 250)
+                            if (dashPoint.Distance(Game.CursorPos) < Yasuo.Player.Distance(Game.CursorPos) - 100 &&
+                                dashPoint.Distance(Game.CursorPos) < 250)
                             {
                                 YasuoSpells.E.Cast(dashAi, packets);
                                 _sweepingBladeDelay = Environment.TickCount;
@@ -299,7 +293,8 @@ namespace Yasuo
             var packets = Yasuo.Menu.GetItemValue<bool>(YasuoMenu.MiscPacketsLoc);
 
             // => Last hit
-            if (Yasuo.Player.GetYasuoQState().IsReady() && YasuoSpells.E.IsReady() && lowHpMinion != null)
+            if (Yasuo.Player.GetYasuoQState().IsReady() && YasuoSpells.E.IsReady() && lowHpMinion != null &&
+                lowHpMinion.Distance(Yasuo.Player.Position) < Yasuo.Player.GetYasuoQState().Range)
             {
                 if (((!Yasuo.Player.HasWhirlwind() && Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLastHitQLoc)) ||
                      (Yasuo.Player.HasWhirlwind() && !Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLastHitQWindLoc))) &&
@@ -313,18 +308,25 @@ namespace Yasuo
                         {
                             YasuoSpells.E.Cast(lowHpMinion, packets);
                             Utility.DelayAction.Add(
-                                250, () => { Yasuo.Player.GetYasuoQState().Cast(lowHpMinion.Position, packets); });
+                                250, () =>
+                                {
+                                    if (!Yasuo.Player.HasWhirlwind())
+                                    {
+                                        Yasuo.QTick = Environment.TickCount;
+                                    }
+                                    Yasuo.Player.GetYasuoQState().Cast(lowHpMinion.Position, packets);
+                                });
                         }
                     }
                 }
             }
 
-
             if (YasuoSpells.E.IsReady() && lowHpMinion != null &&
                 lowHpMinion.Health < Yasuo.Player.GetSweepingBladeDamage(lowHpMinion, stacks) &&
                 !Yasuo.Player.GetDashingEnd(lowHpMinion).To3D().UnderTurret(true))
             {
-                if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLastHitELoc))
+                if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLastHitELoc) &&
+                    lowHpMinion.Distance(Yasuo.Player.Position) < YasuoSpells.E.Range)
                 {
                     YasuoSpells.E.Cast(lowHpMinion, packets);
                 }
@@ -333,12 +335,19 @@ namespace Yasuo
 
             if (Yasuo.Player.GetYasuoQState().IsReady() && lowHpMinion != null &&
                 lowHpMinion.Health < Yasuo.Player.GetSteelTempestDamage(lowHpMinion) &&
-                lowHpMinion.Health > Yasuo.Player.GetSweepingBladeDamage(lowHpMinion, stacks))
+                lowHpMinion.Health > Yasuo.Player.GetSweepingBladeDamage(lowHpMinion, stacks) &&
+                lowHpMinion.Distance(Yasuo.Player.Position) < Yasuo.Player.GetYasuoQState().Range)
             {
                 if ((!Yasuo.Player.HasWhirlwind() && Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLastHitQLoc)) ||
                     (Yasuo.Player.HasWhirlwind() && Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLastHitQWindLoc)))
                 {
-                    Yasuo.Player.GetYasuoQState().Cast(lowHpMinion.Position, packets);
+                    if (!Yasuo.Player.HasWhirlwind())
+                    {
+                        Yasuo.QTick = Environment.TickCount;
+                    }
+                    var prediction = Prediction.GetPrediction(
+                        lowHpMinion, Yasuo.Player.GetYasuoQState().Delay, 0f, Yasuo.Player.GetYasuoQState().Speed);
+                    Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
                 }
             }
 
@@ -368,14 +377,27 @@ namespace Yasuo
                     }
                 }
 
-                if (Yasuo.Player.GetYasuoQState().IsReady())
+                var closestMinion =
+                    ObjectManager.Get<Obj_AI_Minion>()
+                        .Where(m => m.IsValidTarget())
+                        .OrderBy(m => m.Health)
+                        .LastOrDefault();
+                if (Yasuo.Player.GetYasuoQState().IsReady() &&
+                    closestMinion.Distance(Yasuo.Player.Position) < Yasuo.Player.GetYasuoQState().Range)
                 {
                     if ((!Yasuo.Player.HasWhirlwind() && Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLastHitQLoc)) ||
                         (Yasuo.Player.HasWhirlwind() && Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLastHitQWindLoc)))
                     {
-                        if (lowHpMinion != null)
+                        if (closestMinion != null)
                         {
-                            Yasuo.Player.GetYasuoQState().Cast(lowHpMinion.Position, packets);
+                            if (!Yasuo.Player.HasWhirlwind())
+                            {
+                                Yasuo.QTick = Environment.TickCount;
+                            }
+                            var prediction = Prediction.GetPrediction(
+                                closestMinion, Yasuo.Player.GetYasuoQState().Delay, 0f,
+                                Yasuo.Player.GetYasuoQState().Speed);
+                            Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
                         }
                     }
                 }
@@ -391,9 +413,16 @@ namespace Yasuo
             var dashPoint = (Vector3) dashData[0];
             var dashAi = (Obj_AI_Base) dashData[1];
 
-            if (dashAi.IsValidTarget() && dashPoint.IsValid())
+            if (dashPoint.IsValid() && dashAi.IsValidTarget())
             {
-                YasuoSpells.E.Cast(dashAi, Yasuo.Menu.GetItemValue<bool>(YasuoMenu.MiscPacketsLoc));
+                if (Environment.TickCount - _sweepingBladeDelay > 300)
+                {
+                    if (dashPoint.Distance(Game.CursorPos) < Yasuo.Player.Distance(Game.CursorPos) - 100 &&
+                        dashPoint.Distance(Game.CursorPos) < 250)
+                    {
+                        YasuoSpells.E.Cast(dashAi, Yasuo.Menu.GetItemValue<bool>(YasuoMenu.MiscPacketsLoc));
+                    }
+                }
             }
 
             Yasuo.Player.MoveTo(Game.CursorPos, Yasuo.Player.BoundingRadius * 2f);
@@ -427,7 +456,13 @@ namespace Yasuo
             }
             else if (target.Health < Yasuo.Player.GetSteelTempestDamage(target))
             {
-                Yasuo.Player.GetYasuoQState().Cast(target.Position, packets);
+                if (!Yasuo.Player.HasWhirlwind())
+                {
+                    Yasuo.QTick = Environment.TickCount;
+                }
+                var prediction = Prediction.GetPrediction(
+                    target, Yasuo.Player.GetYasuoQState().Delay, 0f, Yasuo.Player.GetYasuoQState().Speed);
+                Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
             }
         }
 
@@ -449,14 +484,14 @@ namespace Yasuo
 
                 if (enemy != null && !enemy.UnderTurret())
                 {
-                    Yasuo.Player.GetYasuoQState().Cast(enemy.Position, packets);
+                    if (!Yasuo.Player.HasWhirlwind())
+                    {
+                        Yasuo.QTick = Environment.TickCount;
+                    }
+                    var prediction = Prediction.GetPrediction(
+                        enemy, Yasuo.Player.GetYasuoQState().Delay, 0f, Yasuo.Player.GetYasuoQState().Speed);
+                    Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
                 }
-            }
-
-            // => Anti Q-Waste
-            if (Yasuo.Player.GetYasuoQState().IsReady() && Yasuo.Player.HasWhirlwind())
-            {
-                // TODO
             }
         }
     }

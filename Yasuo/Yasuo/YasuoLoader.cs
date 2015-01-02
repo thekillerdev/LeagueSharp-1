@@ -86,11 +86,23 @@ namespace Yasuo
                     new YasuoInterrupter("Sion", "SionQ", YasuoMenu.InterruptSionQ, YasuoMenu.InterruptSionQLoc));
 
 
-                var menu = Yasuo.Menu.AddSubMenu(YasuoMenu.Interrupter, YasuoMenu.InterrupterLoc);
-                foreach (var i in ObjectManager.Get<Obj_AI_Hero>().Where(e => e.IsEnemy))
+                Menu menu = null;
+                var flag =
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(e => e.IsEnemy)
+                        .Any(e => Yasuo.Interrupters.Any(i2 => i2.GetChampion() == e.BaseSkinName));
+                if (flag)
                 {
-                    var i1 = i;
-                    foreach (var ii in Yasuo.Interrupters.Where(i2 => i2.GetChampion() == i1.BaseSkinName))
+                    menu = Yasuo.Menu.AddSubMenu(YasuoMenu.Interrupter, YasuoMenu.InterrupterLoc);
+                }
+
+                if (menu != null)
+                {
+                    foreach (
+                        var ii in
+                            ObjectManager.Get<Obj_AI_Hero>()
+                                .Where(e => e.IsEnemy)
+                                .SelectMany(i1 => Yasuo.Interrupters.Where(i2 => i2.GetChampion() == i1.BaseSkinName)))
                     {
                         Yasuo.Menu.AddItem(menu, ii.GetMenuDisplayString(), ii.GetMenuString()).SetValue(true);
                     }

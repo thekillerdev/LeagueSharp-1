@@ -222,9 +222,6 @@ namespace Yasuo
             var auto = AddSubMenu(Auto, AutoLoc); // => Auto
             AddItem(auto, AutoQ, AutoQLoc).SetValue(true); // => Q
 
-            // Interrupter
-            //AddSubMenu(Interrupter, InterrupterLoc); // => Interrupter
-
             // Items
             var items = AddSubMenu(Items, ItemsLoc);
             AddItem(items, ItemsTiamat, ItemsTiamatLoc).SetValue(true); // => Tiamat
