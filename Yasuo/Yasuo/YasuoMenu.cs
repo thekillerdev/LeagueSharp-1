@@ -189,8 +189,8 @@ namespace Yasuo
             AddItem(harass, HarassQRange, HarassQRangeLoc).SetValue(new Slider(475, 475, 525)); // => Q Range
             AddItem(harass, HarassMinE, HarassMinELoc).SetValue(new Slider(2, 2, 8)); // => Min. Minions Requirement
             AddItem(harass, HarassItems, HarassItemsLoc).SetValue(true); // => Use Items
-            AddItem(harass, HarassEGapcloser, HarassEGapcloserLoc).SetValue(true);
-            AddItem(harass, HarassQeCombo, HarassQeComboLoc).SetValue(true);
+            AddItem(harass, HarassEGapcloser, HarassEGapcloserLoc).SetValue(true); // => Use gapcloser
+            AddItem(harass, HarassQeCombo, HarassQeComboLoc).SetValue(true); // => use Q+E
 
             // Killsteal
             var ks = AddSubMenu(Killsteal, KillstealLoc); // => Killsteal

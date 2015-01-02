@@ -198,7 +198,7 @@ namespace Yasuo
                     Yasuo.ShouldDash = false;
                 }
             }
-            else if (Yasuo.Player.Distance(target.Position) < Yasuo.Player.GetYasuoQState().Range)
+            else if (Yasuo.Player.Distance(target.Position) < Yasuo.Menu.GetItemValue<Slider>(YasuoMenu.HarassQRangeLoc).Value)
             {
                 if (Yasuo.Player.GetYasuoQState().IsReady())
                 {
@@ -208,7 +208,7 @@ namespace Yasuo
                     {
                         if (Yasuo.Player.CountEnemysInRange(1200) < 2)
                         {
-                            if (YasuoSpells.E.IsReady())
+                            if (YasuoSpells.E.IsReady() && Yasuo.Menu.GetItemValue<bool>(YasuoMenu.HarassQeComboLoc))
                             {
                                 YasuoSpells.E.Cast(target);
                                 Utility.DelayAction.Add(
@@ -230,7 +230,7 @@ namespace Yasuo
                         }
                         Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
                     }
-                    else
+                    else if(Yasuo.Menu.GetItemValue<bool>(YasuoMenu.HarassQLoc))
                     {
                         Yasuo.QTick = Environment.TickCount;
                         Yasuo.Player.GetYasuoQState().Cast(prediction.CastPosition, packets);
@@ -248,7 +248,7 @@ namespace Yasuo
             }
             else if (Yasuo.Player.Distance(target.Position) > Yasuo.Player.GetYasuoQState().Range)
             {
-                if (YasuoSpells.E.IsReady())
+                if (YasuoSpells.E.IsReady() && Yasuo.Menu.GetItemValue<bool>(YasuoMenu.HarassEGapcloserLoc))
                 {
                     var dashData = Yasuo.Player.GetDashData(Game.CursorPos, target);
                     var dashPoint = (Vector3) dashData[0];
