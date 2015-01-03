@@ -1,4 +1,6 @@
 ﻿using System;
+using LeagueSharp.Common;
+using Color = System.Drawing.Color;
 
 namespace Yasuo
 {
@@ -6,7 +8,7 @@ namespace Yasuo
     {
         public static void OnDraw(EventArgs args)
         {
-            // TODO: Handler
+
         }
     }
 }

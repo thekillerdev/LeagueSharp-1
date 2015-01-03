@@ -9,7 +9,5 @@ namespace Yasuo
         public static YasuoMenu Menu;
         public static bool ShouldDash;
         public static List<YasuoInterrupter> Interrupters = new List<YasuoInterrupter>();
-        public static int QTick;
-        public const int QTickMax = 10000;
     }
 }

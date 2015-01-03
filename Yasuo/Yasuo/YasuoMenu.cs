@@ -40,8 +40,14 @@ namespace Yasuo
         public const string ComboREnemiesLoc = ComboLoc + ".renemies";
         private const string ComboREnemiesPercent = "Last Breath (R) Min. Enemies Health Percent";
         public const string ComboREnemiesPercentLoc = ComboLoc + ".renemiespercent";
+        private const string ComboRKnockType = "Last Breath (R) Self knocked up enemies only";
+        public const string ComboRKnockTypeLoc = ComboLoc + ".renemiesknocktypeonly";
         private const string ComboItems = "Use Items";
         public const string ComboItemsLoc = ComboLoc + ".useitems";
+        private const string ComboGapcloserMode = "Base Gapcloser on";
+        public const string ComboGapcloserModeLoc = ComboLoc + ".basegapcloser";
+        private const string ComboGapcloserEMode = "Keep Dashing even if in attack range";
+        public const string ComboGapcloserEModeLoc = ComboLoc + ".basegapcloserenemy";
 
         /* HARASS */
         private const string Harass = "Harass Settings";
@@ -86,8 +92,10 @@ namespace Yasuo
         public const string FarmingLaneClearQLoc = KillstealLoc + ".lcuseq";
         private const string FarmingLaneClearQWind = "[Lane Clear] Use Whirlwind (3rd Q)";
         public const string FarmingLaneClearQWindLoc = KillstealLoc + ".lcuseqw";
-        private const string FarmingLaneClearItems = "Use Items";
+        private const string FarmingLaneClearItems = "[Lane Clear] Use Items";
         public const string FarmingLaneClearItemsLoc = KillstealLoc + ".lcuseitems";
+        private const string FarmingLaneClearMinItems = "[Lane Clear] Min. Minions to Use Items";
+        public const string FarmingLaneClearMinItemsLoc = ".minmitems";
 
         /* FLEE */
         private const string Flee = "Flee Settings";
@@ -177,12 +185,16 @@ namespace Yasuo
             AddItem(combo, ComboQRange, ComboQRangeLoc).SetValue(new Slider(475, 475, 525)); // => Q Range
             AddItem(combo, ComboREnemies, ComboREnemiesLoc).SetValue(new Slider(1, 1, 5)); // => R Enemies Requirement
             AddItem(combo, ComboREnemiesPercent, ComboREnemiesPercentLoc).SetValue(new Slider(40, 10)); // => R Enemies Health Percent Requirement
+            AddItem(combo, ComboRKnockType, ComboRKnockTypeLoc).SetValue(false); // => R Knockup Type Blink
             AddSpacer(combo); // => SPACER
             AddItem(combo, ComboItems, ComboItemsLoc).SetValue(true); // => Use Items
+            AddItem(combo, ComboGapcloserMode, ComboGapcloserModeLoc)
+                .SetValue(new StringList(new[] { "Mouse", "Target" })); // => Gapcloser Mode
+            AddItem(combo, ComboGapcloserEMode, ComboGapcloserEModeLoc).SetValue(true); // => Keep gapclosing even if in AA range
 
             // Harass
             var harass = AddSubMenu(Harass, HarassLoc); // => Harass
-            AddItem(harass, HarassUse, HarassUseLoc).SetValue(true); // => Use
+            /*AddItem(harass, HarassUse, HarassUseLoc).SetValue(true); // => Use
             AddItem(harass, HarassQ, HarassQLoc).SetValue(true); // => Q
             AddItem(harass, HarassE, HarassELoc).SetValue(true); // => E
             AddSpacer(harass); // => SPACER
@@ -190,7 +202,8 @@ namespace Yasuo
             AddItem(harass, HarassMinE, HarassMinELoc).SetValue(new Slider(2, 2, 8)); // => Min. Minions Requirement
             AddItem(harass, HarassItems, HarassItemsLoc).SetValue(true); // => Use Items
             AddItem(harass, HarassEGapcloser, HarassEGapcloserLoc).SetValue(true); // => Use gapcloser
-            AddItem(harass, HarassQeCombo, HarassQeComboLoc).SetValue(true); // => use Q+E
+            AddItem(harass, HarassQeCombo, HarassQeComboLoc).SetValue(true); // => use Q+E*/
+            AddItem(harass, "Harass Not Working Currently :(", ".harass.notworking");
 
             // Killsteal
             var ks = AddSubMenu(Killsteal, KillstealLoc); // => Killsteal
@@ -207,6 +220,7 @@ namespace Yasuo
             AddItem(farming, FarmingLaneClearQ, FarmingLaneClearQLoc).SetValue(true); // => Laneclear Q
             AddItem(farming, FarmingLaneClearQWind, FarmingLaneClearQWindLoc).SetValue(true); // => Laneclear whirlwind Q
             AddItem(farming, FarmingLaneClearItems, FarmingLaneClearItemsLoc).SetValue(true); // => Laneclear Items
+            AddItem(farming, FarmingLaneClearMinItems, FarmingLaneClearMinItemsLoc).SetValue(new Slider(3, 1, 8)); // => Laneclear Items
 
             // Flee
             var flee = AddSubMenu(Flee, FleeLoc); // => Flee

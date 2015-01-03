@@ -84,6 +84,35 @@ namespace Yasuo
         }
 
         /// <summary>
+        ///     Returns time left for knock up buff to expire
+        /// </summary>
+        /// <param name="objAiBase">Base Object</param>
+        /// <param name="onlySelf">Only yasuo knock ups</param>
+        /// <returns></returns>
+        public static float KnockedUpTimeLeft(this Obj_AI_Base objAiBase, bool onlySelf = false)
+        {
+            if (onlySelf)
+            {
+                var selfBuff = objAiBase.Buffs.FirstOrDefault(b => b.DisplayName.Equals("yasuoq3mis"));
+                if (selfBuff != null)
+                {
+                    return selfBuff.EndTime - Game.Time;
+                }
+            }
+            else
+            {
+                var buff =
+                objAiBase.Buffs.FirstOrDefault(
+                    b => b.Type.Equals(BuffType.Knockup) || b.Type.Equals(BuffType.Knockback));
+                if (buff != null)
+                {
+                    return buff.EndTime - Game.Time;
+                }
+            }
+            return -1f;
+        }
+
+        /// <summary>
         ///     Returns Dash Data
         /// </summary>
         /// <param name="base">Base Object</param>
