@@ -3,6 +3,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Yasuo.Evade;
 
 namespace Yasuo
 {
@@ -12,8 +13,8 @@ namespace Yasuo
 
         public static void OnGameUpdate(EventArgs args)
         {
-            if (Evade() || Windwall())
-                return;
+            Yasuo.EvadeDetectedSkillshots.RemoveAll(skillshot => !skillshot.IsActive());
+            Evader();
 
             switch (Yasuo.Menu.GetOrbwalker().ActiveMode)
             {
@@ -320,7 +321,14 @@ namespace Yasuo
             if (closestMinion != null &&
                 closestMinion.Distance(Yasuo.Player.Position) <= Yasuo.Player.GetYasuoQState().Range)
             {
-                Yasuo.Player.GetYasuoQState().CastIfHitchanceEquals(closestMinion, HitChance.High, packets);
+                if (Yasuo.Player.HasWhirlwind() && Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLaneClearQWindLoc))
+                {
+                    Yasuo.Player.GetYasuoQState().CastIfHitchanceEquals(closestMinion, HitChance.High, packets);
+                }
+                else if (!Yasuo.Player.HasWhirlwind() && Yasuo.Menu.GetItemValue<bool>(YasuoMenu.FarmingLaneClearQLoc))
+                {
+                    Yasuo.Player.GetYasuoQState().CastIfHitchanceEquals(closestMinion, HitChance.High, packets);
+                }
             }
         }
 
@@ -352,8 +360,11 @@ namespace Yasuo
                 if (YasuoSpells.E.IsReady() && siege.Health < Yasuo.Player.GetSweepingBladeDamage(siege, stacks) &&
                     Yasuo.Player.Distance(siege) <= YasuoSpells.E.Range)
                 {
-                    YasuoSpells.E.Cast(siege);
-                    return true;
+                    if (!Yasuo.Player.GetDashingEnd(siege).To3D().UnderTurret(true))
+                    {
+                        YasuoSpells.E.Cast(siege);
+                        return true;
+                    }
                 }
                 if (siege.Health < Yasuo.Player.GetSteelTempestDamage(siege) &&
                     Yasuo.Player.Distance(siege) <= Yasuo.Player.GetYasuoQState().Range)
@@ -367,10 +378,14 @@ namespace Yasuo
                     Yasuo.Player.Distance(siege) <= YasuoSpells.E.Range)
                 {
                     // => Steel Tempest (Q) + Sweeping Blade (E)
-                    YasuoSpells.E.Cast(siege);
-                    Utility.DelayAction.Add(
-                        200, () => Yasuo.Player.GetYasuoQState().CastIfHitchanceEquals(siege, HitChance.High, packets));
-                    return true;
+                    if (!Yasuo.Player.GetDashingEnd(siege).To3D().UnderTurret(true))
+                    {
+                        YasuoSpells.E.Cast(siege);
+                        Utility.DelayAction.Add(
+                            200,
+                            () => Yasuo.Player.GetYasuoQState().CastIfHitchanceEquals(siege, HitChance.High, packets));
+                        return true;
+                    }
                 }
             }
 
@@ -384,8 +399,11 @@ namespace Yasuo
             // => Sweeping Blade (E)
             if (lowEMinion != null && YasuoSpells.E.IsReady())
             {
-                YasuoSpells.E.Cast(lowEMinion);
-                return true;
+                if (!Yasuo.Player.GetDashingEnd(lowEMinion).To3D().UnderTurret(true))
+                {
+                    YasuoSpells.E.Cast(lowEMinion);
+                    return true;
+                }
             }
 
             var lowQMinion =
@@ -480,15 +498,86 @@ namespace Yasuo
             }
         }
 
-        private static bool Evade()
+        private static void Evader()
         {
+            foreach (var skillshot in Yasuo.EvadeDetectedSkillshots)
+            {
+                var flag = false;
+                if (YasuoSpells.E.IsReady())
+                {
+                    if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.EvadeUseLoc))
+                    {
+                        flag = Evade(skillshot);
+                    }
+                }
+
+                if (flag)
+                {
+                    continue;
+                }
+
+                if (YasuoSpells.W.IsReady())
+                {
+                    if (Yasuo.Menu.GetItemValue<bool>(YasuoMenu.AutoWindWallUseLoc))
+                    {
+                        Windwall(skillshot);
+                    }
+                }
+            }
+        }
+
+        private static bool Evade(Skillshot skillshot)
+        {
+            if (YasuoSpells.E.IsReady())
+            {
+                var intersects = Yasuo.Player.Position.To2D().ProjectOn(skillshot.Start, skillshot.End).IsOnSegment;
+                if (intersects)
+                {
+                    foreach (var minion in
+                        ObjectManager.Get<Obj_AI_Minion>()
+                            .Where(
+                                m =>
+                                    m.IsValidTarget() && Yasuo.Player.IsDashable(m) &&
+                                    m.Distance(Yasuo.Player.Position) <= YasuoSpells.E.Range)
+                            .Where(
+                                minion =>
+                                    !Yasuo.Player.Position.To2D()
+                                        .Intersection(
+                                            Yasuo.Player.GetDashingEnd(minion), skillshot.Start, skillshot.End)
+                                        .Intersects))
+                    {
+                        YasuoSpells.E.Cast(minion, Yasuo.Menu.GetItemValue<bool>(YasuoMenu.MiscPacketsLoc));
+                        return true;
+                    }
+                }
+            }
             return false;
         }
 
-        private static bool Windwall()
+        private static void Windwall(Skillshot skillshot)
         {
+            if (YasuoSpells.W.IsReady() && skillshot.SpellData.Type != SkillShotType.SkillshotCircle ||
+                skillshot.SpellData.Type != SkillShotType.SkillshotRing)
+            {
+                if (skillshot.IsAboutToHit(100, Yasuo.Player))
+                {
+                    if (skillshot.IsActive()) // => Might need a different check? TODO
+                    {
+                        var intersects =
+                            Yasuo.Player.Position.To2D().ProjectOn(skillshot.Start, skillshot.End).IsOnSegment;
+                        if (!intersects)
+                        {
+                            return;
+                        }
 
-            return false;
+                        var blockwhere = Yasuo.Player.ServerPosition +
+                                         Vector3.Normalize(
+                                             skillshot.MissilePosition.To3D() - Yasuo.Player.ServerPosition) * 10;
+                            // missle.Position; 
+                        YasuoSpells.W.Cast(blockwhere);
+                    }
+                }
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -27,12 +26,11 @@ namespace Yasuo
 
                 Game.OnGameUpdate += YasuoGame.OnGameUpdate;
                 Drawing.OnDraw += YasuoDrawing.OnDraw;
-                GameObject.OnCreate += GameObjectOnOnCreate;
-                GameObject.OnDelete += GameObjectOnOnDelete;
                 Obj_AI_Base.OnProcessSpellCast += ObjAiBaseOnOnProcessSpellCast;
 
                 new YasuoSpells();
                 Yasuo.Menu = new YasuoMenu();
+                new YasuoEvade();
 
                 Yasuo.Interrupters.Add(
                     new YasuoInterrupter(
@@ -84,7 +82,7 @@ namespace Yasuo
                     new YasuoInterrupter("Varus", "VarusQ", YasuoMenu.InterruptVarusQ, YasuoMenu.InterruptVarusQLoc));
                 Yasuo.Interrupters.Add(
                     new YasuoInterrupter("Sion", "SionQ", YasuoMenu.InterruptSionQ, YasuoMenu.InterruptSionQLoc));
-
+                
 
                 Menu menu = null;
                 var flag =
@@ -119,21 +117,22 @@ namespace Yasuo
                 return;
             }
 
-            foreach (var i in
-                Yasuo.Interrupters.Where(i => i.GetChampion() == sender.BaseSkinName)
-                    .Where(i => i.GetSpellName() == args.SData.Name && Yasuo.Menu.GetItemValue<bool>(i.GetMenuString()))
-                )
+            var interrupt =
+                Yasuo.Interrupters.Any(
+                    i =>
+                        i.GetChampion() == sender.BaseSkinName && i.GetSpellName() == args.SData.Name &&
+                        Yasuo.Menu.GetItemValue<bool>(i.GetMenuString()));
+            if (!interrupt)
             {
-                YasuoSpells.E.Cast(sender);
-                Utility.DelayAction.Add(
-                    250, () =>
-                    {
-                        YasuoSpells.QWind.Cast(Yasuo.Menu.GetItemValue<bool>(YasuoMenu.MiscPacketsLoc));
-                    });
+                return;
             }
-        }
 
-        private static void GameObjectOnOnDelete(GameObject sender, EventArgs args) {}
-        private static void GameObjectOnOnCreate(GameObject sender, EventArgs args) {}
+            YasuoSpells.E.Cast(sender);
+            Utility.DelayAction.Add(
+                350, () =>
+                {
+                    YasuoSpells.QWind.Cast(Yasuo.Menu.GetItemValue<bool>(YasuoMenu.MiscPacketsLoc));
+                });
+        }
     }
 }

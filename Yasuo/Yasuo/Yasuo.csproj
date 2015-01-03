@@ -38,6 +38,9 @@
     <ApplicationIcon>Yasuo_Square_0.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="clipper_library">
+      <HintPath>Evade\clipper_library.dll</HintPath>
+    </Reference>
     <Reference Include="LeagueSharp">
       <HintPath>..\..\..\System\LeagueSharp.dll</HintPath>
     </Reference>
@@ -57,10 +60,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Evade\Collision.cs" />
+    <Compile Include="Evade\EvadeSpellData.cs" />
+    <Compile Include="Evade\EvadeSpellDatabase.cs" />
+    <Compile Include="Evade\Geometry.cs" />
+    <Compile Include="Evade\Skillshot.cs" />
+    <Compile Include="Evade\SkillshotDetector.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Evade\SpellData.cs" />
+    <Compile Include="Evade\SpellDatabase.cs" />
+    <Compile Include="Evade\Utils.cs" />
     <Compile Include="Yasuo.cs" />
     <Compile Include="YasuoAutoLevel.cs" />
     <Compile Include="YasuoDamage.cs" />
     <Compile Include="YasuoDrawing.cs" />
+    <Compile Include="YasuoEvade.cs" />
     <Compile Include="YasuoGame.cs" />
     <Compile Include="YasuoInterrupter.cs" />
     <Compile Include="YasuoLoader.cs" />
@@ -75,6 +90,7 @@
   <ItemGroup>
     <Content Include="Yasuo_Square_0.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

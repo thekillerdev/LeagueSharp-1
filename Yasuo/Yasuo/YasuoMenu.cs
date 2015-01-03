@@ -107,6 +107,18 @@ namespace Yasuo
         private const string FleeTowers = "Flee into enemy towers";
         public const string FleeTowersLoc = FleeLoc + ".towers";
 
+        /* AUTO WINDWALL */
+        private const string AutoWindWall = "Auto WindWall Settings";
+        private const string AutoWindWallLoc = ".autoww";
+        private const string AutoWindWallUse = "Use Auto Windwall";
+        public const string AutoWindWallUseLoc = AutoWindWallLoc + ".usew";
+
+        /* AUTO WINDWALL */
+        private const string Evade = "Evade Settings";
+        private const string EvadeLoc = ".evade";
+        private const string EvadeUse = "Use Sweeping Blade (E) to Evade";
+        public const string EvadeUseLoc = EvadeLoc + ".use";
+
         /* AUTO */
         private const string Auto = "Auto Settings";
         private const string AutoLoc = ".auto";
@@ -146,6 +158,8 @@ namespace Yasuo
         public const string InterruptVarusQLoc = InterrupterLoc + ".varusq";
         public const string InterruptSionQ = "Interrupt Sion's Decimating Smash";
         public const string InterruptSionQLoc = InterrupterLoc + ".sionq";
+        public const string InterruptEzTrueshot = "Interrupt Ezreal's Trueshot Barrage";
+        public const string InterruptEzTrueshotLoc = ".eztrueshotbarrage";
 
         /* ITEMS */
         private const string Items = "Items Settings";
@@ -229,8 +243,14 @@ namespace Yasuo
             AddItem(flee, FleeTowers, FleeTowersLoc).SetValue(true); // => Towers
 
             // Auto Windwall
+            var aww = AddSubMenu(AutoWindWall, AutoWindWallLoc); // => Auto Windwall
+            AddItem(aww, AutoWindWallUse, AutoWindWallUseLoc).SetValue(true); // => Use
+            AddSpacer(aww); // => SPACER
 
             // Evade
+            var evade = AddSubMenu(Evade, EvadeLoc); // => Evade
+            AddItem(evade, EvadeUse, EvadeUseLoc).SetValue(true); // => Use
+            AddSpacer(evade); // => SPACER
 
             // Auto
             var auto = AddSubMenu(Auto, AutoLoc); // => Auto
