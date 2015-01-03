@@ -108,7 +108,7 @@ namespace Yasuo
         public const string FleeTowersLoc = FleeLoc + ".towers";
 
         /* AUTO WINDWALL */
-        private const string AutoWindWall = "Auto WindWall Settings";
+        private const string AutoWindWall = "Auto Windwall Settings";
         private const string AutoWindWallLoc = ".autoww";
         private const string AutoWindWallUse = "Use Auto Windwall";
         public const string AutoWindWallUseLoc = AutoWindWallLoc + ".usew";
