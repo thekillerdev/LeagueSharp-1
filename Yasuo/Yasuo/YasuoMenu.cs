@@ -27,7 +27,7 @@ namespace Yasuo
 
         /* COMBO */
         private const string Combo = "Combo Settings";
-        private const string ComboLoc = RootName+".combo";
+        private const string ComboLoc = ".combo";
         private const string ComboQ = "Use Steel Tempest (Q)";
         public const string ComboQLoc = ComboLoc + ".useq";
         private const string ComboE = "Use Sweeping Blade (E)";
@@ -55,11 +55,11 @@ namespace Yasuo
 
         /* HARASS */
         private const string Harass = "Harass Settings";
-        private const string HarassLoc = RootName+".harass";
+        private const string HarassLoc = ".harass";
 
         /* Killsteal */
         private const string Killsteal = "Killsteal Settings";
-        private const string KillstealLoc = RootName+".ks";
+        private const string KillstealLoc = ".ks";
         private const string KillstealActive = "Enable Killsteal";
         public const string KillstealActiveLoc = KillstealLoc + ".active";
         private const string KillstealQ = "Use Steel Tempest (Q)";
@@ -69,7 +69,7 @@ namespace Yasuo
 
         /* FARMING */
         private const string Farming = "Farming Settings";
-        private const string FarmingLoc = RootName+".farming";
+        private const string FarmingLoc = ".farming";
         private const string FarmingLastHitQ = "[Last Hit] Use Steel Tempest (Q)";
         public const string FarmingLastHitQLoc = KillstealLoc + ".lhuseq";
         private const string FarmingLastHitQWind = "[Last Hit] Use Whirlwind (3rd Q)";
@@ -87,7 +87,7 @@ namespace Yasuo
 
         /* FLEE */
         private const string Flee = "Flee Settings";
-        private const string FleeLoc = RootName+".flee";
+        private const string FleeLoc = ".flee";
         private const string FleeUse = "Use Flee";
         public const string FleeUseLoc = FleeLoc + ".use";
         private const string FleeKey = "Flee Key";
@@ -98,7 +98,7 @@ namespace Yasuo
         /* AUTO WINDWALL */
         public static Menu AutoWindMenu;
         private const string AutoWindWall = "Auto Windwall Settings";
-        public const string AutoWindWallLoc = RootName+".autoww";
+        public const string AutoWindWallLoc = ".autoww";
         private const string AutoWindWallUse = "Use Auto Windwall";
         public const string AutoWindWallUseLoc = AutoWindWallLoc + ".usew";
         private const string AutoWindWallDelay = "Windwall Delay";
@@ -107,19 +107,19 @@ namespace Yasuo
         /* EVADE */
         public static Menu EvadeMenu;
         private const string Evade = "Evade Settings";
-        public const string EvadeLoc = RootName+".evade";
+        public const string EvadeLoc = ".evade";
         private const string EvadeUse = "Use Sweeping Blade (E) to Evade";
         public const string EvadeUseLoc = EvadeLoc + ".use";
 
         /* AUTO */
         private const string Auto = "Auto Settings";
-        private const string AutoLoc = RootName+".auto";
+        private const string AutoLoc = ".auto";
         private const string AutoQ = "Use Steel Tempest (Q)";
         public const string AutoQLoc = AutoLoc + ".useq";
 
         /* ITEMS */
         private const string Items = "Items Settings";
-        private const string ItemsLoc = RootName+".items";
+        private const string ItemsLoc = ".items";
         private const string ItemsTiamat = "Tiamat (Melee Only)";
         public const string ItemsTiamatLoc = ".tiamat";
         private const string ItemsHydra = "Ravenous Hydra (Melee Only)";
@@ -131,7 +131,7 @@ namespace Yasuo
 
         /* MISC */
         private const string Misc = "Miscellaneous Settings";
-        private const string MiscLoc = RootName+".misc";
+        private const string MiscLoc = ".misc";
         private const string MiscPackets = "Use Packets";
         public const string MiscPacketsLoc = MiscLoc + ".packets";
 
