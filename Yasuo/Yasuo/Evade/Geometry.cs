@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ClipperLib;
+using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
 using Color = System.Drawing.Color;
@@ -147,8 +148,15 @@ namespace Yasuo.Evade
                 for (var i = 0; i <= Points.Count - 1; i++)
                 {
                     var nextIndex = (Points.Count - 1 == i) ? 0 : (i + 1);
-                    Utils.DrawLineInWorld(Points[i].To3D(), Points[nextIndex].To3D(), width, color);
+                    DrawLineInWorld(Points[i].To3D(), Points[nextIndex].To3D(), width, color);
                 }
+            }
+
+            private static void DrawLineInWorld(Vector3 start, Vector3 end, int width, Color color)
+            {
+                var segmentStart = Drawing.WorldToScreen(start);
+                var segmentEnd = Drawing.WorldToScreen(end);
+                Drawing.DrawLine(segmentStart[0], segmentStart[1], segmentEnd[0], segmentEnd[1], width, color);
             }
         }
 

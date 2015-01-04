@@ -70,7 +70,6 @@
     </Compile>
     <Compile Include="Evade\SpellData.cs" />
     <Compile Include="Evade\SpellDatabase.cs" />
-    <Compile Include="Evade\Utils.cs" />
     <Compile Include="Yasuo.cs" />
     <Compile Include="YasuoAutoLevel.cs" />
     <Compile Include="YasuoDamage.cs" />

@@ -1,6 +1,9 @@
-﻿using System.Linq;
+﻿using System.CodeDom;
+using System.Collections.Generic;
+using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
+using Yasuo.Evade;
 
 // ReSharper disable ObjectCreationAsStatement
 
@@ -28,61 +31,9 @@ namespace Yasuo
                 Drawing.OnDraw += YasuoDrawing.OnDraw;
                 Obj_AI_Base.OnProcessSpellCast += ObjAiBaseOnOnProcessSpellCast;
 
-                new YasuoSpells();
                 Yasuo.Menu = new YasuoMenu();
                 new YasuoEvade();
-
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Caitlyn", "CaitlynAceintheHole", YasuoMenu.InterruptAceInTheHole,
-                        YasuoMenu.InterruptAceInTheHoleLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Nunu", "AbsoluteZero", YasuoMenu.InterruptAbsoluteZero, YasuoMenu.InterruptAbsoluteZeroLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "FiddleSticks", "Crowstorm", YasuoMenu.InterruptCrowstorm, YasuoMenu.InterruptCrowstormLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "FiddleSticks", "DrainChannel", YasuoMenu.InterruptDrainChannel,
-                        YasuoMenu.InterruptDrainChannelLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Galio", "GalioIdolOfDurand", YasuoMenu.InterruptIdolOfDurand,
-                        YasuoMenu.InterruptIdolOfDurandLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Karthus", "FallenOne", YasuoMenu.InterruptFallenOne, YasuoMenu.InterruptFallenOneLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Katarina", "KatarinaR", YasuoMenu.InterruptKatarinaR, YasuoMenu.InterruptKatarinaRLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Malzahar", "AlZaharNetherGrasp", YasuoMenu.InterruptAlZaharNetherGrasp,
-                        YasuoMenu.InterruptAlZaharNetherGraspLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "MissFortune", "MissFortuneBulletTime", YasuoMenu.InterruptBulletTime,
-                        YasuoMenu.InterruptBulletTimeLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Pantheon", "Pantheon_GrandSkyfall_Jump", YasuoMenu.InterruptGrandSkyfall,
-                        YasuoMenu.InterruptGrandSkyfallLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Shen", "ShenStandUnited", YasuoMenu.InterruptStandUnited, YasuoMenu.InterruptStandUnitedLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Urgot", "UrgotSwap2", YasuoMenu.InterruptUrgotSwap, YasuoMenu.InterruptUrgotSwapLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter(
-                        "Warwick", "InfiniteDuress", YasuoMenu.InterruptInfiniteDuress,
-                        YasuoMenu.InterruptInfiniteDuressLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter("Varus", "VarusQ", YasuoMenu.InterruptVarusQ, YasuoMenu.InterruptVarusQLoc));
-                Yasuo.Interrupters.Add(
-                    new YasuoInterrupter("Sion", "SionQ", YasuoMenu.InterruptSionQ, YasuoMenu.InterruptSionQLoc));
-                
+                new YasuoInterrupter();
 
                 Menu menu = null;
                 var flag =
@@ -91,7 +42,11 @@ namespace Yasuo
                         .Any(e => Yasuo.Interrupters.Any(i2 => i2.GetChampion() == e.BaseSkinName));
                 if (flag)
                 {
-                    menu = Yasuo.Menu.AddSubMenu(YasuoMenu.Interrupter, YasuoMenu.InterrupterLoc);
+                    menu = Yasuo.Menu.AddSubMenu("Interrupt Settings", ".interrupt");
+                    menu.AddItem(new MenuItem(YasuoMenu.RootName + "interrupt.use", "Use Interrupter")).SetValue(true);
+                    menu.AddItem(new MenuItem(YasuoMenu.RootName + "interrupt.underturret", "Interrupt under turret"))
+                        .SetValue(true);
+                    menu.AddItem(new MenuItem(YasuoMenu.RootName + "interrupt.specialspacer0", ""));
                 }
 
                 if (menu != null)
@@ -106,13 +61,93 @@ namespace Yasuo
                     }
                 }
 
+                var enemies = ObjectManager.Get<Obj_AI_Hero>().Where(e => e.IsEnemy);
+
+                foreach (var e in enemies)
+                {
+                    var e1 = e;
+                    foreach (var spell in SpellDatabase.Spells.Where(s => s.ChampionName == e1.BaseSkinName))
+                    {
+                        // => Windwall
+                        if (spell.CollisionObjects.Any(e2 => e2 == CollisionObjectTypes.YasuoWall))
+                        {
+                            var spellActualName = spell.ChampionName;
+                            var slot = "?";
+                            switch (spell.Slot)
+                            {
+                                case SpellSlot.Q:
+                                    spellActualName += " Q";
+                                    slot = "Q";
+                                    break;
+                                case SpellSlot.W:
+                                    spellActualName += " W";
+                                    slot = "W";
+                                    break;
+                                case SpellSlot.E:
+                                    spellActualName += " E";
+                                    slot = "E";
+                                    break;
+                                case SpellSlot.R:
+                                    spellActualName += " R";
+                                    slot = "R";
+                                    break;
+                            }
+                            var theSpell = new Yasuo.MenuData
+                            {
+                                ChampionName = spell.ChampionName,
+                                SpellName = spell.SpellName,
+                                SpellDisplayName = spellActualName,
+                                DisplayName = spellActualName,
+                                Slot = slot,
+                                IsWindwall = true
+                            };
+                            theSpell.AddToMenu();
+                            Yasuo.MenuWallsList.Add(theSpell);
+                        }
+
+                        // => Evade
+                        var eVspellActualName = spell.ChampionName;
+                        var eVslot = "?";
+                        switch (spell.Slot)
+                        {
+                            case SpellSlot.Q:
+                                eVspellActualName += " Q";
+                                eVslot = "Q";
+                                break;
+                            case SpellSlot.W:
+                                eVspellActualName += " W";
+                                eVslot = "W";
+                                break;
+                            case SpellSlot.E:
+                                eVspellActualName += " E";
+                                eVslot = "E";
+                                break;
+                            case SpellSlot.R:
+                                eVspellActualName += " R";
+                                eVslot = "R";
+                                break;
+                        }
+                        var eVtheSpell = new Yasuo.MenuData
+                        {
+                            ChampionName = spell.ChampionName,
+                            SpellName = spell.SpellName,
+                            SpellDisplayName = eVspellActualName,
+                            DisplayName = eVspellActualName,
+                            Slot = eVslot,
+                            IsWindwall = false
+                        };
+                        eVtheSpell.AddToMenu();
+                        Yasuo.MenuDashesList.Add(eVtheSpell);
+                    }
+                }
+
                 Game.PrintChat("WorstPing | Yasuo the Unforgiven, loaded.");
             };
         }
 
         private static void ObjAiBaseOnOnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (!Yasuo.Player.HasWhirlwind() || !(Yasuo.Player.Distance(sender.Position) <= YasuoSpells.E.Range))
+            if (!Yasuo.Player.HasWhirlwind() || !(Yasuo.Player.Distance(sender.Position) <= YasuoSpells.E.Range) || !Yasuo.Menu.GetItemValue<bool>(YasuoMenu.RootName + "interrupt.use"))
             {
                 return;
             }
@@ -127,12 +162,18 @@ namespace Yasuo
                 return;
             }
 
-            YasuoSpells.E.Cast(sender);
-            Utility.DelayAction.Add(
-                350, () =>
-                {
-                    YasuoSpells.QWind.Cast(Yasuo.Menu.GetItemValue<bool>(YasuoMenu.MiscPacketsLoc));
-                });
+            if ((Yasuo.Player.GetDashingEnd(sender).To3D().UnderTurret(true) &&
+                 Yasuo.Menu.GetItemValue<bool>(YasuoMenu.RootName + "interrupt.underturret")) ||
+                !Yasuo.Player.GetDashingEnd(sender).To3D().UnderTurret(true))
+            {
+
+                YasuoSpells.E.Cast(sender);
+                Utility.DelayAction.Add(
+                    100, () =>
+                    {
+                        YasuoSpells.QWind.Cast(Yasuo.Menu.GetItemValue<bool>(YasuoMenu.MiscPacketsLoc));
+                    });
+            }
         }
     }
 }

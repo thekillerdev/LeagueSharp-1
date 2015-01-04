@@ -15,7 +15,7 @@ namespace Yasuo
 
         /* MAIN */
         private const string MenuDisplayName = "Yasuo the Unforgiven";
-        private const string RootName = "wp.yasuo";
+        public const string RootName = "wp.yasuo";
 
         /* TARGET SELECTOR */
         private const string TargetSelector = "TargetSelector";
@@ -27,17 +27,21 @@ namespace Yasuo
 
         /* COMBO */
         private const string Combo = "Combo Settings";
-        private const string ComboLoc = ".combo";
+        private const string ComboLoc = RootName+".combo";
         private const string ComboQ = "Use Steel Tempest (Q)";
         public const string ComboQLoc = ComboLoc + ".useq";
         private const string ComboE = "Use Sweeping Blade (E)";
         public const string ComboELoc = ComboLoc + ".usee";
         private const string ComboR = "Use Last Breath (R)";
         public const string ComboRLoc = ComboLoc + ".user";
-        private const string ComboQRange = "Steel Tempest (Q) Max. Range";
-        public const string ComboQRangeLoc = ComboLoc + ".qrange";
+        private const string ComboRDelay = "Delay before using Last Breath (R)";
+        public const string ComboRDelayLoc = ".userdelay";
         private const string ComboREnemies = "Last Breath (R) Min. Enemies";
         public const string ComboREnemiesLoc = ComboLoc + ".renemies";
+        private const string ComboREnemyPercent = "Last Breath (R) Min. Target Health Percent";
+        public const string ComboREnemyPercentLoc = ComboLoc + ".renemypercent";
+        private const string ComboRTarget = "Last Breath (R) if Target is Knocked Up";
+        public const string ComboRTargetLoc = ".rtargetknockedup";
         private const string ComboREnemiesPercent = "Last Breath (R) Min. Enemies Health Percent";
         public const string ComboREnemiesPercentLoc = ComboLoc + ".renemiespercent";
         private const string ComboRKnockType = "Last Breath (R) Self knocked up enemies only";
@@ -51,27 +55,11 @@ namespace Yasuo
 
         /* HARASS */
         private const string Harass = "Harass Settings";
-        private const string HarassLoc = ".harass";
-        private const string HarassUse = "Use Harass";
-        public const string HarassUseLoc = HarassLoc + ".use";
-        private const string HarassQ = "Use Steel Tempest (Q)";
-        public const string HarassQLoc = HarassLoc + ".useq";
-        private const string HarassQRange = "Steel Tempest (Q) Max. Range";
-        public const string HarassQRangeLoc = HarassLoc + ".useqrange";
-        private const string HarassE = "Use Sweeping Blade (E)";
-        public const string HarassELoc = HarassLoc + ".usee";
-        private const string HarassMinE = "Min. Minions for Harass";
-        public const string HarassMinELoc = HarassLoc + ".usemine";
-        private const string HarassItems = "Use Items";
-        public const string HarassItemsLoc = HarassLoc + ".useitems";
-        private const string HarassQeCombo = "Sweeping Blade E -> Whirlwind Q (Knock Up)";
-        public const string HarassQeComboLoc = ".useeqcombo";
-        private const string HarassEGapcloser = "E Gapcloser";
-        public const string HarassEGapcloserLoc = ".egapcloser";
+        private const string HarassLoc = RootName+".harass";
 
         /* Killsteal */
         private const string Killsteal = "Killsteal Settings";
-        private const string KillstealLoc = ".ks";
+        private const string KillstealLoc = RootName+".ks";
         private const string KillstealActive = "Enable Killsteal";
         public const string KillstealActiveLoc = KillstealLoc + ".active";
         private const string KillstealQ = "Use Steel Tempest (Q)";
@@ -81,7 +69,7 @@ namespace Yasuo
 
         /* FARMING */
         private const string Farming = "Farming Settings";
-        private const string FarmingLoc = ".farming";
+        private const string FarmingLoc = RootName+".farming";
         private const string FarmingLastHitQ = "[Last Hit] Use Steel Tempest (Q)";
         public const string FarmingLastHitQLoc = KillstealLoc + ".lhuseq";
         private const string FarmingLastHitQWind = "[Last Hit] Use Whirlwind (3rd Q)";
@@ -99,7 +87,7 @@ namespace Yasuo
 
         /* FLEE */
         private const string Flee = "Flee Settings";
-        private const string FleeLoc = ".flee";
+        private const string FleeLoc = RootName+".flee";
         private const string FleeUse = "Use Flee";
         public const string FleeUseLoc = FleeLoc + ".use";
         private const string FleeKey = "Flee Key";
@@ -108,62 +96,30 @@ namespace Yasuo
         public const string FleeTowersLoc = FleeLoc + ".towers";
 
         /* AUTO WINDWALL */
+        public static Menu AutoWindMenu;
         private const string AutoWindWall = "Auto Windwall Settings";
-        private const string AutoWindWallLoc = ".autoww";
+        public const string AutoWindWallLoc = RootName+".autoww";
         private const string AutoWindWallUse = "Use Auto Windwall";
         public const string AutoWindWallUseLoc = AutoWindWallLoc + ".usew";
+        private const string AutoWindWallDelay = "Windwall Delay";
+        public const string AutoWindWallDelayLoc = AutoWindWallLoc + ".delay";
 
-        /* AUTO WINDWALL */
+        /* EVADE */
+        public static Menu EvadeMenu;
         private const string Evade = "Evade Settings";
-        private const string EvadeLoc = ".evade";
+        public const string EvadeLoc = RootName+".evade";
         private const string EvadeUse = "Use Sweeping Blade (E) to Evade";
         public const string EvadeUseLoc = EvadeLoc + ".use";
 
         /* AUTO */
         private const string Auto = "Auto Settings";
-        private const string AutoLoc = ".auto";
+        private const string AutoLoc = RootName+".auto";
         private const string AutoQ = "Use Steel Tempest (Q)";
         public const string AutoQLoc = AutoLoc + ".useq";
 
-        /* Interrupter */
-        public const string Interrupter = "Interrupter Settings";
-        public const string InterrupterLoc = ".interrupter";
-        public const string InterruptAceInTheHole = "Interrupt Caitlyn's Ace In The Hole";
-        public const string InterruptAceInTheHoleLoc = InterrupterLoc + ".aceinthehole";
-        public const string InterruptAbsoluteZero = "Interrupt Nunu's Absolute Zero";
-        public const string InterruptAbsoluteZeroLoc = InterrupterLoc + ".absolutezero";
-        public const string InterruptCrowstorm = "Interrupt Fiddlesicks' Crowstorm";
-        public const string InterruptCrowstormLoc = InterrupterLoc + ".crowstorm";
-        public const string InterruptDrainChannel = "Interrupt Fiddlesicks' Drain Channel";
-        public const string InterruptDrainChannelLoc = InterrupterLoc + ".drainchannel";
-        public const string InterruptIdolOfDurand = "Interrupt Galio's Idol Of Durand";
-        public const string InterruptIdolOfDurandLoc = InterrupterLoc + ".idolofdurand";
-        public const string InterruptFallenOne = "Interrupt Karthus' Requiem";
-        public const string InterruptFallenOneLoc = InterrupterLoc + ".fallenone";
-        public const string InterruptKatarinaR = "Interrupt Katarina's Death Lotus";
-        public const string InterruptKatarinaRLoc = InterrupterLoc + ".katarinar";
-        public const string InterruptAlZaharNetherGrasp = "Interrupt Malzahar's Nether Grasp";
-        public const string InterruptAlZaharNetherGraspLoc = InterrupterLoc + ".nethergrasp";
-        public const string InterruptBulletTime = "Interrupt MissFortune's Bullet Time";
-        public const string InterruptBulletTimeLoc = InterrupterLoc + ".bullettime";
-        public const string InterruptGrandSkyfall = "Interrupt Pantheon's Grand Skyfall";
-        public const string InterruptGrandSkyfallLoc = InterrupterLoc + ".grandskyfall";
-        public const string InterruptStandUnited = "Interrupt Shen's Stand United";
-        public const string InterruptStandUnitedLoc = InterrupterLoc + ".standunited";
-        public const string InterruptUrgotSwap = "Interrupt Urgot's Hyper-Kinetic Position Reverser";
-        public const string InterruptUrgotSwapLoc = InterrupterLoc + ".urgotswap2";
-        public const string InterruptInfiniteDuress = "Interrupt Warwick's Infinite Duress";
-        public const string InterruptInfiniteDuressLoc = InterrupterLoc + ".infiniteduress";
-        public const string InterruptVarusQ = "Interrupt Varus' Piercing Arrow";
-        public const string InterruptVarusQLoc = InterrupterLoc + ".varusq";
-        public const string InterruptSionQ = "Interrupt Sion's Decimating Smash";
-        public const string InterruptSionQLoc = InterrupterLoc + ".sionq";
-        public const string InterruptEzTrueshot = "Interrupt Ezreal's Trueshot Barrage";
-        public const string InterruptEzTrueshotLoc = ".eztrueshotbarrage";
-
         /* ITEMS */
         private const string Items = "Items Settings";
-        private const string ItemsLoc = ".items";
+        private const string ItemsLoc = RootName+".items";
         private const string ItemsTiamat = "Tiamat (Melee Only)";
         public const string ItemsTiamatLoc = ".tiamat";
         private const string ItemsHydra = "Ravenous Hydra (Melee Only)";
@@ -175,7 +131,7 @@ namespace Yasuo
 
         /* MISC */
         private const string Misc = "Miscellaneous Settings";
-        private const string MiscLoc = ".misc";
+        private const string MiscLoc = RootName+".misc";
         private const string MiscPackets = "Use Packets";
         public const string MiscPacketsLoc = MiscLoc + ".packets";
 
@@ -196,9 +152,11 @@ namespace Yasuo
             AddItem(combo, ComboE, ComboELoc).SetValue(true); // => E
             AddItem(combo, ComboR, ComboRLoc).SetValue(true); // => R
             AddSpacer(combo); // => SPACER
-            AddItem(combo, ComboQRange, ComboQRangeLoc).SetValue(new Slider(475, 475, 525)); // => Q Range
+            AddItem(combo, ComboRDelay, ComboRDelayLoc).SetValue(new Slider(25, 15)); // => R Casting Delay
             AddItem(combo, ComboREnemies, ComboREnemiesLoc).SetValue(new Slider(1, 1, 5)); // => R Enemies Requirement
             AddItem(combo, ComboREnemiesPercent, ComboREnemiesPercentLoc).SetValue(new Slider(40, 10)); // => R Enemies Health Percent Requirement
+            AddItem(combo, ComboRTarget, ComboRTargetLoc).SetValue(true); // => R Selected Target Mode
+            AddItem(combo, ComboREnemyPercent, ComboREnemyPercentLoc).SetValue(new Slider(40, 10)); // => R Enemy Health Percent Requirement
             AddItem(combo, ComboRKnockType, ComboRKnockTypeLoc).SetValue(false); // => R Knockup Type Blink
             AddSpacer(combo); // => SPACER
             AddItem(combo, ComboItems, ComboItemsLoc).SetValue(true); // => Use Items
@@ -243,12 +201,13 @@ namespace Yasuo
             AddItem(flee, FleeTowers, FleeTowersLoc).SetValue(true); // => Towers
 
             // Auto Windwall
-            var aww = AddSubMenu(AutoWindWall, AutoWindWallLoc); // => Auto Windwall
+            var aww = AutoWindMenu = AddSubMenu(AutoWindWall, AutoWindWallLoc); // => Auto Windwall
             AddItem(aww, AutoWindWallUse, AutoWindWallUseLoc).SetValue(true); // => Use
+            AddItem(aww, AutoWindWallDelay, AutoWindWallDelayLoc).SetValue(new Slider(500, 150, 2000)); // => Windwall Delay
             AddSpacer(aww); // => SPACER
 
             // Evade
-            var evade = AddSubMenu(Evade, EvadeLoc); // => Evade
+            var evade = EvadeMenu = AddSubMenu(Evade, EvadeLoc); // => Evade
             AddItem(evade, EvadeUse, EvadeUseLoc).SetValue(true); // => Use
             AddSpacer(evade); // => SPACER
 
@@ -325,6 +284,16 @@ namespace Yasuo
         public Menu GetMenu()
         {
             return _menu;
+        }
+
+        /// <summary>
+        ///     Quick reference to fetch a submenu
+        /// </summary>
+        /// <param name="args">Sub Menu Location</param>
+        /// <returns></returns>
+        public Menu GetSubMenu(string args)
+        {
+            return _menu.SubMenu(args);
         }
 
         /// <summary>
