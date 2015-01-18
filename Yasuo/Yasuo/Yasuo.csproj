@@ -39,7 +39,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="clipper_library">
-      <HintPath>Evade\clipper_library.dll</HintPath>
+      <HintPath>..\..\..\System\clipper_library.dll</HintPath>
     </Reference>
     <Reference Include="LeagueSharp">
       <HintPath>..\..\..\System\LeagueSharp.dll</HintPath>
@@ -60,25 +60,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Evade\Collision.cs" />
-    <Compile Include="Evade\EvadeSpellData.cs" />
-    <Compile Include="Evade\EvadeSpellDatabase.cs" />
-    <Compile Include="Evade\Geometry.cs" />
-    <Compile Include="Evade\Skillshot.cs" />
-    <Compile Include="Evade\SkillshotDetector.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Evade\SpellData.cs" />
-    <Compile Include="Evade\SpellDatabase.cs" />
-    <Compile Include="Yasuo.cs" />
-    <Compile Include="YasuoAutoLevel.cs" />
-    <Compile Include="YasuoDamage.cs" />
-    <Compile Include="YasuoDrawing.cs" />
-    <Compile Include="YasuoEvade.cs" />
-    <Compile Include="YasuoGame.cs" />
-    <Compile Include="YasuoInterrupter.cs" />
-    <Compile Include="YasuoLoader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Yasuo.cs" />
+    <Compile Include="YasuoDamages.cs" />
+    <Compile Include="YasuoGame.cs" />
+    <Compile Include="YasuoLoader.cs" />
     <Compile Include="YasuoMenu.cs" />
     <Compile Include="YasuoSpells.cs" />
     <Compile Include="YasuoUtility.cs" />

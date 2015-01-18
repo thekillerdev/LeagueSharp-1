@@ -8,17 +8,17 @@ namespace Yasuo
         /// <summary>
         ///     Steel Tempest Spell
         /// </summary>
-        public static Spell Q = new Spell(SpellSlot.Q, 475f); // Original: 475f
-
-        /// <summary>
-        ///     Steel Tempest Whirlwind Passive
-        /// </summary>
-        public static Spell QWind = new Spell(SpellSlot.Q, 900f); // Original: 900f 
+        public static USpell Q = new USpell
+        {
+            QStage0 = new Spell(SpellSlot.Q, 475f),
+            QStage1 = new Spell(SpellSlot.Q, 900f),
+            DashingRange = 375f
+        };
 
         /// <summary>
         ///     Wind Wall Spell
         /// </summary>
-        public static Spell W = new Spell(SpellSlot.W, 900f);
+        public static Spell W = new Spell(SpellSlot.W, 400f);
 
         /// <summary>
         ///     Sweeping Blade Spell
@@ -50,10 +50,25 @@ namespace Yasuo
         /// </summary>
         public static ItemData.Item BilgewaterCutlass = ItemData.Bilgewater_Cutlass;
 
+        /// <summary>
+        ///     Yasuo Skills Loader
+        /// </summary>
         static YasuoSpells()
         {
-            Q.SetSkillshot(0.36f, 350f, 20000f, false, SkillshotType.SkillshotLine);
-            QWind.SetSkillshot(0.36f, 120f, 1200f, true, SkillshotType.SkillshotLine);
+            Q.QStage0.SetSkillshot(0.36f, 350f, 20000f, false, SkillshotType.SkillshotLine);
+            Q.QStage1.SetSkillshot(0.36f, 120f, 1200f, true, SkillshotType.SkillshotLine);
+        }
+
+        public struct USpell
+        {
+            public float DashingRange;
+            public Spell QStage0;
+            public Spell QStage1;
+
+            public bool IsReady()
+            {
+                return QStage0.IsReady() | QStage1.IsReady();
+            }
         }
     }
 }

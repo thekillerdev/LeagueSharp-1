@@ -1,320 +1,325 @@
-﻿#region
-
-using LeagueSharp.Common;
-
-#endregion
+﻿using LeagueSharp.Common;
 
 namespace Yasuo
 {
     public class YasuoMenu
     {
-        /* FIELDS */
-        private static Menu _menu;
-        private readonly Orbwalking.Orbwalker orbwalker;
-        private static int _spacerCount = -1;
-
-        /* MAIN */
-        private const string MenuDisplayName = "Yasuo the Unforgiven";
-        public const string RootName = "wp.yasuo";
-
-        /* TARGET SELECTOR */
-        private const string TargetSelector = "TargetSelector";
-        private const string TargetSelectorLoc = ".ts";
-
-        /* ORBWALKER */
-        private const string Orbwalker = "Orbwalker";
-        private const string OrbwalkerLoc = ".orbwalker";
-
-        /* COMBO */
-        private const string Combo = "Combo Settings";
-        private const string ComboLoc = ".combo";
-        private const string ComboQ = "Use Steel Tempest (Q)";
-        public const string ComboQLoc = ComboLoc + ".useq";
-        private const string ComboE = "Use Sweeping Blade (E)";
-        public const string ComboELoc = ComboLoc + ".usee";
-        private const string ComboR = "Use Last Breath (R)";
-        public const string ComboRLoc = ComboLoc + ".user";
-        private const string ComboRDelay = "Delay before using Last Breath (R)";
-        public const string ComboRDelayLoc = ".userdelay";
-        private const string ComboREnemies = "Last Breath (R) Min. Enemies";
-        public const string ComboREnemiesLoc = ComboLoc + ".renemies";
-        private const string ComboREnemyPercent = "Last Breath (R) Min. Target Health Percent";
-        public const string ComboREnemyPercentLoc = ComboLoc + ".renemypercent";
-        private const string ComboRTarget = "Last Breath (R) if Target is Knocked Up";
-        public const string ComboRTargetLoc = ".rtargetknockedup";
-        private const string ComboREnemiesPercent = "Last Breath (R) Min. Enemies Health Percent";
-        public const string ComboREnemiesPercentLoc = ComboLoc + ".renemiespercent";
-        private const string ComboRKnockType = "Last Breath (R) Self knocked up enemies only";
-        public const string ComboRKnockTypeLoc = ComboLoc + ".renemiesknocktypeonly";
-        private const string ComboItems = "Use Items";
-        public const string ComboItemsLoc = ComboLoc + ".useitems";
-        private const string ComboGapcloserMode = "Base Gapcloser on";
-        public const string ComboGapcloserModeLoc = ComboLoc + ".basegapcloser";
-        private const string ComboGapcloserEMode = "Keep Dashing even if in attack range";
-        public const string ComboGapcloserEModeLoc = ComboLoc + ".basegapcloserenemy";
-
-        /* HARASS */
-        private const string Harass = "Harass Settings";
-        private const string HarassLoc = ".harass";
-
-        /* Killsteal */
-        private const string Killsteal = "Killsteal Settings";
-        private const string KillstealLoc = ".ks";
-        private const string KillstealActive = "Enable Killsteal";
-        public const string KillstealActiveLoc = KillstealLoc + ".active";
-        private const string KillstealQ = "Use Steel Tempest (Q)";
-        public const string KillstealQLoc = KillstealLoc + ".useq";
-        private const string KillstealE = "Use Sweeping Blade (E)";
-        public const string KillstealELoc = KillstealLoc + ".usee";
-
-        /* FARMING */
-        private const string Farming = "Farming Settings";
-        private const string FarmingLoc = ".farming";
-        private const string FarmingLastHitQ = "[Last Hit] Use Steel Tempest (Q)";
-        public const string FarmingLastHitQLoc = KillstealLoc + ".lhuseq";
-        private const string FarmingLastHitQWind = "[Last Hit] Use Whirlwind (3rd Q)";
-        public const string FarmingLastHitQWindLoc = KillstealLoc + ".lhuseqw";
-        private const string FarmingLastHitE = "[Last Hit] Use Sweeping Blade (E)";
-        public const string FarmingLastHitELoc = KillstealLoc + ".lhusee";
-        private const string FarmingLaneClearQ = "[Lane Clear] Use Steel Tempest (Q)";
-        public const string FarmingLaneClearQLoc = KillstealLoc + ".lcuseq";
-        private const string FarmingLaneClearQWind = "[Lane Clear] Use Whirlwind (3rd Q)";
-        public const string FarmingLaneClearQWindLoc = KillstealLoc + ".lcuseqw";
-        private const string FarmingLaneClearItems = "[Lane Clear] Use Items";
-        public const string FarmingLaneClearItemsLoc = KillstealLoc + ".lcuseitems";
-        private const string FarmingLaneClearMinItems = "[Lane Clear] Min. Minions to Use Items";
-        public const string FarmingLaneClearMinItemsLoc = ".minmitems";
-
-        /* FLEE */
-        private const string Flee = "Flee Settings";
-        private const string FleeLoc = ".flee";
-        private const string FleeUse = "Use Flee";
-        public const string FleeUseLoc = FleeLoc + ".use";
-        private const string FleeKey = "Flee Key";
-        public const string FleeKeyLoc = FleeLoc + ".key";
-        private const string FleeTowers = "Flee into enemy towers";
-        public const string FleeTowersLoc = FleeLoc + ".towers";
-
-        /* AUTO WINDWALL */
-        public static Menu AutoWindMenu;
-        private const string AutoWindWall = "Auto Windwall Settings";
-        public const string AutoWindWallLoc = ".autoww";
-        private const string AutoWindWallUse = "Use Auto Windwall";
-        public const string AutoWindWallUseLoc = AutoWindWallLoc + ".usew";
-        private const string AutoWindWallDelay = "Windwall Delay";
-        public const string AutoWindWallDelayLoc = AutoWindWallLoc + ".delay";
-
-        /* EVADE */
-        public static Menu EvadeMenu;
-        private const string Evade = "Evade Settings";
-        public const string EvadeLoc = ".evade";
-        private const string EvadeUse = "Use Sweeping Blade (E) to Evade";
-        public const string EvadeUseLoc = EvadeLoc + ".use";
-
-        /* AUTO */
-        private const string Auto = "Auto Settings";
-        private const string AutoLoc = ".auto";
-        private const string AutoQ = "Use Steel Tempest (Q)";
-        public const string AutoQLoc = AutoLoc + ".useq";
-
-        /* ITEMS */
-        private const string Items = "Items Settings";
-        private const string ItemsLoc = ".items";
-        private const string ItemsTiamat = "Tiamat (Melee Only)";
-        public const string ItemsTiamatLoc = ".tiamat";
-        private const string ItemsHydra = "Ravenous Hydra (Melee Only)";
-        public const string ItemsHydraLoc = ".hydra";
-        private const string ItemsBilgewater = "Bilgewater Cutlass";
-        public const string ItemsBilgewaterLoc = ".bilgewater";
-        private const string ItemsBlade = "Blade of the Ruined King";
-        public const string ItemsBladeLoc = ".blade";
-
-        /* MISC */
-        private const string Misc = "Miscellaneous Settings";
-        private const string MiscLoc = ".misc";
-        private const string MiscPackets = "Use Packets";
-        public const string MiscPacketsLoc = MiscLoc + ".packets";
-
+        /// <summary>
+        ///     Yasuo Menu Constructor
+        /// </summary>
         public YasuoMenu()
         {
-            // Menu start
-            _menu = new Menu(MenuDisplayName, RootName, true);
+            // => Menu Initialize
+            _menu = new Menu(RootDisplayName, RootName, true);
 
-            // TargetSelector
-            LeagueSharp.Common.TargetSelector.AddToMenu(AddSubMenu(TargetSelector, TargetSelectorLoc));
+            // => Orbwalker Initialize
+            _orbwalker = new Orbwalking.Orbwalker(AddSubMenu(OrbwalkerDisplayName, OrbwalkerName));
 
-            // Orbwalker
-            orbwalker = new Orbwalking.Orbwalker(AddSubMenu(Orbwalker, OrbwalkerLoc));
+            // => TargetSelector Initialize
+            TargetSelector.AddToMenu(AddSubMenu(TargetSelectorDisplayName, TargetSelectorName));
 
-            // Combo
-            var combo = AddSubMenu(Combo, ComboLoc); // => Combo
-            AddItem(combo, ComboQ, ComboQLoc).SetValue(true); // => Q
-            AddItem(combo, ComboE, ComboELoc).SetValue(true); // => E
-            AddItem(combo, ComboR, ComboRLoc).SetValue(true); // => R
-            AddSpacer(combo); // => SPACER
-            AddItem(combo, ComboRDelay, ComboRDelayLoc).SetValue(new Slider(25, 15)); // => R Casting Delay
-            AddItem(combo, ComboREnemies, ComboREnemiesLoc).SetValue(new Slider(1, 1, 5)); // => R Enemies Requirement
-            AddItem(combo, ComboREnemiesPercent, ComboREnemiesPercentLoc).SetValue(new Slider(40, 10)); // => R Enemies Health Percent Requirement
-            AddItem(combo, ComboRTarget, ComboRTargetLoc).SetValue(true); // => R Selected Target Mode
-            AddItem(combo, ComboREnemyPercent, ComboREnemyPercentLoc).SetValue(new Slider(40, 10)); // => R Enemy Health Percent Requirement
-            AddItem(combo, ComboRKnockType, ComboRKnockTypeLoc).SetValue(false); // => R Knockup Type Blink
-            AddSpacer(combo); // => SPACER
-            AddItem(combo, ComboItems, ComboItemsLoc).SetValue(true); // => Use Items
-            AddItem(combo, ComboGapcloserMode, ComboGapcloserModeLoc)
-                .SetValue(new StringList(new[] { "Mouse", "Target" })); // => Gapcloser Mode
-            AddItem(combo, ComboGapcloserEMode, ComboGapcloserEModeLoc).SetValue(true); // => Keep gapclosing even if in AA range
+            #region Combo Initialize
 
-            // Harass
-            var harass = AddSubMenu(Harass, HarassLoc); // => Harass
-            /*AddItem(harass, HarassUse, HarassUseLoc).SetValue(true); // => Use
-            AddItem(harass, HarassQ, HarassQLoc).SetValue(true); // => Q
-            AddItem(harass, HarassE, HarassELoc).SetValue(true); // => E
-            AddSpacer(harass); // => SPACER
-            AddItem(harass, HarassQRange, HarassQRangeLoc).SetValue(new Slider(475, 475, 525)); // => Q Range
-            AddItem(harass, HarassMinE, HarassMinELoc).SetValue(new Slider(2, 2, 8)); // => Min. Minions Requirement
-            AddItem(harass, HarassItems, HarassItemsLoc).SetValue(true); // => Use Items
-            AddItem(harass, HarassEGapcloser, HarassEGapcloserLoc).SetValue(true); // => Use gapcloser
-            AddItem(harass, HarassQeCombo, HarassQeComboLoc).SetValue(true); // => use Q+E*/
-            AddItem(harass, "Harass Not Working Currently :(", ".harass.notworking");
+            var combo = AddSubMenu(ComboDisplayName, ComboName); // => Combo Menu
+            AddItem(combo, ComboQDisplayName, ComboQName).SetValue(true); // => Use Q
+            AddItem(combo, Combo3QDisplayName, Combo3QName).SetValue(true); // => Use 3rd Q
+            AddItem(combo, ComboEDisplayName, ComboEName).SetValue(true); // => Use E
+            AddItem(combo, ComboRDisplayName, ComboRName).SetValue(true); // => Use R
+            AddSpacer(combo); // => Spacer
+            AddItem(combo, ComboRModeDisplayName, ComboRModeName)
+                .SetValue(new StringList(new[] { "Multi-target", "Single-target", "Both" }, 1)); // => R Mode
+            AddItem(combo, ComboRPercentDisplayName, ComboRPercentName).SetValue(new Slider(40)); // => Min. Enemies Health %
+            AddItem(combo, ComboRPercent2DisplayName, ComboRPercent2Name).SetValue(new Slider(40)); // => Min. Enemies Health %
+            AddItem(combo, ComboRSelfDisplayName, ComboRSelfName).SetValue(false); // => Self Knockedup Enemies
+            AddItem(combo, ComboRMinDisplayName, ComboRMinName).SetValue(new Slider(3, 1, 5)); // => Min. Enemies
+            AddItem(combo, ComboRAirTimeDisplayName, ComboRAirTimeName).SetValue(new Slider(500, 250, 1000)); // => Min. Airtime
+            AddSpacer(combo); // => Spacer
+            AddItem(combo, ComboGapcloserModeDisplayName, ComboGapcloserModeName) // => Gapcloser Mode
+                .SetValue(new StringList(new[] { "Follow Mouse", "Follow Enemy" })); // => Gapcloser Mode
+            AddItem(combo, ComboGapcloserFModeDisplayName, ComboGapcloserFModeName).SetValue(false); // => Gapcloser Follow even in attack range
+            var items = AddSubMenu(combo, ComboItemsDisplayName, ComboItemsName); // => Items Menu
+            AddItem(items, ComboItemsTiamatDisplayName, ComboItemsTiamatName).SetValue(true); // => Tiamat
+            AddItem(items, ComboItemsHydraDisplayName, ComboItemsHydraName).SetValue(true); // => Ravenous Hydra
+            AddItem(items, ComboItemsBilgewaterDisplayName, ComboItemsBilgewaterName).SetValue(true); // => Bilgewater Cutlass
+            AddItem(items, ComboItemsBotRkDisplayName, ComboItemsBotRkName).SetValue(true); // => BladeoftheRuinedKing
 
-            // Killsteal
-            var ks = AddSubMenu(Killsteal, KillstealLoc); // => Killsteal
-            AddItem(ks, KillstealActive, KillstealActiveLoc).SetValue(true); // => Use
-            AddItem(ks, KillstealQ, KillstealQLoc).SetValue(true); // => Q
-            AddItem(ks, KillstealE, KillstealELoc).SetValue(true); // => E
 
-            // Farming
-            var farming = AddSubMenu(Farming, FarmingLoc); // => Farming
-            AddItem(farming, FarmingLastHitQ, FarmingLastHitQLoc).SetValue(true); // => Lasthit Q
-            AddItem(farming, FarmingLastHitQWind, FarmingLastHitQWindLoc).SetValue(true); // => Lasthit whirlwind Q
-            AddItem(farming, FarmingLastHitE, FarmingLastHitELoc).SetValue(true); // => Lasthit E
-            AddSpacer(farming); // => SPACER
-            AddItem(farming, FarmingLaneClearQ, FarmingLaneClearQLoc).SetValue(true); // => Laneclear Q
-            AddItem(farming, FarmingLaneClearQWind, FarmingLaneClearQWindLoc).SetValue(true); // => Laneclear whirlwind Q
-            AddItem(farming, FarmingLaneClearItems, FarmingLaneClearItemsLoc).SetValue(true); // => Laneclear Items
-            AddItem(farming, FarmingLaneClearMinItems, FarmingLaneClearMinItemsLoc).SetValue(new Slider(3, 1, 8)); // => Laneclear Items
+            #endregion
 
-            // Flee
-            var flee = AddSubMenu(Flee, FleeLoc); // => Flee
-            AddItem(flee, FleeUse, FleeUseLoc).SetValue(true); // => Use
-            AddItem(flee, FleeKey, FleeKeyLoc).SetValue(new KeyBind("Z".ToCharArray()[0], KeyBindType.Press)); // => Key
-            AddItem(flee, FleeTowers, FleeTowersLoc).SetValue(true); // => Towers
+            #region Flee Initialize
 
-            // Auto Windwall
-            var aww = AutoWindMenu = AddSubMenu(AutoWindWall, AutoWindWallLoc); // => Auto Windwall
-            AddItem(aww, AutoWindWallUse, AutoWindWallUseLoc).SetValue(true); // => Use
-            AddItem(aww, AutoWindWallDelay, AutoWindWallDelayLoc).SetValue(new Slider(500, 150, 2000)); // => Windwall Delay
-            AddSpacer(aww); // => SPACER
+            var flee = AddSubMenu(FleeDisplayName, FleeName);
+            AddItem(flee, FleeEnableDisplayName, FleeEnableName).SetValue(true);
+            AddItem(flee, FleeKeyDisplayName, FleeKeyName).SetValue(new KeyBind('Z', KeyBindType.Press));
+            AddItem(flee, FleeFleeIntoTowersDisplayName, FleeFleeIntoTowersName).SetValue(true);
 
-            // Evade
-            var evade = EvadeMenu = AddSubMenu(Evade, EvadeLoc); // => Evade
-            AddItem(evade, EvadeUse, EvadeUseLoc).SetValue(true); // => Use
-            AddSpacer(evade); // => SPACER
+            #endregion
 
-            // Auto
-            var auto = AddSubMenu(Auto, AutoLoc); // => Auto
-            AddItem(auto, AutoQ, AutoQLoc).SetValue(true); // => Q
+            #region Farming Initialize
 
-            // Items
-            var items = AddSubMenu(Items, ItemsLoc);
-            AddItem(items, ItemsTiamat, ItemsTiamatLoc).SetValue(true); // => Tiamat
-            AddItem(items, ItemsHydra, ItemsHydraLoc).SetValue(true); // => Hydra
-            AddItem(items, ItemsBilgewater, ItemsBilgewaterLoc).SetValue(true); // =? Bilgewater
-            AddItem(items, ItemsBlade, ItemsBladeLoc).SetValue(true); // => Blade
+            var farming = AddSubMenu(FarmingDisplayName, FarmingName);
+            AddItem(farming, FarmingLastHitQDisplayName, FarmingLastHitQName).SetValue(true);
+            AddItem(farming, FarmingLastHit3QDisplayName, FarmingLastHit3QName).SetValue(true);
+            AddItem(farming, FarmingLastHitEDisplayName, FarmingLastHitEName).SetValue(true);
+            AddItem(farming, FarmingLastHitQaaDisplayName, FarmingLastHitQaaName).SetValue(true);
+            AddItem(farming, FarmingLastHitEaaDisplayName, FarmingLastHitEaaName).SetValue(true);
+            AddItem(farming, FarmingLastHitTurretDisplayName, FarmingLastHitTurretName).SetValue(false);
+            AddSpacer(farming);
+            AddItem(farming, FarmingLaneClearQDisplayName, FarmingLaneClearQName).SetValue(true);
+            AddItem(farming, FarmingLaneClear3QDisplayName, FarmingLaneClear3QName).SetValue(true);
+            AddItem(farming, FarmingLaneClearEDisplayName, FarmingLaneClearEName).SetValue(true);
+            AddItem(farming, FarmingLaneClearQaaDisplayName, FarmingLaneClearQaaName).SetValue(true);
+            AddItem(farming, FarmingLaneClearEaaDisplayName, FarmingLaneClearEaaName).SetValue(true);
+            AddItem(farming, FarmingLaneClearTurretDisplayName, FarmingLaneClearTurretName).SetValue(false);
 
-            // Misc
-            var misc = AddSubMenu(Misc, MiscLoc); // => Misc
-            AddItem(misc, MiscPackets, MiscPacketsLoc).SetValue(true); // => Packets
+            #endregion
 
-            // Footer
+            #region Killsteal Initialize
+
+            //
+            var ks = AddSubMenu(KillstealDisplayName, KillstealName);
+            AddItem(ks, KillstealEnabledDisplayName, KillstealEnabledName).SetValue(true);
+            AddSpacer(ks);
+            AddItem(ks, KillstealQDisplayName, KillstealQName).SetValue(true);
+            AddItem(ks, Killsteal3QDisplayName, Killsteal3QName).SetValue(true);
+            AddItem(ks, KillstealEDisplayName, KillstealEName).SetValue(true);
+            AddItem(ks, KillstealEIntoTowerDisplayName, KillstealEIntoTowerName).SetValue(true);
+
+            #endregion
+
+            #region Misc Initialize
+
+            var misc = AddSubMenu(MiscDisplayName, MiscName); // => Misc Menu
+            AddItem(misc, MiscPacketsDisplayName, MiscPacketsName).SetValue(true); // => Packets
+
+            #endregion
+
+            // => Menu Footer
             AddSpacer(_menu); // => Spacer
-            AddSpacer(_menu, "Yasuo the Unforgiven"); // => Footer description
+            AddItem(_menu, RootDisplayName, RootDescriptionName); // => Description
 
+            // => Menu Finalize
             _menu.AddToMainMenu();
         }
 
         /// <summary>
-        ///     Quick reference to add a Yasuo Sub Menu.
+        ///     Add a sub menu towards the main menu.
         /// </summary>
-        /// <param name="displayName">Menu Display Name</param>
-        /// <param name="name">Menu Location Name</param>
-        /// <returns>The created menu</returns>
-        public Menu AddSubMenu(string displayName, string name)
+        /// <param name="displayName">Sub Menu Display Name</param>
+        /// <param name="localisationName">Sub Menu Directory</param>
+        /// <returns></returns>
+        public Menu AddSubMenu(string displayName, string localisationName)
         {
-            return _menu == null ? null : _menu.AddSubMenu(new Menu(displayName, RootName + name));
+            return _menu.AddSubMenu(new Menu(displayName, localisationName));
         }
 
         /// <summary>
-        ///     Quick reference to add a Yasuo Item.
+        ///     Add a sub menu towards a selected menu.
         /// </summary>
-        /// <param name="menu">Menu</param>
-        /// <param name="displayName">Menu Display Name</param>
-        /// <param name="name">Menu Location Name</param>
-        /// <returns>The created item</returns>
-        public MenuItem AddItem(Menu menu, string displayName, string name)
+        /// <param name="menu">Parent Menu</param>
+        /// <param name="displayName">Sub Menu Display Name</param>
+        /// <param name="localisationName">Sub Menu Directory</param>
+        /// <returns></returns>
+        public Menu AddSubMenu(Menu menu, string displayName, string localisationName)
         {
-            return menu == null ? null : menu.AddItem(new MenuItem(RootName + name, displayName));
+            return menu.AddSubMenu(new Menu(displayName, RootName + localisationName));
         }
 
         /// <summary>
-        ///     Quick reference to add a Spacer.
+        ///     Add an item towards a selected menu.
         /// </summary>
-        /// <param name="menu">Menu</param>
-        /// <param name="display">Spacer Display Name</param>
-        /// <returns>The created spacer in MenuItem instance</returns>
-        public static MenuItem AddSpacer(Menu menu, string display = "")
+        /// <param name="menu">Parent Menu</param>
+        /// <param name="displayName">Item Display Name</param>
+        /// <param name="localisationName">Item Directory</param>
+        /// <returns></returns>
+        public MenuItem AddItem(Menu menu, string displayName, string localisationName)
         {
-            ++_spacerCount;
-            return menu == null ? null : menu.AddItem(new MenuItem(".spacer" + _spacerCount, display));
+            return menu.AddItem(new MenuItem(RootName + localisationName, displayName));
         }
 
         /// <summary>
-        ///     Quick reference to fetch the orbwalker
+        ///     Add a spacer towards a selected menu.
         /// </summary>
-        /// <returns>The orbwalker instance</returns>
+        /// <param name="menu">Parent Menu</param>
+        /// <param name="localisationName">Spacer Directory</param>
+        public void AddSpacer(Menu menu, string localisationName = "")
+        {
+            _spacer++;
+            menu.AddItem(new MenuItem(RootName + localisationName + ".spacer_" + _spacer, ""));
+        }
+
+        /// <summary>
+        ///     Orbwalker instance
+        /// </summary>
+        /// <returns>Returns the orbwalker instance</returns>
         public Orbwalking.Orbwalker GetOrbwalker()
         {
-            return orbwalker;
+            return _orbwalker;
         }
 
         /// <summary>
-        ///     Quick reference to fetch the menu
+        ///     Menu instance
         /// </summary>
-        /// <returns>Yasuo Menu</returns>
+        /// <returns>Returns the menu instance</returns>
         public Menu GetMenu()
         {
             return _menu;
         }
 
         /// <summary>
-        ///     Quick reference to fetch a submenu
+        ///     Retrives a value from a MenuItem
         /// </summary>
-        /// <param name="args">Sub Menu Location</param>
-        /// <returns></returns>
-        public Menu GetSubMenu(string args)
+        /// <typeparam name="T">Value Type</typeparam>
+        /// <param name="localisationName">Item Directory</param>
+        /// <returns>MenuItem value</returns>
+        public T GetValue<T>(string localisationName)
         {
-            return _menu.SubMenu(args);
+            return _menu.Item(RootName + localisationName).GetValue<T>();
         }
 
-        /// <summary>
-        ///     Quick reference to fetch an item value
-        /// </summary>
-        /// <typeparam name="T">Any</typeparam>
-        /// <param name="str">Item Location</param>
-        /// <returns>Item Value</returns>
-        public T GetItemValue<T>(string str)
-        {
-            return _menu.Item(RootName + str).GetValue<T>();
-        }
+        #region Fields
 
-        /// <summary>
-        ///     Quick reference to fetch the item
-        /// </summary>
-        /// <param name="str">Item Location</param>
-        /// <returns>Item</returns>
-        public MenuItem GetItem(string str)
-        {
-            return _menu.Item(RootName + str);
-        }
+        private readonly Menu _menu; // => The Menu
+        private readonly Orbwalking.Orbwalker _orbwalker; // => The Orbwalker
+
+        private int _spacer = -1; // => Spacer Counter
+
+        private const string RootDisplayName = "Yasuo the Unforgiven"; // => Menu Display Name
+        private const string RootName = "l33t.yasuo"; // => Menu Name
+        private const string RootDescriptionName = ".desc";
+
+        private const string OrbwalkerDisplayName = "Orbwalker"; // => Orbwalker Display Name
+        private const string OrbwalkerName = ".orbwalker"; // => Orbwalker Name
+
+        private const string TargetSelectorDisplayName = "Target Selector"; // => TargetSelector Display Name
+        private const string TargetSelectorName = ".targetselector"; // => TargetSelector Name
+
+        #region Combo
+
+        private const string ComboDisplayName = "Combo Settings"; // => Combo Display Name
+        private const string ComboName = ".combo"; // => Combo Name
+
+        private const string ComboQDisplayName = "Use Steel Tempest (Q)"; // => Combo Q Display Name
+        public const string ComboQName = ComboName + ".useq"; // => Combo Q Name
+        private const string Combo3QDisplayName = "Use Steel Tempest - Whirlwind (3rd Q)"; // => Combo Q Display Name
+        public const string Combo3QName = ComboName + ".use3q"; // => Combo Q Name
+        private const string ComboEDisplayName = "Use Sweeping Blade (E)"; // => Combo E Display Name
+        public const string ComboEName = ComboName + ".usee"; // => Combo E Name
+        private const string ComboRDisplayName = "Use Last Breath (R)"; // => Combo R Display Name
+        public const string ComboRName = ComboName + ".user"; // => Combo R Name
+
+        private const string ComboRModeDisplayName = "Last Breath (R) Mode"; // => Combo R Mode Display Name
+        public const string ComboRModeName = ComboName + ".rmode"; // => Combo R Mode Name
+        private const string ComboRMinDisplayName = "[Last Breath] Min. Enemies to Use R"; // => R Min Enemies to use R
+        public const string ComboRMinName = ComboName + ".rmin";
+
+        private const string ComboRPercentDisplayName = "[Last Breath] Min. Enemies Health %"; // => Combo R Min. Enemies Health % Display Name
+        public const string ComboRPercentName = ComboName + ".renemieshealthper"; // => Combo R Min. Enemies Health % Name
+        private const string ComboRPercent2DisplayName = "[Last Breath] Min. Target Health %"; // => Combo R Min. Target Health % Display Name
+        public const string ComboRPercent2Name = ComboName + ".renemyhealthper"; // => Combo R Min. Enemies Health % Name
+        private const string ComboRSelfDisplayName = "[Last Breath] Only self knockedup enemies"; // => R only self knockedup enemies Display Name
+        public const string ComboRSelfName = ComboName + ".ronlyself"; // => R only self knockedup enemies Name
+        private const string ComboRAirTimeDisplayName = "[Last Breath] Keep in the air for (milliseconds)"; // => R Keep in the air before casting Display Name
+        public const string ComboRAirTimeName = ComboName + ".rairtime"; // => R Keep in the air before casting Name
+        private const string ComboGapcloserModeDisplayName = "Gapcloser Mode"; // => Gapcloser Mode Display name
+        public const string ComboGapcloserModeName = ComboName + ".gapclosermode"; // => Gapcloser Mode Display name
+        private const string ComboGapcloserFModeDisplayName = "[Gapcloser] Follow even if in attack range"; // => Gapcloser Follow Mode Display name
+        public const string ComboGapcloserFModeName = ComboName + ".gapcloserfollowmode"; // => Gapcloser Follow Mode Display name
+
+        #region Items
+
+        private const string ComboItemsDisplayName = "Item Settings"; // => Items Display Name
+        private const string ComboItemsName = ComboName + ".items"; // => Items Name
+
+        private const string ComboItemsTiamatDisplayName = "Use Tiamat"; // => Tiamat Display Name
+        public const string ComboItemsTiamatName = ComboItemsName + ".usetiamat"; // => Tiamat Name
+        private const string ComboItemsHydraDisplayName = "Use Ravenous Hydra"; // => Ravenous Hydra Display Name
+        public const string ComboItemsHydraName = ComboItemsName + ".usehydra"; // => Ravenous Hydra Name
+        private const string ComboItemsBilgewaterDisplayName = "Use Bilgewater Cutlass"; // => Bilgewater Cutlass Display Name
+        public const string ComboItemsBilgewaterName = ComboItemsName + ".usebilgewater"; // => Bilgewater Cutlass Name
+        private const string ComboItemsBotRkDisplayName = "Use Blade of the Ruined King"; // => Blade of the Ruined King Display Name
+        public const string ComboItemsBotRkName = ComboItemsName + ".usebotrk"; // => Blade of the Ruined King Name
+
+        #endregion
+
+        #endregion
+
+        #region Flee
+
+        private const string FleeDisplayName = "Flee Settings"; // => Flee Display Name
+        private const string FleeName = ".flee"; // => Flee Name
+
+        private const string FleeEnableDisplayName = "Enable Flee Mode"; // => Flee Enabled Display Name
+        public const string FleeEnableName = FleeName + ".useflee"; // => Flee Enabled Name
+        private const string FleeKeyDisplayName = "Flee"; // => Flee Key Display Name
+        public const string FleeKeyName = FleeName + ".usefleekey"; // => Flee Key Name
+        private const string FleeFleeIntoTowersDisplayName = "Flee into enemy towers"; // => Flee into towers Display Name
+        public const string FleeFleeIntoTowersName = FleeName + ".usefleetowers"; // => Flee into towers
+
+        #endregion
+
+        #region Farming
+
+        private const string FarmingDisplayName = "Farming Settings"; // => Farming Display Name
+        private const string FarmingName = ".farming"; // => Farming Name
+
+        private const string FarmingLastHitQDisplayName = "[LastHit] Use Steel Tempest (Q)"; // => Last Hit Q Display Name
+        public const string FarmingLastHitQName = FarmingName + ".lhuseq"; // => Last Hit Q Name
+        private const string FarmingLastHit3QDisplayName = "[LastHit] Use Steel Tempest (Q) - Whirlwind"; // => Last Hit 3rd Q Display Name
+        public const string FarmingLastHit3QName = FarmingName + ".lhuse3q"; // => Last Hit 3rd Q Name
+        private const string FarmingLastHitEDisplayName = "[LastHit] Use Sweeping Blade (E)"; // => Last Hit E Display Name
+        public const string FarmingLastHitEName = FarmingName + ".lhusee"; // => Last Hit E Name
+        private const string FarmingLastHitEaaDisplayName = "[LastHit] Prioritize E over Basic Attack"; // => Last Hit Prioritize E over AA Display Name
+        public const string FarmingLastHitEaaName = FarmingName + "lheoveraa"; // => Last Hit Prioritize E over AA Name
+        private const string FarmingLastHitQaaDisplayName = "[LastHit] Prioritize Q over Basic Attack"; // => Last Hit Prioritize Q over AA Display Name
+        public const string FarmingLastHitQaaName = FarmingName + "lhqoveraa"; // => Last Hit Prioritize Q over AA Name
+        private const string FarmingLastHitTurretDisplayName = "[LastHit] Use Sweeping Blade (E) towards under turret"; // => Last Hit Use E to towers Display Name
+        public const string FarmingLastHitTurretName = FarmingName + "lhuseut"; // => Last Hit Use E to towers Name
+
+        private const string FarmingLaneClearQDisplayName = "[LaneClear] Use Steel Tempest (Q)"; // => Lane Clear Q Display Name
+        public const string FarmingLaneClearQName = FarmingName + ".lcuseq"; // => Lane Clear Q Name
+        private const string FarmingLaneClear3QDisplayName = "[LaneClear] Use Steel Tempest (Q) - Whirlwind"; // => Lane Clear 3rd Q Display Name
+        public const string FarmingLaneClear3QName = FarmingName + ".lcuse3q"; // => Lane Clear 3rd Q Name
+        private const string FarmingLaneClearEDisplayName = "[LaneClear] Use Sweeping Blade (E)"; // => Lane Clear E Display Name
+        public const string FarmingLaneClearEName = FarmingName + ".lcusee"; // => Lane Clae E Name
+        private const string FarmingLaneClearEaaDisplayName = "[LaneClear] Prioritize E over Basic Attack"; // => Lane Clear Prioritize E over AA Display Name
+        public const string FarmingLaneClearEaaName = FarmingName + "lceoveraa"; // => Lane Clear Prioritize E over AA Name
+        private const string FarmingLaneClearQaaDisplayName = "[LaneClear] Prioritize Q over Basic Attack"; // => Lane Clear Prioritize Q over AA Display Name
+        public const string FarmingLaneClearQaaName = FarmingName + "lcqoveraa"; // => Lane Clear Prioritize Q over AA Name
+        private const string FarmingLaneClearTurretDisplayName = "[LaneClear] Use Sweeping Blade (E) towards under turret"; // => Lane Clear Use E to towers Display Name
+        public const string FarmingLaneClearTurretName = FarmingName + "lcuseut"; // => Lane Clear Use E to towers Name
+
+        #endregion
+
+        #region Killsteal
+
+        private const string KillstealDisplayName = "Killsteal Settings"; // => Killsteal Display Name
+        private const string KillstealName = ".ks"; // => Killsteal Name
+        private const string KillstealEnabledDisplayName = "Killsteal Enabled"; // => Killsteal Enabled Display Name
+        public const string KillstealEnabledName = KillstealName + ".kse"; // => Killsteal Enabled Name
+
+        private const string KillstealQDisplayName = "Use Steel Tempest (Q)"; // => Killsteal Q Display Name
+        public const string KillstealQName = KillstealName + ".useq"; // => Killsteal Q Name
+        private const string Killsteal3QDisplayName = "Use Steel Tempest - Whirlwind (3rd Q)"; // => Killsteal 3Q Display Name
+        public const string Killsteal3QName = KillstealName + ".use3q"; // => Killsteal 3Q Name
+        private const string KillstealEDisplayName = "Use Sweeping Blade (E)"; // => Killsteal E Display Name
+        public const string KillstealEName = KillstealName + ".usee"; // => Killsteal E Name
+        private const string KillstealEIntoTowerDisplayName = "Use Sweeping Blade (E) towards under turret"; // => Killsteal E Into Towers Display Name
+        public const string KillstealEIntoTowerName = KillstealName + ".useeintotower"; // => Killsteal E Into Towers Name
+
+
+        #endregion
+
+        #region Misc
+
+        private const string MiscDisplayName = "Misc Settings"; // => Misc Display Name
+        private const string MiscName = ".misc"; // => Misc Name
+
+        private const string MiscPacketsDisplayName = "Packets"; // => Packets Display Name
+        public const string MiscPacketsName = MiscName + ".packets"; // => Packets Display Name
+
+        #endregion
+
+        #endregion
     }
 }

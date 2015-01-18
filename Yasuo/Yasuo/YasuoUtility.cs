@@ -14,183 +14,150 @@ namespace Yasuo
         private static readonly Random Random = new Random(DateTime.Now.Millisecond);
 
         /// <summary>
-        ///     Checks if the object has the whirlwind passive.
-        /// </summary>
-        /// <param name="objAiBase">The object to check if has whirlwind</param>
-        /// <returns></returns>
-        public static bool HasWhirlwind(this Obj_AI_Base objAiBase)
-        {
-            return objAiBase.HasBuff("YasuoQ3W");
-        }
-
-        /// <summary>
-        ///     Checks if the targetted objet is able to be dashed on.
-        /// </summary>
-        /// <param name="objAiBase">The object of the dasher</param>
-        /// <param name="targetObjAiBase">The object of the one who is being dashed on</param>
-        /// <returns>True/False</returns>
-        public static bool IsDashable(this Obj_AI_Base objAiBase, Obj_AI_Base targetObjAiBase)
-        {
-            return objAiBase.Distance(targetObjAiBase.Position) <= 475f && !targetObjAiBase.HasBuff("YasuoDashWrapper");
-        }
-
-        /// <summary>
-        ///     Calculates the Vector2 position of the dashing end position.
-        /// </summary>
-        /// <param name="objAiBase">The object of the dasher</param>
-        /// <param name="unitObjAiBase">The object of the one who is being dashed on</param>
-        /// <returns>Vector2 position</returns>
-        public static Vector2 GetDashingEnd(this Obj_AI_Base objAiBase, Obj_AI_Base unitObjAiBase)
-        {
-            var vector3 = new Vector2(
-                unitObjAiBase.Position.X - objAiBase.Position.X, unitObjAiBase.Position.Y - objAiBase.Position.Y);
-            var abs = Math.Sqrt(vector3.X * vector3.X + vector3.Y * vector3.Y);
-            return new Vector2(
-                (float) (objAiBase.Position.X + (475f * (vector3.X / abs))),
-                (float) (objAiBase.Position.Y + (475f * (vector3.Y / abs))));
-        }
-
-        /// <summary>
-        ///     Calculates the real auto attack range of the object.
-        /// </summary>
-        /// <param name="objAiBase">The object to be checked of</param>
-        /// <returns>Float Attack Range</returns>
-        public static float GetAutoAttackRange(this Obj_AI_Base objAiBase)
-        {
-            return (objAiBase.AttackRange + objAiBase.BoundingRadius);
-        }
-
-        /// <summary>
-        ///     Returns Yasuo's correct Steel Tempest (Q) mode
-        /// </summary>
-        /// <param name="objAiBase">Base Object</param>
-        /// <returns>Steel Tempest Spell Instance</returns>
-        public static Spell GetYasuoQState(this Obj_AI_Base objAiBase)
-        {
-            return (objAiBase.HasWhirlwind()) ? YasuoSpells.QWind : YasuoSpells.Q;
-        }
-
-        /// <summary>
-        ///     Returns if the base object is knocked up.
-        /// </summary>
-        /// <param name="objAiBase">Base Object</param>
-        /// <param name="onlySelf">Only yasuo knock ups</param>
-        /// <returns>True/False</returns>
-        public static bool IsKnockedUp(this Obj_AI_Base objAiBase, bool onlySelf = false)
-        {
-            return (onlySelf)
-                ? (objAiBase.HasBuff("yasuoq3mis"))
-                : (objAiBase.HasBuffOfType(BuffType.Knockup) || objAiBase.HasBuffOfType(BuffType.Knockback));
-        }
-
-        /// <summary>
-        ///     Returns time left for knock up buff to expire
-        /// </summary>
-        /// <param name="objAiBase">Base Object</param>
-        /// <param name="onlySelf">Only yasuo knock ups</param>
-        /// <returns></returns>
-        public static float KnockedUpTimeLeft(this Obj_AI_Base objAiBase, bool onlySelf = false)
-        {
-            if (onlySelf)
-            {
-                var selfBuff = objAiBase.Buffs.FirstOrDefault(b => b.DisplayName.Equals("yasuoq3mis"));
-                if (selfBuff != null)
-                {
-                    return selfBuff.EndTime - Game.Time;
-                }
-            }
-            else
-            {
-                var buff =
-                objAiBase.Buffs.FirstOrDefault(
-                    b => b.Type.Equals(BuffType.Knockup) || b.Type.Equals(BuffType.Knockback));
-                if (buff != null)
-                {
-                    return buff.EndTime - Game.Time;
-                }
-            }
-            return -1f;
-        }
-
-        /// <summary>
-        ///     Returns Dash Data
+        ///     Checks if the base object has Yasuo's 3rd Q passive (Whirlwind)
         /// </summary>
         /// <param name="base">Base Object</param>
-        /// <param name="vector3">Vector3 Position</param>
-        /// <param name="focusTarget">If to focus target</param>
+        /// <returns>True/False on the passive state</returns>
+        public static bool HasWhirlwind(this Obj_AI_Base @base)
+        {
+            return @base.HasBuff("YasuoQ3W");
+        }
+
+        /// <summary>
+        ///     Checks if the base object can dash onto target.
+        /// </summary>
+        /// <param name="base">Base Object</param>
+        /// <param name="target">Target Object</param>
+        /// <returns>True/False on dashable state</returns>
+        public static bool IsDashable(this Obj_AI_Base @base, Obj_AI_Base target)
+        {
+            return @base.Distance(target.Position) < YasuoSpells.E.Range && !target.HasBuff("YasuoDashWrapper");
+        }
+
+        /// <summary>
+        ///     Calculates the ending poisition of the dash.
+        /// </summary>
+        /// <param name="base">Base Object</param>
+        /// <param name="target">Target Object</param>
+        /// <returns>Vector2 Ending Position</returns>
+        public static Vector2 GetDashingEnd(this Obj_AI_Base @base, Obj_AI_Base target)
+        {
+            if (!target.IsValidTarget())
+            {
+                return Vector2.Zero;
+            }
+
+            var baseX = @base.Position.X; // => Base X axis
+            var baseY = @base.Position.Y; // => Base Y axis
+            var targetX = target.Position.X; // => Target X axis
+            var targetY = target.Position.Y; // => Target Y axis
+
+            var vector = new Vector2(targetX - baseX, targetY - baseY); // => Vector2
+            var sqrt = Math.Sqrt(vector.X * vector.X + vector.Y * vector.Y); // => Sqaure(x)
+
+            var x = (float) (baseX + (YasuoSpells.E.Range * (vector.X / sqrt))); // => Ending X axis
+            var y = (float) (baseY + (YasuoSpells.E.Range * (vector.Y / sqrt))); // => Ending Y axis
+
+            return new Vector2(x, y).Extend(@base.Position.To2D(), -150f); // => extand by 150f to oppsite direction
+        }
+
+        /// <summary>
+        ///     Calculates the real auto attack range of the base object.
+        /// </summary>
+        /// <param name="base">Base Object</param>
+        /// <returns>Float Attack Range</returns>
+        public static float GetAutoAttackRange(this Obj_AI_Base @base)
+        {
+            return (@base.AttackRange + @base.BoundingRadius);
+        }
+
+        /// <summary>
+        ///     Checks if the base object is knocked up.
+        /// </summary>
+        /// <param name="base">Base Object</param>
+        /// <param name="selfKnockup">Only self knockups</param>
+        /// <returns>Knockup status</returns>
+        public static bool IsKnockedup(this Obj_AI_Base @base, bool selfKnockup = false)
+        {
+            return selfKnockup
+                ? @base.HasBuff("yasuoq3mis")
+                : @base.HasBuffOfType(BuffType.Knockup) || @base.HasBuffOfType(BuffType.Knockback);
+        }
+
+        /// <summary>
+        ///     Calculates the time left for the base object before ending knocked bufftype.
+        /// </summary>
+        /// <param name="base">Base Object</param>
+        /// <returns>Time left for knocked buff type to end</returns>
+        public static float KnockupTimeLeft(this Obj_AI_Base @base)
+        {
+            var buff = @base.Buffs.Find(b => b.Type.Equals(BuffType.Knockup) || b.Type.Equals(BuffType.Knockback));
+            return (buff != null) ? buff.EndTime - Game.Time : -1f;
+        }
+
+        /// <summary>
+        ///     Calculates Dash Data
+        /// </summary>
+        /// <param name="base">Base Object</param>
+        /// <param name="vector3">Vector3 toPosition</param>
+        /// <param name="target">Target Object</param>
         /// <param name="ignoreTower">Ignore Towers</param>
-        /// <returns>Object[index=0 is Vector3],[index=1 is Obj_AI_Base]</returns>
-        public static object[] GetDashData(this Obj_AI_Base @base,
+        /// <returns>DashData Object</returns>
+        public static DashData? GetDashData(this Obj_AI_Base @base,
             Vector3 vector3,
-            Obj_AI_Hero focusTarget = null,
+            Obj_AI_Hero target = null,
             bool ignoreTower = true)
         {
-            var returnObjects = new object[2];
-            returnObjects[0] = Vector3.Zero;
-            returnObjects[1] = null;
+            var rVector = Vector3.Zero;
+            Obj_AI_Base rAiBase = null;
 
             if (!vector3.IsValid())
             {
                 return null;
             }
 
-            var minions =
+            var list =
                 ObjectManager.Get<Obj_AI_Base>()
-                    .Where(m => m.IsValidTarget() && m.Distance(@base) <= YasuoSpells.E.Range && @base.IsDashable(m));
-            foreach (var m in minions)
+                    .FindAll(o => o.Distance(@base) < YasuoSpells.E.Range && @base.IsDashable(o) && o.IsTargetable);
+            foreach (var o in list)
             {
-                var point = @base.Position + (m.Position - @base.Position).Normalized() * YasuoSpells.E.Range;
+                var vector = @base.Position + (o.Position - @base.Position).Normalized() * YasuoSpells.E.Range;
 
-                if (!ignoreTower && point.UnderTurret(true))
+                if (!ignoreTower && vector.UnderTurret(true) || o == target)
                 {
                     continue;
                 }
 
-                if (!((Vector3) returnObjects[0]).IsValid())
+                if (!rVector.IsValid())
                 {
-                    returnObjects[0] = point;
-                    returnObjects[1] = m;
+                    rVector = vector;
+                    rAiBase = o;
                 }
-                else if (point.Distance(vector3) < ((Vector3) returnObjects[0]).Distance(vector3))
+                else if (vector.Distance(vector3) < rVector.Distance(vector3))
                 {
-                    returnObjects[0] = point;
-                    returnObjects[1] = m;
+                    rVector = vector;
+                    rAiBase = o;
                 }
             }
 
-            var enemies =
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(
-                        e =>
-                            e.IsValidTarget() && e.Distance(@base.Position) <= YasuoSpells.E.Range &&
-                            @base.IsDashable(e));
-            foreach (var e in enemies)
+            if (!rAiBase.IsValidTarget() && target != null && target.Distance(@base.Position) < YasuoSpells.E.Range)
             {
-                if (focusTarget.IsValidTarget() && e == focusTarget)
+                var vector = @base.Position + (target.Position - @base.Position).Normalized() * YasuoSpells.E.Range;
+
+                if (!ignoreTower && vector.UnderTurret(true))
                 {
-                    continue;
+                    return null;
                 }
 
-                var point = @base.Position + (e.Position - @base.Position).Normalized() * YasuoSpells.E.Range;
-
-                if (!ignoreTower && point.UnderTurret(true))
-                {
-                    continue;
-                }
-
-                if (!((Vector3) returnObjects[0]).IsValid())
-                {
-                    returnObjects[0] = point;
-                    returnObjects[1] = e;
-                }
-                else if (point.Distance(vector3) < ((Vector3) returnObjects[0]).Distance(vector3))
-                {
-                    returnObjects[0] = point;
-                    returnObjects[1] = e;
-                }
+                rAiBase = target;
+                rVector = vector;
             }
 
-            return returnObjects;
+            if (rAiBase.IsValidTarget())
+            {
+                return new DashData { ObjAiBase = rAiBase, Vector3 = rVector };
+            }
+            return null;
         }
 
         /// <summary>
@@ -225,6 +192,15 @@ namespace Yasuo
                         (pVector3.To2D() - @player.ServerPosition.To2D()).Normalized().To3D();
 
             @player.IssueOrder(GameObjectOrder.MoveTo, point);
+        }
+
+        /// <summary>
+        ///     DashData struct
+        /// </summary>
+        public struct DashData
+        {
+            public Obj_AI_Base ObjAiBase;
+            public Vector3 Vector3;
         }
     }
 }
