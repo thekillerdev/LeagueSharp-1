@@ -3,6 +3,7 @@ using System.Linq;
 using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX;
+using Yasuo.Evade;
 
 namespace Yasuo
 {
@@ -31,6 +32,9 @@ namespace Yasuo
         /// <param name="args">System EventArgs</param>
         public void OnGameUpdate(EventArgs args)
         {
+            Yasuo.EvadeDetectedSkillshots.RemoveAll(skillshot => !skillshot.IsActive());
+            Evader();
+
             switch (menu.GetOrbwalker().ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -80,7 +84,7 @@ namespace Yasuo
                         {
                             if (dashData.Value.Vector3.Distance(Game.CursorPos) <
                                 Yasuo.Player.Distance(Game.CursorPos) - 100 &&
-                                dashData.Value.Vector3.Distance(Game.CursorPos) < 250)
+                                dashData.Value.Vector3.Distance(Game.CursorPos) < Yasuo.Menu.GetValue<Slider>(YasuoMenu.ComboERangeName).Value)
                             {
                                 YasuoSpells.E.Cast(dashData.Value.ObjAiBase, packets);
                                 DashingEnd = player.GetDashingEnd(dashData.Value.ObjAiBase);
@@ -108,7 +112,7 @@ namespace Yasuo
                             {
                                 if (dashData.Value.Vector3.Distance(target.ServerPosition) <
                                     Yasuo.Player.Distance(target.ServerPosition) - 100 &&
-                                    dashData.Value.Vector3.Distance(target.ServerPosition) < 250)
+                                    dashData.Value.Vector3.Distance(target.ServerPosition) < Yasuo.Menu.GetValue<Slider>(YasuoMenu.ComboERangeName).Value)
                                 {
                                     YasuoSpells.E.Cast(dashData.Value.ObjAiBase, packets);
                                     DashingEnd = player.GetDashingEnd(dashData.Value.ObjAiBase);
@@ -146,7 +150,7 @@ namespace Yasuo
                 {
                     // => Not dashing
                     var targetPosition =
-                        Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 100f, target.MoveSpeed)
+                        Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 0f, target.MoveSpeed)
                             .UnitPosition;
                     // => Prediction
                     var castPosition =
@@ -154,7 +158,7 @@ namespace Yasuo
                             .CastPosition; // => Prediction
 
                     // => Prediction Distance
-                    if (player.Distance(targetPosition) < YasuoSpells.Q.QStage0.Range - 20f)
+                    if (player.Distance(targetPosition) < YasuoSpells.Q.QStage0.Range)
                     {
                         YasuoSpells.Q.QStage0.Cast(castPosition, packets);
                     }
@@ -182,7 +186,7 @@ namespace Yasuo
                             .CastPosition; // => Prediction
 
                     // => Prediction Distance
-                    if (player.Distance(target.ServerPosition) < YasuoSpells.Q.QStage1.Range - 20f)
+                    if (player.Distance(target.ServerPosition) < YasuoSpells.Q.QStage1.Range)
                     {
                         YasuoSpells.Q.QStage1.Cast(castPosition, packets);
                     }
@@ -331,7 +335,7 @@ namespace Yasuo
                         if (qMinion != null && Environment.TickCount - LastSweepingBladeTick > 420 &&
                             !player.IsDashing())
                         {
-                            if (player.Distance(qMinion.ServerPosition) < YasuoSpells.Q.QStage0.Range - 20f)
+                            if (player.Distance(qMinion.ServerPosition) < YasuoSpells.Q.QStage0.Range)
                             {
                                 YasuoSpells.Q.QStage0.Cast(qMinion, packets);
                                 return;
@@ -346,10 +350,10 @@ namespace Yasuo
                 var qMinions = minions.FindAll(m => m.IsValidTarget(YasuoSpells.Q.QStage1.Range));
                 if (qMinions.Any())
                 {
-                    var qMinion = qMinions.OrderBy(m => m.Health).FirstOrDefault();
+                    var qMinion = qMinions.OrderBy(m => m.Health).LastOrDefault();
                     if (qMinion != null && Environment.TickCount - LastSweepingBladeTick > 420 && !player.IsDashing())
                     {
-                        if (player.Distance(qMinion.ServerPosition) < YasuoSpells.Q.QStage0.Range - 20f)
+                        if (player.Distance(qMinion.ServerPosition) < YasuoSpells.Q.QStage0.Range)
                         {
                             YasuoSpells.Q.QStage1.Cast(qMinion, packets);
                         }
@@ -400,7 +404,7 @@ namespace Yasuo
                         var eMinion = eMinions.OrderBy(m => m.Health).FirstOrDefault();
                         if (eMinion != null)
                         {
-                            var underTower = eMinion.UnderTurret(true);
+                            var underTower = player.GetDashingEnd(eMinion).To3D().UnderTurret(true);
                             var shouldDive = (laneclear)
                                 ? menu.GetValue<bool>(YasuoMenu.FarmingLaneClearTurretName)
                                 : menu.GetValue<bool>(YasuoMenu.FarmingLastHitTurretName);
@@ -530,7 +534,7 @@ namespace Yasuo
             // => E Function
             if (useE && YasuoSpells.E.IsReady() && player.GetSweepingBladeDamage(target) > target.Health)
             {
-                var underTower = target.UnderTurret(true);
+                var underTower = player.GetDashingEnd(target).To3D().UnderTurret(true);
                 var shouldDive = menu.GetValue<bool>(YasuoMenu.KillstealEIntoTowerName);
                 if (underTower && shouldDive)
                 {
@@ -564,7 +568,7 @@ namespace Yasuo
                 {
                     // => Not dashing
                     var targetPosition =
-                        Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 100f, target.MoveSpeed)
+                        Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 0f, target.MoveSpeed)
                             .UnitPosition;
                     // => Prediction
                     var castPosition =
@@ -572,7 +576,7 @@ namespace Yasuo
                             .CastPosition; // => Prediction
 
                     // => Prediction Distance
-                    if (player.Distance(targetPosition) < YasuoSpells.Q.QStage0.Range - 20f)
+                    if (player.Distance(targetPosition) < YasuoSpells.Q.QStage0.Range)
                     {
                         YasuoSpells.Q.QStage0.Cast(castPosition, packets);
                     }
@@ -601,7 +605,7 @@ namespace Yasuo
                             .CastPosition; // => Prediction
 
                     // => Prediction Distance
-                    if (player.Distance(target.ServerPosition) < YasuoSpells.Q.QStage1.Range - 20f)
+                    if (player.Distance(target.ServerPosition) < YasuoSpells.Q.QStage1.Range)
                     {
                         YasuoSpells.Q.QStage1.Cast(castPosition, packets);
                     }
@@ -624,6 +628,110 @@ namespace Yasuo
                             HealthPrediction.LaneClearHealthPrediction(
                                 minion, (int) ((player.AttackDelay * 1000) * 2f), 0) <=
                             player.GetAutoAttackDamage(minion));
+        }
+
+        private static void Evader()
+        {
+            foreach (var skillshot in Yasuo.EvadeDetectedSkillshots)
+            {
+                var flag = false;
+                if (YasuoSpells.E.IsReady())
+                {
+                    if (Yasuo.Menu.GetValue<bool>(YasuoMenu.EvadeUseLoc))
+                    {
+                        flag = Evade(skillshot);
+                    }
+                }
+
+                if (flag)
+                {
+                    continue;
+                }
+
+                if (YasuoSpells.W.IsReady())
+                {
+                    if (Yasuo.Menu.GetValue<bool>(YasuoMenu.AutoWindWallUseLoc))
+                    {
+                        Windwall(skillshot);
+                    }
+                }
+            }
+        }
+
+        private static bool Evade(Skillshot skillshot)
+        {
+            if (YasuoSpells.E.IsReady())
+            {
+                // => If anything, execute the windwall.
+                var flag = true;
+
+                foreach (var ss in Yasuo.MenuDashesList.Where(ss => ss.SpellName == skillshot.SpellData.SpellName))
+                {
+                    flag =
+                        Yasuo.Menu.GetValue<bool>(
+                            ((ss.IsWindwall) ? YasuoMenu.AutoWindWallLoc : YasuoMenu.EvadeLoc) + "." + ss.ChampionName +
+                            "." + ss.Slot);
+                    break;
+                }
+
+                if (flag)
+                {
+                    // => Will skillshot collide with Yasuo?
+                    if (Yasuo.Player.Position.To2D().ProjectOn(skillshot.Start, skillshot.End).IsOnSegment)
+                    {
+                        var minions =
+                            ObjectManager.Get<Obj_AI_Minion>()
+                                .Where(m => m.IsValidTarget() && Yasuo.Player.IsDashable(m));
+                        var safeMinions =
+                            minions.Where(
+                                m =>
+                                    !Yasuo.Player.GetDashingEnd(m).ProjectOn(skillshot.Start, skillshot.End).IsOnSegment);
+
+                        var objAiMinions = safeMinions as Obj_AI_Minion[] ?? safeMinions.ToArray();
+                        if (objAiMinions.Any())
+                        {
+                            var minion = objAiMinions.OrderBy(m => m.Distance(Yasuo.Player.Position)).FirstOrDefault();
+                            if (minion != null)
+                            {
+                                YasuoSpells.E.Cast(
+                                    minion,
+                                    Yasuo.Menu.GetValue<bool>(YasuoMenu.MiscPacketsName));
+
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static void Windwall(Skillshot skillshot)
+        {
+            if (YasuoSpells.W.IsReady() && skillshot.SpellData.Type != SkillShotType.SkillshotCircle ||
+                skillshot.SpellData.Type != SkillShotType.SkillshotRing)
+            {
+                var isAboutToHitRange = Yasuo.Menu.GetValue<Slider>(YasuoMenu.AutoWindWallDelayLoc).Value;
+
+                // => If anything, execute the windwall.
+                var flag =
+                    Yasuo.MenuWallsList.Where(ss => ss.SpellName == skillshot.SpellData.SpellName)
+                        .Select(
+                            ss =>
+                                Yasuo.Menu.GetValue<bool>(
+                                    ((ss.IsWindwall) ? YasuoMenu.AutoWindWallLoc : YasuoMenu.EvadeLoc) + "." +
+                                    ss.ChampionName + "." + ss.Slot))
+                        .FirstOrDefault();
+
+                if (flag)
+                {
+                    if (skillshot.IsAboutToHit(isAboutToHitRange, Yasuo.Player))
+                    {
+                        var cast = Yasuo.Player.ServerPosition + Vector3.Normalize(skillshot.MissilePosition.To3D() - Yasuo.Player.ServerPosition) * 10;
+                        YasuoSpells.W.Cast(cast, Yasuo.Menu.GetValue<bool>(YasuoMenu.MiscPacketsName));
+                    }
+                }
+            }
         }
     }
 }

@@ -37,6 +37,7 @@ namespace Yasuo
             AddItem(combo, ComboGapcloserModeDisplayName, ComboGapcloserModeName) // => Gapcloser Mode
                 .SetValue(new StringList(new[] { "Follow Mouse", "Follow Enemy" })); // => Gapcloser Mode
             AddItem(combo, ComboGapcloserFModeDisplayName, ComboGapcloserFModeName).SetValue(false); // => Gapcloser Follow even in attack range
+            AddItem(combo, ComboERangeDisplayName, ComboERangeName).SetValue(new Slider(475, 0, 475));
             var items = AddSubMenu(combo, ComboItemsDisplayName, ComboItemsName); // => Items Menu
             AddItem(items, ComboItemsTiamatDisplayName, ComboItemsTiamatName).SetValue(true); // => Tiamat
             AddItem(items, ComboItemsHydraDisplayName, ComboItemsHydraName).SetValue(true); // => Ravenous Hydra
@@ -86,6 +87,17 @@ namespace Yasuo
             AddItem(ks, KillstealEIntoTowerDisplayName, KillstealEIntoTowerName).SetValue(true);
 
             #endregion
+
+            // Auto Windwall
+            var aww = AutoWindMenu = AddSubMenu(AutoWindWall, AutoWindWallLoc); // => Auto Windwall
+            AddItem(aww, AutoWindWallUse, AutoWindWallUseLoc).SetValue(true); // => Use
+            AddItem(aww, AutoWindWallDelay, AutoWindWallDelayLoc).SetValue(new Slider(500, 150, 2000)); // => Windwall Delay
+            AddSpacer(aww); // => SPACER
+
+            // Evade
+            var evade = EvadeMenu = AddSubMenu(Evade, EvadeLoc); // => Evade
+            AddItem(evade, EvadeUse, EvadeUseLoc).SetValue(true); // => Use
+            AddSpacer(evade); // => SPACER
 
             #region Misc Initialize
 
@@ -177,6 +189,16 @@ namespace Yasuo
             return _menu.Item(RootName + localisationName).GetValue<T>();
         }
 
+        /// <summary>
+        ///     Quick reference to fetch the item
+        /// </summary>
+        /// <param name="str">Item Location</param>
+        /// <returns>Item</returns>
+        public MenuItem GetItem(string str)
+        {
+            return _menu.Item(RootName + str);
+        }
+
         #region Fields
 
         private readonly Menu _menu; // => The Menu
@@ -219,12 +241,15 @@ namespace Yasuo
         public const string ComboRPercent2Name = ComboName + ".renemyhealthper"; // => Combo R Min. Enemies Health % Name
         private const string ComboRSelfDisplayName = "[Last Breath] Only self knockedup enemies"; // => R only self knockedup enemies Display Name
         public const string ComboRSelfName = ComboName + ".ronlyself"; // => R only self knockedup enemies Name
-        private const string ComboRAirTimeDisplayName = "[Last Breath] Keep in the air for (milliseconds)"; // => R Keep in the air before casting Display Name
+        private const string ComboRAirTimeDisplayName = "[Last Breath] Keep in the air till (milliseconds)"; // => R Keep in the air before casting Display Name
         public const string ComboRAirTimeName = ComboName + ".rairtime"; // => R Keep in the air before casting Name
         private const string ComboGapcloserModeDisplayName = "Gapcloser Mode"; // => Gapcloser Mode Display name
         public const string ComboGapcloserModeName = ComboName + ".gapclosermode"; // => Gapcloser Mode Display name
         private const string ComboGapcloserFModeDisplayName = "[Gapcloser] Follow even if in attack range"; // => Gapcloser Follow Mode Display name
         public const string ComboGapcloserFModeName = ComboName + ".gapcloserfollowmode"; // => Gapcloser Follow Mode Display name
+
+        private const string ComboERangeDisplayName = "Sweeping Blade (E) Casting Range";
+        public const string ComboERangeName = ComboName + ".usecastingrange";
 
         #region Items
 
@@ -307,6 +332,26 @@ namespace Yasuo
         private const string KillstealEIntoTowerDisplayName = "Use Sweeping Blade (E) towards under turret"; // => Killsteal E Into Towers Display Name
         public const string KillstealEIntoTowerName = KillstealName + ".useeintotower"; // => Killsteal E Into Towers Name
 
+
+        #endregion
+
+        #region Windwall/Evade
+
+        /* AUTO WINDWALL */
+        public static Menu AutoWindMenu;
+        private const string AutoWindWall = "Auto Windwall Settings";
+        public const string AutoWindWallLoc = ".autoww";
+        private const string AutoWindWallUse = "Use Auto Windwall";
+        public const string AutoWindWallUseLoc = AutoWindWallLoc + ".usew";
+        private const string AutoWindWallDelay = "Windwall Delay";
+        public const string AutoWindWallDelayLoc = AutoWindWallLoc + ".delay";
+
+        /* EVADE */
+        public static Menu EvadeMenu;
+        private const string Evade = "Evade Settings";
+        public const string EvadeLoc = ".evade";
+        private const string EvadeUse = "Use Sweeping Blade (E) to Evade";
+        public const string EvadeUseLoc = EvadeLoc + ".use";
 
         #endregion
 
