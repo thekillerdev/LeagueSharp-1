@@ -84,7 +84,8 @@ namespace Yasuo
                         {
                             if (dashData.Value.Vector3.Distance(Game.CursorPos) <
                                 Yasuo.Player.Distance(Game.CursorPos) - 100 &&
-                                dashData.Value.Vector3.Distance(Game.CursorPos) < Yasuo.Menu.GetValue<Slider>(YasuoMenu.ComboERangeName).Value)
+                                dashData.Value.Vector3.Distance(Game.CursorPos) <
+                                Yasuo.Menu.GetValue<Slider>(YasuoMenu.ComboERangeName).Value)
                             {
                                 YasuoSpells.E.Cast(dashData.Value.ObjAiBase, packets);
                                 DashingEnd = player.GetDashingEnd(dashData.Value.ObjAiBase);
@@ -112,7 +113,8 @@ namespace Yasuo
                             {
                                 if (dashData.Value.Vector3.Distance(target.ServerPosition) <
                                     Yasuo.Player.Distance(target.ServerPosition) - 100 &&
-                                    dashData.Value.Vector3.Distance(target.ServerPosition) < Yasuo.Menu.GetValue<Slider>(YasuoMenu.ComboERangeName).Value)
+                                    dashData.Value.Vector3.Distance(target.ServerPosition) <
+                                    Yasuo.Menu.GetValue<Slider>(YasuoMenu.ComboERangeName).Value)
                                 {
                                     YasuoSpells.E.Cast(dashData.Value.ObjAiBase, packets);
                                     DashingEnd = player.GetDashingEnd(dashData.Value.ObjAiBase);
@@ -150,8 +152,7 @@ namespace Yasuo
                 {
                     // => Not dashing
                     var targetPosition =
-                        Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 0f, target.MoveSpeed)
-                            .UnitPosition;
+                        Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 0f, target.MoveSpeed).UnitPosition;
                     // => Prediction
                     var castPosition =
                         Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 0f, YasuoSpells.Q.QStage0.Speed)
@@ -568,8 +569,7 @@ namespace Yasuo
                 {
                     // => Not dashing
                     var targetPosition =
-                        Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 0f, target.MoveSpeed)
-                            .UnitPosition;
+                        Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 0f, target.MoveSpeed).UnitPosition;
                     // => Prediction
                     var castPosition =
                         Prediction.GetPrediction(target, YasuoSpells.Q.QStage0.Delay, 0f, YasuoSpells.Q.QStage0.Speed)
@@ -685,7 +685,8 @@ namespace Yasuo
                         var safeMinions =
                             minions.Where(
                                 m =>
-                                    !Yasuo.Player.GetDashingEnd(m).ProjectOn(skillshot.Start, skillshot.End).IsOnSegment);
+                                    !Yasuo.Player.GetDashingEnd(m).ProjectOn(skillshot.Start, skillshot.End).IsOnSegment &&
+                                    !Yasuo.Player.GetDashingEnd(m).To3D().UnderTurret(true));
 
                         var objAiMinions = safeMinions as Obj_AI_Minion[] ?? safeMinions.ToArray();
                         if (objAiMinions.Any())
@@ -693,9 +694,7 @@ namespace Yasuo
                             var minion = objAiMinions.OrderBy(m => m.Distance(Yasuo.Player.Position)).FirstOrDefault();
                             if (minion != null)
                             {
-                                YasuoSpells.E.Cast(
-                                    minion,
-                                    Yasuo.Menu.GetValue<bool>(YasuoMenu.MiscPacketsName));
+                                YasuoSpells.E.Cast(minion, Yasuo.Menu.GetValue<bool>(YasuoMenu.MiscPacketsName));
 
                                 return true;
                             }
@@ -727,7 +726,9 @@ namespace Yasuo
                 {
                     if (skillshot.IsAboutToHit(isAboutToHitRange, Yasuo.Player))
                     {
-                        var cast = Yasuo.Player.ServerPosition + Vector3.Normalize(skillshot.MissilePosition.To3D() - Yasuo.Player.ServerPosition) * 10;
+                        var cast = Yasuo.Player.ServerPosition +
+                                   Vector3.Normalize(skillshot.MissilePosition.To3D() - Yasuo.Player.ServerPosition) *
+                                   10;
                         YasuoSpells.W.Cast(cast, Yasuo.Menu.GetValue<bool>(YasuoMenu.MiscPacketsName));
                     }
                 }
