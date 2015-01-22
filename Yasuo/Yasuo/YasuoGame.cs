@@ -660,6 +660,11 @@ namespace Yasuo
 
         private static bool Evade(Skillshot skillshot)
         {
+            if (!Yasuo.Menu.GetValue<bool>(YasuoMenu.EvadeUseLoc))
+            {
+                return false;
+            }
+
             if (YasuoSpells.E.IsReady())
             {
                 // => If anything, execute the windwall.
@@ -707,6 +712,11 @@ namespace Yasuo
 
         private static void Windwall(Skillshot skillshot)
         {
+            if (!Yasuo.Menu.GetValue<bool>(YasuoMenu.AutoWindWallUseLoc))
+            {
+                return;
+            }
+
             if (YasuoSpells.W.IsReady() && skillshot.SpellData.Type != SkillShotType.SkillshotCircle ||
                 skillshot.SpellData.Type != SkillShotType.SkillshotRing)
             {
