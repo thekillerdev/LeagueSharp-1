@@ -43,17 +43,22 @@ namespace Yasuo
             if ((player.HasBuff("ItemStatikShankCharge") && !player.HasWhirlwind()) ||
                 (player.HasBuff("ItemStatikShankCharge") && player.IsDashing()))
             {
-                var magicResist = (target.SpellBlock * player.PercentMagicPenetrationMod) -
-                                  player.FlatMagicPenetrationMod;
+                var magicResist = target.SpellBlock;
 
+                //Penetration cant reduce magic resist below 0
                 double k;
                 if (magicResist < 0)
                 {
                     k = 2 - 100 / (100 - magicResist);
                 }
+                else if ((target.SpellBlock * player.PercentMagicPenetrationMod) - player.FlatMagicPenetrationMod < 0)
+                {
+                    k = 1;
+                }
                 else
                 {
-                    k = 100 / (100 + magicResist);
+                    k = 100 /
+                        (100 + (target.SpellBlock * player.PercentMagicPenetrationMod) - player.FlatMagicPenetrationMod);
                 }
 
                 //Take into account the percent passives
@@ -230,11 +235,6 @@ namespace Yasuo
         {
             double d = 0;
 
-            if (!(source is Obj_AI_Hero))
-            {
-                return d;
-            }
-
             //Offensive masteries:
 
             //Butcher
@@ -246,6 +246,52 @@ namespace Yasuo
                         m => m.Page == MasteryPage.Offense && m.Id == 65 && m.Points == 1))
                 {
                     d = d + 2;
+                }
+            }
+
+            //Defensive masteries:
+
+            //Block
+            //Reduces incoming damage from champion basic attacks by 1 / 2
+            if (source is Obj_AI_Hero && target is Obj_AI_Hero)
+            {
+                var mastery =
+                    ((Obj_AI_Hero) target).Masteries.FirstOrDefault(m => m.Page == MasteryPage.Defense && m.Id == 65);
+                if (mastery != null && mastery.Points >= 1)
+                {
+                    d = d - 1 * mastery.Points;
+                }
+            }
+
+            //Tough Skin
+            //Reduces damage taken from neutral monsters by 1 / 2
+            if (source is Obj_AI_Minion && target is Obj_AI_Hero && source.Team == GameObjectTeam.Neutral)
+            {
+                var mastery =
+                    ((Obj_AI_Hero) target).Masteries.FirstOrDefault(m => m.Page == MasteryPage.Defense && m.Id == 68);
+                if (mastery != null && mastery.Points >= 1)
+                {
+                    d = d - 1 * mastery.Points;
+                }
+            }
+
+            //Unyielding
+            //Melee - Reduces all incoming damage from champions by 2
+            //Ranged - Reduces all incoming damage from champions by 1
+            if (source is Obj_AI_Hero && target is Obj_AI_Hero)
+            {
+                var mastery =
+                    ((Obj_AI_Hero) target).Masteries.FirstOrDefault(m => m.Page == MasteryPage.Defense && m.Id == 81);
+                if (mastery != null && mastery.Points == 1)
+                {
+                    if (source.IsMelee())
+                    {
+                        d = d - 2;
+                    }
+                    else
+                    {
+                        d = d - 1;
+                    }
                 }
             }
 
