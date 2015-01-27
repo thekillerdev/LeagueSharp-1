@@ -734,13 +734,15 @@ namespace Yasuo
 
                 if (flag)
                 {
-                    if (skillshot.IsAboutToHit(isAboutToHitRange, Yasuo.Player))
+                    if (!skillshot.IsAboutToHit(isAboutToHitRange, Yasuo.Player))
                     {
-                        var cast = Yasuo.Player.ServerPosition +
-                                   Vector3.Normalize(skillshot.MissilePosition.To3D() - Yasuo.Player.ServerPosition) *
-                                   10;
-                        YasuoSpells.W.Cast(cast, Yasuo.Menu.GetValue<bool>(YasuoMenu.MiscPacketsName));
+                        return;
                     }
+
+                    var cast = Yasuo.Player.ServerPosition +
+                               Vector3.Normalize(skillshot.MissilePosition.To3D() - Yasuo.Player.ServerPosition) *
+                               10;
+                    YasuoSpells.W.Cast(cast, Yasuo.Menu.GetValue<bool>(YasuoMenu.MiscPacketsName));
                 }
             }
         }
