@@ -8,18 +8,16 @@ namespace Jayce
     {
         public MeleeSpells()
         {
-            Spells = new Dictionary<SpellSlot, SpellStage[]>
+            Spells = new Dictionary<SpellSlot, Spell[]>
             {
-                { SpellSlot.Q, new[] { new SpellStage(new Spell(SpellSlot.Q, 600f)) } },
-                {
-                    SpellSlot.W, new[] { new SpellStage(new Spell(SpellSlot.W, 285f, TargetSelector.DamageType.Magical)) }
-                },
-                { SpellSlot.E, new[] { new SpellStage(new Spell(SpellSlot.E, 240f)) } },
-                { SpellSlot.R, new[] { new SpellStage(new Spell(SpellSlot.R)) } }
+                { SpellSlot.Q, new[] { new Spell(SpellSlot.Q, 600f) } },
+                { SpellSlot.W, new[] { new Spell(SpellSlot.W, 285f, TargetSelector.DamageType.Magical) } },
+                { SpellSlot.E, new[] { new Spell(SpellSlot.E, 240f) } },
+                { SpellSlot.R, new[] { new Spell(SpellSlot.R) } }
             };
         }
 
-        public Dictionary<SpellSlot, SpellStage[]> Spells { get; set; }
+        public Dictionary<SpellSlot, Spell[]> Spells { get; set; }
         public bool IsRanged { get; set; }
     }
 }

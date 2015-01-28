@@ -6,7 +6,7 @@ namespace Jayce
 {
     internal interface ISpellManager
     {
-        Dictionary<SpellSlot, SpellStage[]> Spells { get; set; }
+        Dictionary<SpellSlot, Spell[]> Spells { get; set; }
         bool IsRanged { get; set; }
     }
 }
